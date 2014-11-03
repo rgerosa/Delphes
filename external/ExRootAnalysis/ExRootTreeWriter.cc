@@ -25,6 +25,8 @@
 
 using namespace std;
 
+//-----------------------------------------------------------------------------
+
 ExRootTreeWriter::ExRootTreeWriter(TFile *file, const char *treeName) :
   fFile(file), fTree(0), fTreeName(treeName)
 {
@@ -49,6 +51,17 @@ ExRootTreeBranch *ExRootTreeWriter::NewBranch(const char *name, TClass *cl)
 {
   if(!fTree) fTree = NewTree();
   ExRootTreeBranch *branch = new ExRootTreeBranch(name, cl, fTree);
+  fBranches.insert(branch);
+  return branch;
+}
+
+//------------------------------------------------------------------------------
+// create a new entry plain float branch
+
+ExRootTreeBranch *ExRootTreeWriter::NewFloatBranch(const char *name)
+{
+  if(!fTree) fTree = NewTree();
+  ExRootTreeBranch *branch = new ExRootTreeBranch(name, fTree);
   fBranches.insert(branch);
   return branch;
 }

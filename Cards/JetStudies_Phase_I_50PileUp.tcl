@@ -6,7 +6,7 @@
 
 set ExecutionPath {
 
-  PileUpMerger
+  
   ModifyBeamSpot
   ParticlePropagator
   StatusPid
@@ -161,28 +161,28 @@ module JetPileUpSubtractor PuppiJetPileUpSubtractor {
 # PileUp Merger
 ###############
 
-module PileUpMerger PileUpMerger {
-  set InputArray Delphes/stableParticles
+#module PileUpMerger PileUpMerger {
+#  set InputArray Delphes/stableParticles
 
-  set OutputArray stableParticles
-  set NPUOutputArray NPU
+#  set OutputArray stableParticles
+#  set NPUOutputArray NPU
 
   # Get rid of beam spot from http://red-gridftp11.unl.edu/Snowmass/MinBias100K_14TeV.pileup ...
-  set InputBSX 2.44
-  set InputBSY 3.39
+ # set InputBSX 2.44
+ # set InputBSY 3.39
 
   # ... and replace it with beam spot from CMSSW files  
-  set OutputBSX 0.24
-  set OutputBSY 0.39  
+  #set OutputBSX 0.24
+  #set OutputBSY 0.39  
 
   # pre-generated minbias input file
-  set PileUpFile MinBias.pileup
-
+  # set PileUpFile MinBias.pileup
+  #set PileUpFile /afs/cern.ch/user/s/spigazzi/work/public/MinBias_13TeV_100k_1.pileup
   # average expected pile up
-  set MeanPileUp 50
+  #set MeanPileUp 50
   # spread in the beam direction in m (assumes gaussian)
-  set ZVertexSpread 0.053
-}
+  #set ZVertexSpread 0.053
+#}
 
 ################
 # ModifyBeamSpot
@@ -190,7 +190,7 @@ module PileUpMerger PileUpMerger {
 
 module ModifyBeamSpot ModifyBeamSpot {
   set ZVertexSpread 0.053
-  set InputArray PileUpMerger/stableParticles
+  set InputArray Delphes/stableParticles
   set OutputArray stableParticles
   set PVOutputArray PV  
 }
@@ -207,7 +207,7 @@ module ModifyBeamSpot ModifyBeamSpotNoPU {
 #################################
 
 module ParticlePropagator ParticlePropagator {
-  set InputArray PileUpMerger/stableParticles
+  set InputArray Delphes/stableParticles
 
   set OutputArray stableParticles
   set ChargedHadronOutputArray chargedHadrons
@@ -1761,7 +1761,7 @@ module TreeWriter TreeWriter {
   add Branch ScalarHT/energy ScalarHT ScalarHT
   add Branch Rho/rho Rho Rho
   add Branch GlobalRho/rho GlobalRho Rho
-  add Branch PileUpMerger/NPU NPU ScalarHT
+  #add Branch PileUpMerger/NPU NPU ScalarHT
   add Branch IsoTrackFilter/IsoTrack IsoTrack IsoTrack
 
   add Branch PuppiJetFinder/jets PuppiJet Jet
