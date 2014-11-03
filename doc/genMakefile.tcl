@@ -268,7 +268,15 @@ dictDeps {DELPHES_DICT} {modules/Pythia8LinkDef.h}
 puts {endif}
 puts {}
 
+puts {ifeq ($(HAS_PYTHIA8),true)}
+executableDeps {readers/DelphesPythia8v2.cpp}
+dictDeps {DELPHES_DICT_v2} {modules/Pythia8LinkDef.h}
+puts {endif}
+puts {}
+
 dictDeps {DELPHES_DICT} {classes/ClassesLinkDef.h} {modules/ModulesLinkDef.h} {external/ExRootAnalysis/ExRootAnalysisLinkDef.h}
+
+dictDeps {DELPHES_DICT_v2} {classes/ClassesLinkDef.h} {modules/ModulesLinkDef.h} {external/ExRootAnalysis/ExRootAnalysisLinkDef.h}
 
 dictDeps {DISPLAY_DICT} {display/DisplayLinkDef.h}
 
