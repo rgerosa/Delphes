@@ -38,6 +38,8 @@ fastjet 3.1.0 version, in case you want another one change FASTJET_TGZ entry. If
     make install -j
     make fragile-shared -j
     make fragile-shared-install -j
+    cd ..
+    cd ..
 
 At this point you have a local installation complete for fastjet + contrib package. If you want to make it "global" inside the cmssw release in order to set all the environment
 variable correctly and pass this versione to scram do:
@@ -57,7 +59,7 @@ INSTALL DELPHES
 git clone https://github.com/rgerosa/Delphes.git
 cd Delphes
 ./configure
-make
+make -j
 
 ===========================
 Quick start with Delphes
