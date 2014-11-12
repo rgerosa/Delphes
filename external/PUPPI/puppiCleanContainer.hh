@@ -1,7 +1,7 @@
 #include "NoTrees.hh"
 #include "RecoObj.hh"
-#include "external/fastjet/internal/base.hh"
-#include "external/fastjet/PseudoJet.hh"
+#include "fastjet/internal/base.hh"
+#include "fastjet/PseudoJet.hh"
 
 using namespace std;
 //using namespace fastjet;

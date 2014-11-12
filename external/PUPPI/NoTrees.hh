@@ -25,8 +25,8 @@
 #ifndef __FASTJET_CONTRIB_NOTREES_HH__
 #define __FASTJET_CONTRIB_NOTREES_HH__
 
-#include "external/fastjet/internal/base.hh"
-#include "external/fastjet/FunctionOfPseudoJet.hh"
+#include "fastjet/internal/base.hh"
+#include "fastjet/FunctionOfPseudoJet.hh"
 
 #include <string>
 #include <algorithm>

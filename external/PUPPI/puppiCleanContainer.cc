@@ -1,16 +1,11 @@
 #include "puppiCleanContainer.hh"
 #include "Math/SpecFuncMathCore.h"
 #include "Math/ProbFunc.h"
-#include "external/fastjet/internal/base.hh"
 #include "TH2F.h"
 #include "TMath.h"
 
 
 using namespace std;
-//using namespace fastjet;
-
-//FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
-
 
 puppiCleanContainer::puppiCleanContainer(std::vector<RecoObj> inParticles,double iTrackerEta,bool iExperiment,bool iTuned){
     _isExperiment = iExperiment;
