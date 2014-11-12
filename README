@@ -1,29 +1,67 @@
-GETTING STARTED WITH CMS VERSION OF DELPHES
-===========================================
+=========================================================
+GETTING STARTED WITH CMS VERSION OF DELPHES WITHIN CMSSW
+=========================================================
 
-Set up GitHub per instructions on http://cms-sw.github.io/cmssw/usercode-faq.html (and linked pages)
-Then do:
+    cmsrel CMSSW_6_2_0_SLHC20
+    cd CMSSW_6_2_0_SLHC20/src
+    cmsenv
+    
+================================
+INSTALL FASTJET RELEASE +CONTRIB
+================================
+
+For the moment follow this recipe, we will setup and automatic script. Inside whatever directory in the $CMSSW_BASE/src run the following commands (N.B. this recipe refers to
+fastjet 3.1.0 version, in case you want another one change FASTJET_TGZ entry. If csh shell change export FASTJET_BASE=$PWD into setenv FASTJET_BASE $PWD)
+
+    mkdir fastjet
+    cd fastjet
+    FASTJET_URL="http://fastjet.fr/repo"
+    FASTJET_TGZ="fastjet-3.1.0.tar.gz" 
+    FASTJET_DIR=`echo $PWD/$FASTJET_TGZ | sed 's/.tar.gz//'`
+    FASTJET_VER=`echo $FASTJET_TGZ | sed 's/.tar.gz//' |cut -d'-' -f2`
+    wget "$FASTJET_URL/$FASTJET_TGZ" -O $FASTJET_TGZ
+    tar fzx $FASTJET_TGZ
+    rm -rf $FASTJET_TGZ
+    export FASTJET_BASE=$PWD
+    cd $FASTJET_DIR
+    ./configure --prefix=$FASTJET_BASE
+    make -j
+    make check -j
+    make install -j
+    cd ..
+    svn checkout http://fastjet.hepforge.org/svn/contrib/trunk fjcontrib 
+    cd fjcontrib
+    ./scripts/update-contribs.sh 
+    ./configure --fastjet-config=$FASTJET_BASE/bin/fastjet-config CXXFLAGS="-I$FASTJET_BASE/include -I$FASTJET_BASE/tools"
+    make -j
+    make check -j
+    make install -j
+    make fragile-shared -j
+    make fragile-shared-install -j
+
+At this point you have a local installation complete for fastjet + contrib package. If you want to make it "global" inside the cmssw release in order to set all the environment
+variable correctly and pass this versione to scram do:
+
+    1) open $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/fastjet.xml and change: 
+       <environment name="FASTJET_BASE" default=" <output of echo $FASTJET_BASE set during installation"/>
+       <environment name="LIBDIR" default="$FASTJET_BASE/lib"/>
+       <environment name="INCLUDE" default="$FASTJET_BASE/include"/>
+    2) Run: scram setup fastjet  
+
+
+==========================
+INSTALL DELPHES
+==========================
+
  
-git clone https://github.com/sethzenz/Delphes.git
+git clone https://github.com/rgerosa/Delphes.git
 cd Delphes
 ./configure
 make
 
-
+===========================
 Quick start with Delphes
-========================
-
-Commands to get the code:
-
-   wget http://cp3.irmp.ucl.ac.be/downloads/Delphes-3.0.10.tar.gz
-
-   tar -zxf Delphes-3.0.10.tar.gz
-
-Commands to compile the code:
-
-   cd Delphes-3.0.10
-
-   make
+===========================
 
 Finally, we can run Delphes:
 
@@ -51,7 +89,7 @@ For more detailed documentation, please visit
 
 https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook
 
-
+=================================
 Simple analysis using TTree::Draw
 =================================
 
@@ -80,7 +118,7 @@ This information is also available at
 
    https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/RootTreeDescription
 
-
+====================
 Macro-based analysis
 ====================
 
@@ -93,49 +131,36 @@ Start ROOT and load Delphes shared library:
    gSystem->Load("libDelphes");
 
 Basic analysis macro:
-
 {
   // Create chain of root trees
   TChain chain("Delphes");
-  chain.Add("delphes_output.root");
-  
+  chain.Add("delphes_output.root");  
   // Create object of class ExRootTreeReader
   ExRootTreeReader *treeReader = new ExRootTreeReader(&chain);
-  Long64_t numberOfEntries = treeReader->GetEntries();
-  
+  Long64_t numberOfEntries = treeReader->GetEntries();  
   // Get pointers to branches used in this analysis
   TClonesArray *branchElectron = treeReader->UseBranch("Electron");
-
   // Book histograms
   TH1 *histElectronPT = new TH1F("electron pt", "electron P_{T}", 50, 0.0, 100.0);
-
   // Loop over all events
-  for(Int_t entry = 0; entry < numberOfEntries; ++entry)
-  {
-
+  for(Int_t entry = 0; entry < numberOfEntries; ++entry){
     // Load selected branches with data from specified event
-    treeReader->ReadEntry(entry);
-  
+    treeReader->ReadEntry(entry); 
     // If event contains at least 1 electron
-    if(branchElectron->GetEntries() > 0)
-    {
+    if(branchElectron->GetEntries() > 0){
       // Take first electron
-      Electron *electron = (Electron*) branchElectron->At(0);
-      
+      Electron *electron = (Electron*) branchElectron->At(0);      
       // Plot electron transverse momentum
-      histElectronPT->Fill(electron->PT);
-      
+      histElectronPT->Fill(electron->PT);      
       // Print electron transverse momentum
       cout << electron->PT << endl;
     }
-
   }
-
   // Show resulting histograms
   histElectronPT->Draw();
 }
 
-
+==================================
 More advanced macro-based analysis
 ==================================
 
@@ -143,9 +168,4 @@ The 'examples' directory contains ROOT macros Example1.C, Example2.C and Example
 
 Here are the commands to run these ROOT macros:
 
-   root -l
-   .X examples/Example1.C("delphes_output.root");
-
-or
-
-   root -l examples/Example1.C\(\"delphes_output.root\"\)
+   root -l examples/Example1.C\(\"delphes_output.root\"\);
