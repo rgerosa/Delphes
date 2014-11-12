@@ -83,7 +83,7 @@ proc dictDeps {dictVar args} {
 proc sourceDeps {srcPrefix args} {
 
   global prefix suffix srcSuf objSuf
-
+  
   set source [eval glob -nocomplain $args]
 
   set srcObjFiles {}
@@ -196,7 +196,17 @@ endif
 
 SrcSuf = cc
 
-CXXFLAGS += $(ROOTCFLAGS) -Wno-write-strings -D_FILE_OFFSET_BITS=64 -DDROP_CGAL -I. -Iexternal -Iexternal/tcl
+FASTJET_BASE_TMP =$(shell scram tool info fastjet | grep FASTJET_BASE)
+FASTJET_BASE     =$(subst FASTJET_BASE=,,$(FASTJET_BASE_TMP))
+FASTJET_LIB_TMP  =$(shell scram tool info fastjet | grep LIB | grep -v LIBDIR)
+FASTJET_LIB      =$(subst LIB=,,$(FASTJET_LIB_TMP))
+FASTJET_LIBDIR_TMP =$(shell scram tool info fastjet | grep LIBDIR)
+FASTJET_LIBDIR   =$(subst LIBDIR=,,$(FASTJET_LIBDIR_TMP))
+FASTJET_INCLUDE_TMP  =$(shell scram tool info fastjet | grep INCLUDE)
+FASTJET_INCLUDE  =$(subst INCLUDE=,,$(FASTJET_INCLUDE_TMP))
+
+CXXFLAGS += $(ROOTCFLAGS) -Wno-write-strings -D_FILE_OFFSET_BITS=64 -DDROP_CGAL -I. -Iexternal -Iexternal/tcl -I$(FASTJET_INCLUDE)
+
 DELPHES_LIBS = $(shell $(RC) --libs) -lEG $(SYSLIBS)
 DISPLAY_LIBS = $(shell $(RC) --evelibs) $(SYSLIBS)
 
@@ -208,9 +218,9 @@ ifneq ($(CMSSW_RELEASE_BASE),)
 CXXFLAGS += -I$(CMSSW_RELEASE_BASE)/src
 endif
 ifneq ($(LD_LIBRARY_PATH),)
-DELPHES_LIBS += -L$(subst include,lib,$(subst :, -L,$(LD_LIBRARY_PATH))) -lGenVector 
+DELPHES_LIBS += -L$(subst include,lib,$(subst :, -L,$(LD_LIBRARY_PATH))) -lGenVector -lGenVector -lfastjet -lfastjetcontribfragile -lfastjetplugins -lfastjettools -lsiscone -lsiscone_spherical
 endif
-DELPHES_LIBS += -lFWCoreFWLite -lDataFormatsFWLite -lDataFormatsPatCandidates -lDataFormatsLuminosity -lCommonToolsUtils -lMathCore -lDataFormatsMath  -lGenVector
+DELPHES_LIBS += -lFWCoreFWLite -lDataFormatsFWLite -lDataFormatsPatCandidates -lDataFormatsLuminosity -lCommonToolsUtils -lMathCore -lDataFormatsMath  -lGenVector -lGenVector -lfastjet -lfastjetcontribfragile -lfastjetplugins -lfastjettools -lsiscone -lsiscone_spherical
 endif
 
 ifneq ($(PROMC),)
@@ -233,10 +243,10 @@ endif
 
 ###
 
-DELPHES = libDelphes.$(DllSuf)
+DELPHES    = libDelphes.$(DllSuf)
 DELPHESLIB = libDelphes.lib
 
-DISPLAY = libDelphesDisplay.$(DllSuf)
+DISPLAY    = libDelphesDisplay.$(DllSuf)
 DISPLAYLIB = libDelphesDisplay.lib
 
 VERSION = $(shell cat VERSION)
@@ -268,19 +278,13 @@ dictDeps {DELPHES_DICT} {modules/Pythia8LinkDef.h}
 puts {endif}
 puts {}
 
-puts {ifeq ($(HAS_PYTHIA8),true)}
-executableDeps {readers/DelphesPythia8v2.cpp}
-dictDeps {DELPHES_DICT_v2} {modules/Pythia8LinkDef.h}
-puts {endif}
-puts {}
-
 dictDeps {DELPHES_DICT} {classes/ClassesLinkDef.h} {modules/ModulesLinkDef.h} {external/ExRootAnalysis/ExRootAnalysisLinkDef.h}
 
 dictDeps {DELPHES_DICT_v2} {classes/ClassesLinkDef.h} {modules/ModulesLinkDef.h} {external/ExRootAnalysis/ExRootAnalysisLinkDef.h}
 
 dictDeps {DISPLAY_DICT} {display/DisplayLinkDef.h}
 
-sourceDeps {DELPHES} {classes/*.cc} {modules/*.cc} {external/ExRootAnalysis/*.cc} {external/fastjet/*.cc} {external/fastjet/tools/*.cc} {external/fastjet/plugins/*/*.cc} {external/PUPPI/*.cc}
+sourceDeps {DELPHES} {classes/*.cc} {modules/*.cc} {external/ExRootAnalysis/*.cc} {external/PUPPI/*.cc}
 
 sourceDeps {DISPLAY} {display/*.cc}
 
