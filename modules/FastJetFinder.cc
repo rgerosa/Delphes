@@ -43,15 +43,16 @@
 #include "fastjet/ClusterSequenceArea.hh"
 #include "fastjet/tools/JetMedianBackgroundEstimator.hh"
 #include "fastjet/tools/Filter.hh"
-#include "fastjet/tools/Njettiness.hh"
+#include "fastjet/contrib/Nsubjettiness.hh"
+#include "fastjet/contrib/NjettinessPlugin.hh"
 
-#include "fastjet/plugins/SISCone/fastjet/SISConePlugin.hh"
-#include "fastjet/plugins/CDFCones/fastjet/CDFMidPointPlugin.hh"
-#include "fastjet/plugins/CDFCones/fastjet/CDFJetCluPlugin.hh"
+#include "fastjet/SISConePlugin.hh"
+#include "fastjet/CDFMidPointPlugin.hh"
+#include "fastjet/CDFJetCluPlugin.hh"
 
 using namespace std;
 using namespace fastjet;
-
+using namespace contrib;
 //------------------------------------------------------------------------------
 
 FastJetFinder::FastJetFinder() :
@@ -340,17 +341,16 @@ void FastJetFinder::Process()
       // NSubJettiness
       //------------------------------------
       double beta = 1.0; // power for angular dependence, e.g. beta = 1 --> linear k-means, beta = 2 --> quadratic/classic k-means
-      double R0 = 0.8; // Characteristic jet radius for normalization
+      double R0   = 0.8; // Characteristic jet radius for normalization
       double Rcut = 10000.0; // maximum R particles can be from axis to be included in jet (large value for no cutoff)
-      NsubParameters paraNsub(beta, R0, Rcut);
+      
+      fastjet::contrib::Nsubjettiness nSub1(1,fastjet::contrib::Njettiness::onepass_kt_axes,beta,R0,Rcut);
+      fastjet::contrib::Nsubjettiness nSub2(2,fastjet::contrib::Njettiness::onepass_kt_axes,beta,R0,Rcut);
+      fastjet::contrib::Nsubjettiness nSub3(3,fastjet::contrib::Njettiness::onepass_kt_axes,beta,R0,Rcut);
+      candidate->Tau1 = nSub1(*itOutputList);
+      candidate->Tau2 = nSub2(*itOutputList);
+      candidate->Tau3 = nSub3(*itOutputList);
 
-      Njettiness nSubOnePass(Njettiness::onepass_kt_axes,paraNsub);
-
-      vector<fastjet::PseudoJet> jet_constituents = itOutputList->constituents();
-      candidate->Tau1 = nSubOnePass.getTau(1,jet_constituents);
-      candidate->Tau2 = nSubOnePass.getTau(2,jet_constituents);
-      candidate->Tau3 = nSubOnePass.getTau(3,jet_constituents);
-  
       //------------------------------------
       // W-tag - Mass drop from trimmed jets
       //------------------------------------
