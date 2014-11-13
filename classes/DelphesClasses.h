@@ -2,15 +2,11 @@
 #define DelphesClasses_h
 
 /**
- *
  *  Definition of classes to be stored in the root tree.
  *  Function CompareXYZ sorts objects by the variable XYZ that MUST be
  *  present in the data members of the root tree class of the branch.
- *
  *  $Date: 2008-06-04 13:57:24 $
  *  $Revision: 1.1 $
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */
@@ -35,37 +31,31 @@ class DelphesFactory;
 
 //---------------------------------------------------------------------------
 
-class Event: public TObject
-{
-public:
+class Event: public TObject{
+
+ public:
 
   Long64_t Number; // event number
-
   Float_t ReadTime;
   Float_t ProcTime;  
-
   ClassDef(Event, 1)
 };
 
 //---------------------------------------------------------------------------
 
-class LHCOEvent: public Event
-{
-public:
-
+class LHCOEvent: public Event{
+ public:
   Int_t Trigger; // trigger word
-
   ClassDef(LHCOEvent, 1)
 };
 
 //---------------------------------------------------------------------------
 
-class LHEFEvent: public Event
-{
-public:
+class LHEFEvent: public Event {
+  
+  public:
 
   Int_t ProcessID; // subprocess code for the event | hepup.IDPRUP
-
   Float_t Weight; // weight for the event | hepup.XWGTUP
   Float_t ScalePDF; // scale in GeV used in the calculation of the PDFs in the event | hepup.SCALUP
   Float_t AlphaQED; // value of the QED coupling used in the event | hepup.AQEDUP
@@ -76,9 +66,9 @@ public:
 
 //---------------------------------------------------------------------------
 
-class HepMCEvent: public Event
-{
-public:
+class HepMCEvent: public Event{
+
+  public:
 
   Int_t ProcessID; // unique signal process id | signal_process_id()
   Int_t MPI; // number of multi parton interactions | mpi () 
@@ -103,11 +93,10 @@ public:
   ClassDef(HepMCEvent, 2)
 };
 
-//---------------------------------------------------------------------------
 
-class GenParticle: public SortableObject
-{
-public:
+//---------------------------------------------------------------------------
+class GenParticle: public SortableObject{
+  public:
   Int_t PID; // particle HEP ID number | hepevt.idhep[number]
 
   Int_t Status; // particle status | hepevt.isthep[number]
@@ -150,9 +139,8 @@ public:
 
 //---------------------------------------------------------------------------
 
-class MissingET: public TObject
-{
-public:
+class MissingET: public TObject{
+ public:
   Float_t MET; // mising transverse energy
   Float_t Phi; // mising energy azimuthal angle
 
@@ -161,29 +149,26 @@ public:
 
 //---------------------------------------------------------------------------
 
-class ScalarHT: public TObject
-{
-public:
+class ScalarHT: public TObject{
+
+ public:
   Float_t HT; // scalar sum of transverse momenta
 
   ClassDef(ScalarHT, 1)
 };
 
 //---------------------------------------------------------------------------
-
-class Rho: public TObject
-{
+class Rho: public TObject{
  public:
   Float_t Rho; // rho energy density
   Float_t Edges[2]; // pseudorapidity range edges
   
   ClassDef(Rho, 1)
-    };
+};
 
 //---------------------------------------------------------------------------
 
-class Weight: public TObject
-{
+class Weight: public TObject {
 public:
   Float_t Weight; // weight for the event
 
@@ -192,9 +177,9 @@ public:
 
 //---------------------------------------------------------------------------
 
-class Photon: public SortableObject
-{
-public:
+class Photon: public SortableObject {
+
+ public:
 
   Float_t PT; // photon transverse momentum
   Float_t Eta; // photon pseudorapidity
@@ -219,9 +204,8 @@ public:
 
 //---------------------------------------------------------------------------
 
-class Electron: public SortableObject
-{
-public:
+class Electron: public SortableObject {
+ public:
 
   Float_t PT; // electron transverse momentum
   Float_t Eta; // electron pseudorapidity
@@ -231,6 +215,10 @@ public:
 
   Float_t EhadOverEem; // ratio of the hadronic versus electromagnetic energy deposited in the calorimeter
   Float_t IsolationVar; // Sum of chHadEt, NeutralHadEt, and  GammaEt
+  Float_t chargedHadronEnergy;
+  Float_t netrualHadronEnergy;
+  Float_t gammaEnergy;
+  Float_t chargedPUEnergy;
 
   Float_t TOuter; // Time at calorimeter face
 
@@ -241,14 +229,14 @@ public:
 
   TLorentzVector P4();
 
-  ClassDef(Electron, 3)
+  ClassDef(Electron,3)
 };
 
 //---------------------------------------------------------------------------
 
-class Muon: public SortableObject
-{
-public:
+class Muon: public SortableObject {
+
+ public:
 
   Float_t PT; // muon transverse momentum
   Float_t Eta; // muon pseudorapidity
@@ -256,6 +244,10 @@ public:
 
   Int_t Charge; // muon charge
   Float_t IsolationVar; 
+  Float_t chargedHadronEnergy;
+  Float_t netrualHadronEnergy;
+  Float_t gammaEnergy;
+  Float_t chargedPUEnergy;
 
   TRef Particle; // reference to generated particle
 
@@ -270,17 +262,22 @@ public:
 
 //---------------------------------------------------------------------------
 
-class IsoTrack: public SortableObject
-{
-public:
+class IsoTrack: public SortableObject {
+ 
+ public:
 
   Float_t PT; // IsoTrack transverse momentum
   Float_t Eta; // IsoTrack pseudorapidity
   Float_t Phi; // IsoTrack azimuthal angle
 
-  Int_t Charge; // IsoTrack charge
+  Int_t   Charge; // IsoTrack charge
   Float_t IsolationVar; 
-  Int_t IsEMCand; // Whether it is a Electron/Muon candidate
+  Float_t chargedHadronEnergy;
+  Float_t netrualHadronEnergy;
+  Float_t gammaEnergy;
+  Float_t chargedPUEnergy;
+
+  Int_t   IsEMCand; // Whether it is a Electron/Muon candidate
 
   TRef Particle; // reference to generated particle
 
@@ -294,9 +291,9 @@ public:
 
 //---------------------------------------------------------------------------
 
-class Jet: public SortableObject
-{
-public:
+class Jet: public SortableObject {
+ 
+ public:
 
   Float_t PT; // jet transverse momentum
   Float_t Eta; // jet pseudorapidity
@@ -307,26 +304,81 @@ public:
   Float_t DeltaEta;  // jet radius in pseudorapidity
   Float_t DeltaPhi;  // jet radius in azimuthal angle
 
-  UInt_t WTag;
-  UInt_t TopTag;
-  UInt_t HTag;
-
   Float_t Tau1;
   Float_t Tau2;
   Float_t Tau3;
 
-  UInt_t NSubJets;
-  Float_t MassDrop;
-  Float_t TrimmedMass;
+  int NSubJetsTrimmed;
+
+  float TrimmedMass;
+  float TrimmedPt;
+  float TrimmedEta;
+  float TrimmedPhi;
+
+  float TrimmedMassSub1;
+  float TrimmedPtSub1;
+  float TrimmedEtaSub1;
+  float TrimmedPhiSub1;
+
+  float TrimmedMassSub2;
+  float TrimmedPtSub2;
+  float TrimmedEtaSub2;
+  float TrimmedPhiSub2;
+
+  float TrimmedMassSub3;
+  float TrimmedPtSub3;
+  float TrimmedEtaSub3;
+  float TrimmedPhiSub3;
+
+  int NSubJetsPruned;
+
+  float PrunedMass;
+  float PrunedPt;
+  float PrunedEta;
+  float PrunedPhi;
+
+  float PrunedMassSub1;
+  float PrunedPtSub1;
+  float PrunedEtaSub1;
+  float PrunedPhiSub1;
+
+  float PrunedMassSub2;
+  float PrunedPtSub2;
+  float PrunedEtaSub2;
+  float PrunedPhiSub2;
+
+  float PrunedMassSub3;
+  float PrunedPtSub3;
+  float PrunedEtaSub3;
+  float PrunedPhiSub3;
+
+  int NSubJetsSoftDrop;
+
+  float SoftDropMass;
+  float SoftDropPt;
+  float SoftDropEta;
+  float SoftDropPhi;
+
+  float SoftDropMassSub1;
+  float SoftDropPtSub1;
+  float SoftDropEtaSub1;
+  float SoftDropPhiSub1;
+
+  float SoftDropMassSub2;
+  float SoftDropPtSub2;
+  float SoftDropEtaSub2;
+  float SoftDropPhiSub2;
+
+  float SoftDropMassSub3;
+  float SoftDropPtSub3;
+  float SoftDropEtaSub3;
+  float SoftDropPhiSub3;
 
   Float_t Beta, BetaStar; // dZ;
   Float_t MeanSqDeltaR, PTD;
-  Int_t NCharged, NNeutrals;
-  Float_t  FracPt[5]; // [0] <--> 0.0 < dR < 0.1,  [1] <--> 0.1 < dR < 0.2,  etc.
+  Int_t   NCharged, NNeutrals;
+  Float_t FracPt[5]; // [0] <--> 0.0 < dR < 0.1,  [1] <--> 0.1 < dR < 0.2,  etc.
 
-  // These are experimental and not currently planned to be used
-  //  Float_t t0,t1,t10,t20,t30,t40; // Jet timing (at calorimeter) with ecal deposit (particle) level smearing by 0,1,10,20,30,40 ps
-  //  Int_t nTimes;
 
   Float_t AreaX,AreaY,AreaZ,AreaT; // 4-vector area
   
@@ -346,14 +398,15 @@ public:
   TLorentzVector P4();
   TLorentzVector AreaP4();
 
-  ClassDef(Jet, 4)
+  ClassDef(Jet,4)
 };
 
 //---------------------------------------------------------------------------
 
-class Track: public SortableObject 
-{
-public:  
+class Track: public SortableObject  {
+
+ public:  
+
   Int_t PID; // HEP ID number
 
   Int_t Charge; // track charge
@@ -393,9 +446,9 @@ public:
 
 //---------------------------------------------------------------------------
 
-class Tower: public SortableObject 
-{
-public:
+class Tower: public SortableObject  {
+
+ public:
   Float_t ET; // calorimeter tower transverse energy
   Float_t Eta; // calorimeter tower pseudorapidity
   Float_t Phi; // calorimeter tower azimuthal angle
@@ -422,11 +475,11 @@ public:
 
 //---------------------------------------------------------------------------
 
-class Candidate: public SortableObject 
-{
+class Candidate: public SortableObject  {
   friend class DelphesFactory;
 
 public:
+
   Candidate();
 
   Int_t PID;
@@ -434,13 +487,12 @@ public:
   Int_t Status;
   Int_t M1, M2, D1, D2;
 
-  Int_t Charge;
+  Int_t   Charge;
 
   Float_t Mass;
   Float_t IsolationVar;
   Float_t TrackIsolationVar;
 
-  
   Int_t IsPU;
   Int_t IsRecoPU; // Assigned by charged hadron subtractor where applicable
                   // Reflects decision ncoprorating z vertex resolution
@@ -450,18 +502,6 @@ public:
   UInt_t BTag;
   UInt_t TauTag;
 
-  UInt_t WTag;
-  UInt_t TopTag;
-  UInt_t HTag;
-
-  Float_t Tau1;
-  Float_t Tau2;
-  Float_t Tau3;
-
-  UInt_t NSubJets;
-  Float_t MassDrop;
-  Float_t TrimmedMass;
-
   Float_t Eem;
   Float_t Ehad;
 
@@ -469,13 +509,83 @@ public:
   Float_t DeltaEta;
   Float_t DeltaPhi;
 
+  Float_t Tau1; 
+  Float_t Tau2; 
+  Float_t Tau3; 
+
+  int NSubJetsTrimmed;
+
+  float TrimmedMass;
+  float TrimmedPt;
+  float TrimmedEta;
+  float TrimmedPhi;
+
+  float TrimmedMassSub1;
+  float TrimmedPtSub1;
+  float TrimmedEtaSub1;
+  float TrimmedPhiSub1;
+
+  float TrimmedMassSub2;
+  float TrimmedPtSub2;
+  float TrimmedEtaSub2;
+  float TrimmedPhiSub2;
+
+  float TrimmedMassSub3;
+  float TrimmedPtSub3;
+  float TrimmedEtaSub3;
+  float TrimmedPhiSub3;
+
+  int NSubJetsPruned;
+
+  float PrunedMass;
+  float PrunedPt;
+  float PrunedEta;
+  float PrunedPhi;
+
+  float PrunedMassSub1;
+  float PrunedPtSub1;
+  float PrunedEtaSub1;
+  float PrunedPhiSub1;
+
+  float PrunedMassSub2;
+  float PrunedPtSub2;
+  float PrunedEtaSub2;
+  float PrunedPhiSub2;
+
+  float PrunedMassSub3;
+  float PrunedPtSub3;
+  float PrunedEtaSub3;
+  float PrunedPhiSub3;
+
+  int NSubJetsSoftDrop;
+
+  float SoftDropMass;
+  float SoftDropPt;
+  float SoftDropEta;
+  float SoftDropPhi;
+
+  float SoftDropMassSub1;
+  float SoftDropPtSub1;
+  float SoftDropEtaSub1;
+  float SoftDropPhiSub1;
+
+  float SoftDropMassSub2;
+  float SoftDropPtSub2;
+  float SoftDropEtaSub2;
+  float SoftDropPhiSub2;
+
+  float SoftDropMassSub3;
+  float SoftDropPtSub3;
+  float SoftDropEtaSub3;
+  float SoftDropPhiSub3;
+
+
   TLorentzVector Momentum, Position, Area;
 
   Float_t Beta, BetaStar;
   Float_t MeanSqDeltaR, PTD;
-  Int_t NCharged, NNeutrals;
+  Int_t   NCharged, NNeutrals;
   Float_t  FracPt[5]; // [0] <--> 0.0 < dR < 0.1,  [1] <--> 0.1 < dR < 0.2,  etc.
-  //  Float_t t0,t1,t10,t20,t30,t40; // Jet timing (at calorimeter) with ecal deposit (particle) level smearing by 0,1,10,20,30,40 ps
   Int_t nTimes;
 
   std::vector<std::pair<float,float> > ecal_E_t; 

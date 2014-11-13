@@ -4,11 +4,8 @@
 /** \class FastJetFinder
  *
  *  Finds jets using FastJet library.
- *
  *  $Date: 2013-11-04 11:59:27 +0100 (Mon, 04 Nov 2013) $
  *  $Revision: 1315 $
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
  *
  */
@@ -26,8 +23,8 @@ namespace fastjet {
   class Selector;
 }
 
-class FastJetFinder: public DelphesModule
-{
+class FastJetFinder: public DelphesModule {
+
 public:
 
   FastJetFinder();
@@ -44,28 +41,28 @@ private:
 
   // For genjets mostly
   Int_t fKeepPileUp;
-
   Int_t fJetAlgorithm;
+  Int_t fMaxIterations;
+  Int_t fMaxPairSize;
+  Int_t fIratch;
+
   Double_t fParameterR;
   Double_t fJetPTMin;
   Double_t fConeRadius;
   Double_t fSeedThreshold;
   Double_t fConeAreaFraction;
-  Int_t fMaxIterations;
-  Int_t fMaxPairSize;
-  Int_t fIratch;
   Double_t fAdjacencyCut;
   Double_t fOverlapThreshold;
 
   // --- FastJet Area method --------
-
   fastjet::AreaDefinition *fAreaDefinition;
-  Int_t fAreaAlgorithm;
-  Bool_t  fComputeRho;
+  Int_t  fAreaAlgorithm;
+  Bool_t fComputeRho;
+  Bool_t fComputeRhoGrid;
 
   // -- ghost based areas --
   Double_t fGhostEtaMax;
-  Int_t fRepeat;
+  Int_t    fRepeat;
   Double_t fGhostArea;
   Double_t fGridScatter;
   Double_t fPtScatter;
@@ -84,6 +81,7 @@ private:
   TObjArray *fRhoOutputArray; //!
 
   ClassDef(FastJetFinder, 1)
+
 };
 
 #endif

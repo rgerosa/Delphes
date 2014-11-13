@@ -525,17 +525,10 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array)
 
     entry->BTag = candidate->BTag;
     entry->TauTag = candidate->TauTag;
-    entry->WTag = candidate->WTag;
-    entry->TopTag = candidate->TopTag;
-    entry->HTag = candidate->HTag;
 
     entry->Tau1=candidate->Tau1;
     entry->Tau2=candidate->Tau2;
     entry->Tau3=candidate->Tau3;
-
-    entry->TrimmedMass=candidate->TrimmedMass;
-    entry->NSubJets=candidate->NSubJets;
-    entry->MassDrop=candidate->MassDrop;
 
     entry->Charge = candidate->Charge;
 

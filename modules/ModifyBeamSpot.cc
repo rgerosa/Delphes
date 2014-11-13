@@ -103,7 +103,7 @@ void ModifyBeamSpot::Process()
     const TLorentzVector &candidatePosition = candidate->Position;
 
     if (currentPU < 0 || currentPU != candidate->IsPU) {
-      //      cout << "SCZ Debug: currentPU=" << currentPU << " candidate->IsPU=" << candidate->IsPU << " so throwing new numbers" << endl;
+      //cout << "SCZ Debug: currentPU=" << currentPU << " candidate->IsPU=" << candidate->IsPU << " so throwing new numbers" << endl;
 
       if (currentPU == 0) {
 	// Done with PV
@@ -144,14 +144,6 @@ void ModifyBeamSpot::Process()
  
     fOutputArray->Add(candidate);
 
-    /*
-    cout << "In ModifyBeamSpot. Have just added candidate with X Y Z T " << candidate->Position.X() << " " << candidate->Position.Y() << " "
-         << candidate->Position.Z() << " " << candidate->Position.T() << " " << endl;
-    Candidate *prt = static_cast<Candidate*>(candidate->GetCandidates()->Last());
-    const TLorentzVector &ini = prt->Position;
-    cout << "                                                   Mother has X Y Z T " << ini.X() << " " << ini.Y() << " " << ini.Z() << " " << ini.T() << endl;
-    */
-
   }
 
   // If PV is somehow last (i.e. no pileup, still gotta divide out
@@ -167,7 +159,7 @@ void ModifyBeamSpot::Process()
 
   // Store the PV "beam spot"
   DelphesFactory *factory = GetFactory();
-  candidate = factory->NewCandidate();
+  candidate               = factory->NewCandidate();
   candidate->Position.SetXYZT(PVX,PVY,PVZ,PVT);
   fPVOutputArray->Add(candidate);
 
