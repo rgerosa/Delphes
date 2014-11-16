@@ -482,20 +482,22 @@ public:
 
   Candidate();
 
-  Int_t PID;
+  TLorentzVector Momentum, Position, Area;
 
+  Int_t PID;
   Int_t Status;
   Int_t M1, M2, D1, D2;
 
-  Int_t   Charge;
+  Int_t Charge;
 
   Float_t Mass;
+
   Float_t IsolationVar;
   Float_t TrackIsolationVar;
 
   Int_t IsPU;
-  Int_t IsRecoPU; // Assigned by charged hadron subtractor where applicable
-                  // Reflects decision ncoprorating z vertex resolution
+  Int_t IsRecoPU; // Assigned by charged hadron subtractor where applicable Reflects decision ncoprorating z vertex resolution
+
   Int_t IsConstituent;
   Int_t IsEMCand; // Whether it is a Electron/Muon candidate
   
@@ -580,29 +582,28 @@ public:
   float SoftDropPhiSub3;
 
 
-  TLorentzVector Momentum, Position, Area;
-
   Float_t Beta, BetaStar;
   Float_t MeanSqDeltaR, PTD;
   Int_t   NCharged, NNeutrals;
-  Float_t  FracPt[5]; // [0] <--> 0.0 < dR < 0.1,  [1] <--> 0.1 < dR < 0.2,  etc.
-  Int_t nTimes;
+  Float_t FracPt[5]; // [0] <--> 0.0 < dR < 0.1,  [1] <--> 0.1 < dR < 0.2,  etc.
+  Int_t   nTimes;
 
   std::vector<std::pair<float,float> > ecal_E_t; 
 
-  static CompBase *fgCompare; //!
-  const CompBase *GetCompare() const { return fgCompare; }
+  static CompBase *fgCompare; 
+  const  CompBase *GetCompare() const { return fgCompare; }
 
   void AddCandidate(Candidate *object);
   TObjArray *GetCandidates();
 
   Bool_t Overlaps(const Candidate *object) const;
 
-  virtual void Copy(TObject &object) const;
+  virtual void     Copy(TObject &object) const;
   virtual TObject *Clone(const char *newname = "") const;
-  virtual void Clear(Option_t* option = ""); 
+  virtual void     Clear(Option_t* option = ""); 
 
 private:
+
   DelphesFactory *fFactory; //!
   TObjArray *fArray; //!
   

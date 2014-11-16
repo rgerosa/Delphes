@@ -118,7 +118,6 @@ void TrackPileUpSubtractor::Process()
     {
       particle = static_cast<Candidate*>(candidate->GetCandidates()->Last());
       z = particle->Position.Z();
-
       // apply pile-up subtraction
       // assume perfect pile-up subtraction for tracks outside fZVertexResolution
       if(candidate->IsPU && TMath::Abs(z-PVZ) > fZVertexResolution) {

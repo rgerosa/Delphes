@@ -49,6 +49,7 @@ public:
   int GetInt(const char *name, int defaultValue, int index = -1);
   long GetLong(const char *name, long defaultValue, int index = -1);
   double GetDouble(const char *name, double defaultValue, int index = -1);
+  float GetFloat(const char *name, float defaultValue, int index = -1);
   bool GetBool(const char *name, bool defaultValue, int index = -1);
   const char *GetString(const char *name, const char *defaultValue, int index = -1);
   ExRootConfParam GetParam(const char *name);

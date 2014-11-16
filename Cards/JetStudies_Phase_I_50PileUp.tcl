@@ -37,7 +37,6 @@ set ExecutionPath {
  
   Calorimeter
   CalorimeterNoPU
-
   TrackPileUpSubtractor
 
   EFlowMerger
@@ -57,20 +56,19 @@ set ExecutionPath {
   JetPileUpSubtractorGrid
   JetPileUpSubtractor4VArea
 
+  NeutrinoFilter
+  GenJetFinderNoNu
+  GenMissingET
+
+  RunPUPPI
+
   TreeWriter
 
 }
 
+ #EFlowChargedMerger --> CHS can be applied directly in puppi, skipping to run it outside the puppi module
 
 
-
-
- # NeutrinoFilter
- # GenJetFinderNoNu
- # GenMissingET
-
- # EFlowChargedMerger
- # RunPUPPI
  # PuppiJetFinder
  # PuppiRho
  # PuppiJetPileUpSubtractor
@@ -622,8 +620,11 @@ module TrackPileUpSubtractor TrackPileUpSubtractor {
 
 module Merger EFlowMerger {
 
-  add InputArray TrackPileUpSubtractor/eflowTracks 
+  ## charged particles after having applied CHS
+  add InputArray TrackPileUpSubtractor/eflowTracks  
+  ## calorimeter towers to get also photons and neutral hadrons
   add InputArray Calorimeter/eflowTowers
+  ## muons that are not included in the pileup subtractor
   add InputArray MuonMomentumSmearing/muons
   set OutputArray eflow
 
@@ -631,8 +632,11 @@ module Merger EFlowMerger {
 
 module Merger EFlowMergerNoPU {
 
+  ## only eflow tracks from the calorimeter since no need to do CHS
   add InputArray CalorimeterNoPU/eflowTracks
+  ## calorimeter towers to get also photons and neutral hadrons
   add InputArray CalorimeterNoPU/eflowTowers
+  ## muons that are not included in the pileup subtractor
   add InputArray MuonMomentumSmearingNoPU/muons
   set OutputArray eflow
 
@@ -804,9 +808,10 @@ module FastJetFinder GenJetFinder {
   
   ## generator level particle, no smearing and no efficiecny
   set InputArray Delphes/stableParticles
-
   
   set OutputArray jets
+
+  set AreaAlgorithm 1
 
   # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
   set JetAlgorithm 6
@@ -873,8 +878,72 @@ module JetPileUpSubtractor JetPileUpSubtractor4VArea { ## make the rho correctio
 
 }
 
+### Neutrino Filter on generated particles  of status 1 without any smearing
+module NeutrinoFilter NeutrinoFilter {
+  set InputArray  Delphes/stableParticles  
+  set OutputArray stableParticles
+}
 
+### make GenJets without neutrino
+module FastJetFinder GenJetFinderNoNu {
+  set InputArray NeutrinoFilter/stableParticles
+  
+  set OutputArray jets
 
+  set AreaAlgorithm 1
+  
+  # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
+  set JetAlgorithm 6
+  set ParameterR 0.4
+  
+  set JetPTMin 5.0
+
+}
+
+### -sum of all particles after filtering neutrinos
+module Merger GenMissingET {
+  add InputArray NeutrinoFilter/stableParticles
+  set MomentumOutputArray momentum
+}
+
+### EFlow merger before PUPPI
+module Merger EFlowChargedMerger {
+  ## charged particles from LV
+  add InputArray TrackPileUpSubtractor/eflowTracks
+  ## muons
+  add InputArray MuonMomentumSmearing/muons
+  set OutputArray eflowTracks
+}
+
+###########################
+### Run the puppi code  ###
+###########################
+
+module RunPUPPI RunPUPPI {
+
+  set TrackInputArray   Calorimeter/eflowTracks
+  set NeutralInputArray Calorimeter/eflowTowers
+  set PVInputArray      ModifyBeamSpot/PV
+
+  set MinPuppiWeight 0.01
+  set UseExp         false
+  
+  add EtaMinBin           0.   2.5   3.0
+  add EtaMaxBin           2.5  3.0   10.0
+  add PtMinBin            0.5  0.5   0.5
+  add ConeSizeBin         0.3  0.3   0.3 
+  add RMSPtMinBin         0.1  0.5   0.5
+  add RMSScaleFactorBin   1    1.0   1.0
+  add NeutralMinEBin      0.2  0.2   0.2
+  add NeutralPtSlope      0.02 0.02  0.02
+  add ApplyCHS            true true  true
+  add UseCharged          true false false
+  add ApplyLowPUCorr      true true  true
+  add MetricId            5    0     0
+
+  set OutputArray weightedparticles
+
+} 
 
 
 
@@ -885,21 +954,7 @@ module Merger PileUpJetIDMissingET {
   set MomentumOutputArray momentum
 }
   
-module Merger EFlowChargedMerger {
-  add InputArray TrackPileUpSubtractor/eflowTracks
-  add InputArray MuonMomentumSmearing/muons
-  set OutputArray eflowTracks
-}
 
-module RunPUPPI RunPUPPI {
-#  set TrackInputArray EFlowChargedMerger/eflowTracks
-  set TrackInputArray Calorimeter/eflowTracks
-  set NeutralInputArray Calorimeter/eflowTowers
-  
-  set TrackerEta 2.5
-
-  set OutputArray weightedparticles
-} 
 
 module FastJetFinder PuppiJetFinder {
   set InputArray RunPUPPI/weightedparticles
@@ -965,24 +1020,7 @@ module JetPileUpSubtractor PuppiJetPileUpSubtractor {
 
 
 
-module NeutrinoFilter NeutrinoFilter {
-  set InputArray Delphes/stableParticles
-  
-  set OutputArray stableParticles
-}
 
-module FastJetFinder GenJetFinderNoNu {
-  set InputArray NeutrinoFilter/stableParticles
-  
-  set OutputArray jets
-  
-  # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
-  set JetAlgorithm 6
-  set ParameterR 0.4
-  
-  set JetPTMin 5.0
-
-}
 
 
 
@@ -1183,11 +1221,6 @@ module Merger MissingET {
   set MomentumOutputArray momentum
 }
 
-module Merger GenMissingET {
-#  add InputArray Delphes/stableParticles
-  add InputArray NeutrinoFilter/stableParticles
-  set MomentumOutputArray momentum
-}
 
 module Merger PuppiMissingET {
   add InputArray RunPUPPI/weightedparticles

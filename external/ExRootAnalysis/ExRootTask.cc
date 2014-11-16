@@ -248,6 +248,18 @@ double ExRootTask::GetDouble(const char *name, double defaultValue, int index)
   }
 }
 
+float ExRootTask::GetFloat(const char *name, float defaultValue, int index)
+{
+  if(fConfReader)
+  {
+    return fConfReader->GetFloat(TString(GetName()) + "::" + name, defaultValue, index);
+  }
+  else
+  {
+    return defaultValue;
+  }
+}
+
 //------------------------------------------------------------------------------
 
 bool ExRootTask::GetBool(const char *name, bool defaultValue, int index)

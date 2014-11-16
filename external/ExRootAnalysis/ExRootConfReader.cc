@@ -140,6 +140,17 @@ double ExRootConfReader::GetDouble(const char *name, double defaultValue, int in
   return object.GetDouble(defaultValue);
 }
 
+float ExRootConfReader::GetFloat(const char *name, double defaultValue, int index)
+{
+  ExRootConfParam object = GetParam(name);
+  if(index >= 0)
+  {
+    object = object[index];
+  }
+
+  return float(object.GetDouble(defaultValue));
+}
+
 //------------------------------------------------------------------------------
 
 bool ExRootConfReader::GetBool(const char *name, bool defaultValue, int index)
@@ -269,6 +280,19 @@ double ExRootConfParam::GetDouble(double defaultValue)
     throw runtime_error(message.str());
   }
   return result;
+}
+
+float ExRootConfParam::GetFloat(double defaultValue)
+{
+  stringstream message;
+  double result = defaultValue;
+  if(fObject && TCL_OK != Tcl_GetDoubleFromObj(fTclInterp, fObject, &result))
+  {
+    message << "parameter '"<< fName << "' is not a number." << endl;
+    message << fName << " = " << Tcl_GetStringFromObj(fObject, 0);
+    throw runtime_error(message.str());
+  }
+  return float(result);
 }
 
 //------------------------------------------------------------------------------
