@@ -31,6 +31,13 @@ fastjet 3.1.0 version, in case you want another one change FASTJET_TGZ entry. If
     cd ..
     svn checkout http://fastjet.hepforge.org/svn/contrib/trunk fjcontrib 
     cd fjcontrib
+
+Here you have to open by hand the following file contribs.svn and set the following lines: 
+    GenericSubtractor                tags/2.0.0-alpha-PUWS14.1
+    RecursiveTools                   tags/1.0.0-alpha
+
+Then you can move on with the last commands:    
+
     ./scripts/update-contribs.sh 
     ./configure --fastjet-config=$FASTJET_BASE/bin/fastjet-config CXXFLAGS="-I$FASTJET_BASE/include -I$FASTJET_BASE/tools"
     make -j
