@@ -158,40 +158,41 @@ void Isolation::Process(){
         ++counter;
       }
     }
-  }
+  
 
-  // loop over all input towers
-  sumNeutral = 0.0;
-  counter = 0;
-  itNeutralIsolationArray.Reset();
-  while((isolation = static_cast<Candidate*>(itNeutralIsolationArray.Next()))){
+    // loop over all input towers
+    sumNeutral = 0.0;
+    counter = 0;
+    itNeutralIsolationArray.Reset();
+    while((isolation = static_cast<Candidate*>(itNeutralIsolationArray.Next()))){
       const TLorentzVector &isolationMomentum = isolation->Momentum;
       if(candidateMomentum.DeltaR(isolationMomentum) <= fDeltaRMax && !candidate->Overlaps(isolation)){
         sumNeutral += isolationMomentum.Pt();
         ++counter;
       }
-  }
+    }
 
-  // find rho
-  rho = 0.0;
-  if(fRhoInputArray){
-    fItRhoInputArray->Reset();
-    while((object = static_cast<Candidate*>(fItRhoInputArray->Next()))){
+    // find rho
+    rho = 0.0;
+    if(fRhoInputArray){
+     fItRhoInputArray->Reset();
+     while((object = static_cast<Candidate*>(fItRhoInputArray->Next()))){
         if(eta >= object->Edges[0] && eta < object->Edges[1]){
           rho = object->Momentum.Pt();
         }
+     }
     }
+
+    // correct sum for pile-up contamination
+    sum = sumCharged + TMath::Max(sumNeutral - TMath::Max(rho,0.0)*fDeltaRMax*fDeltaRMax*TMath::Pi(),0.0);
+
+    ratio = sum/candidateMomentum.Pt();
+
+    candidate->IsolationVar = ratio;
+
+    if((fUsePTSum && sum > fPTSumMax) || ratio > fPTRatioMax) continue;
+    fOutputArray->Add(candidate);
   }
-
-  // correct sum for pile-up contamination
-  sum = sumCharged + TMath::Max(sumNeutral - TMath::Max(rho,0.0)*fDeltaRMax*fDeltaRMax*TMath::Pi(),0.0);
-
-  ratio = sum/candidateMomentum.Pt();
-
-  candidate->IsolationVar = ratio;
-
-  if((fUsePTSum && sum > fPTSumMax) || ratio > fPTRatioMax) continue;
-  fOutputArray->Add(candidate);
 }
 
 
