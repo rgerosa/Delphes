@@ -91,6 +91,7 @@ Candidate::Candidate() :
   IsolationVar(0), TrackIsolationVar(0),
   Charge(0), Mass(0.0),
   IsPU(0), IsRecoPU(0), IsEMCand(0), IsConstituent(0),
+  chargedHadronEnergy(0),netrualHadronEnergy(0),gammaEnergy(0),chargedPUEnergy(0),
   BTag(0), TauTag(0), Eem(0.0), Ehad(0.0),
   Tau1(0), Tau2(0), Tau3(0),
   NSubJetsTrimmed(0),
@@ -181,6 +182,10 @@ void Candidate::Copy(TObject &obj) const{
   object.IsPU = IsPU;
   object.IsRecoPU = IsRecoPU;
   object.IsEMCand = IsEMCand;
+  object.chargedHadronEnergy = chargedHadronEnergy;
+  object.netrualHadronEnergy = netrualHadronEnergy;
+  object.gammaEnergy = gammaEnergy;
+  object.chargedPUEnergy = chargedPUEnergy;
   object.IsConstituent = IsConstituent;
   object.BTag = BTag;
   object.TauTag = TauTag;
@@ -305,6 +310,10 @@ void Candidate::Clear(Option_t* option){
   IsRecoPU = 0;
   IsConstituent = 0;
   IsEMCand = 0;
+  chargedHadronEnergy = 0;
+  netrualHadronEnergy = 0;
+  gammaEnergy         = 0;
+  chargedPUEnergy     = 0;
   BTag = 0;
   TauTag = 0;
   Eem = 0.0;

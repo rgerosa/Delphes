@@ -495,6 +495,11 @@ public:
   Float_t IsolationVar;
   Float_t TrackIsolationVar;
 
+  Float_t chargedHadronEnergy;
+  Float_t netrualHadronEnergy;
+  Float_t gammaEnergy;
+  Float_t chargedPUEnergy;
+
   Int_t IsPU;
   Int_t IsRecoPU; // Assigned by charged hadron subtractor where applicable Reflects decision ncoprorating z vertex resolution
 
