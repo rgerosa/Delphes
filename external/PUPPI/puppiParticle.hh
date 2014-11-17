@@ -11,12 +11,12 @@ class puppiParticle {
  public:
 
   puppiParticle(){
-    fPt_ = 0.;
-    fEta_ = 0.;
-    fPval_ = 1.;
+    fPt_         = 0.;
+    fEta_        = 0.;
+    fPval_       = 1.;
     fParticleId_ = -1;
-    fPosition_ = -1; 
-  }; // default constructor
+    fPosition_   = -1; 
+  }; 
 
   puppiParticle(const float & pt, const float & eta, const float & pval, const int & particleId, const int & position):
     fPt_(pt),
@@ -46,7 +46,7 @@ class puppiParticle {
 
   // oper operator =
   bool operator == (const puppiParticle & particle2) const {
-    if( fPt_ == particle2.fPt_ and     fEta_ == particle2.fEta_ and 
+    if( fPt_ == particle2.fPt_     and fEta_ == particle2.fEta_ and 
         fPval_ == particle2.fPval_ and fParticleId_ == particle2.fParticleId_ and 
         fPosition_ == particle2.fPosition_) return true;
     else return false ;
@@ -57,20 +57,20 @@ class puppiParticle {
   float fPval_;       // metric value                                                                                                                                                     
   int   fParticleId_; // particle id means user_index                                                                                                                                     
   int   fPosition_;   // position in the original particle vector                                                                                                                        
+
 };
 
 class puppiValSort : public std::binary_function<int,int,bool> {
  public:
-  // default constructor
+
   puppiValSort(){};
-  // default de-constructor
+
   ~puppiValSort(){};
-  // Operator ()
+
   bool operator() (const puppiParticle & x, const puppiParticle & y){
     if(x.fPval_ < y.fPval_ ) return true;
     return false;
   }
 };
-
 
 #endif

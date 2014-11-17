@@ -1,3 +1,7 @@
+#ifndef PUPPICLEANCONTAINER_HH
+#define PUPPICLEANCONTAINER_HH
+
+
 #include "PUPPI/RecoObj.hh"
 #include "PUPPI/puppiParticle.hh"
 #include "PUPPI/puppiAlgoBin.hh"
@@ -41,20 +45,20 @@ class puppiCleanContainer{
  
  protected:
 
-   void    getRMSAvg(int iPuppiAlgo, std::vector<fastjet::PseudoJet> & particlesAll, std::vector<fastjet::PseudoJet> &chargedPV);        
-   float   goodVar  (const fastjet::PseudoJet & particle, const std::vector<fastjet::PseudoJet> & particleAll, const int & pPupId, const float & coneSize);    
-   void    computeMedRMS(const int & puppiAlgo);  
-   float   compute(const float & val, const float & chi2, const puppiAlgoBin & puppiAlgo);
+   void    getRMSAvg(const int &, std::vector<fastjet::PseudoJet> &, std::vector<fastjet::PseudoJet> &);        
+   float   goodVar  (const fastjet::PseudoJet &, const std::vector<fastjet::PseudoJet> &, const int &, const float &);    
+   void    computeMedRMS(const int &);  
+   float   compute(const float &, const std::vector<puppiParticle> &, const std::vector<puppiAlgoBin> &, const std::vector<int> &);
 
    // some get functions
    float getNeutralPtCut(const float&, const float&, const int&);
-   int   getPuppiId(const float & pt, const float & eta, const std::vector<puppiAlgoBin> & puppiAlgos);
-   float getChi2FromdZ(float iDZ);
-
+   std::vector<int> getPuppiId(const float &, const float &, const std::vector<puppiAlgoBin> &);
+   bool  isGoodPuppiId(const float &, const float &, const puppiAlgoBin &);
+   float getChi2FromdZ(float);
    // other functions
-   float  var_within_R(const int & pPupId, const vector<fastjet::PseudoJet> & particles, const fastjet::PseudoJet& centre, const float & R);
-   float  pt_within_R(const std::vector<fastjet::PseudoJet> & particles, const fastjet::PseudoJet & centre, const float & R);
-   fastjet::PseudoJet flow_within_R(const vector<fastjet::PseudoJet> & particles, const fastjet::PseudoJet& centre, const float & R);
+   float  var_within_R(const int &, const vector<fastjet::PseudoJet> &, const fastjet::PseudoJet &, const float &);
+   float  pt_within_R(const std::vector<fastjet::PseudoJet> &, const fastjet::PseudoJet &, const float &);
+   fastjet::PseudoJet flow_within_R(const vector<fastjet::PseudoJet> &, const fastjet::PseudoJet &, const float &);
    
   
  private:    
@@ -68,10 +72,12 @@ class puppiCleanContainer{
   std::vector<puppiAlgoBin> puppiAlgo_;
   std::vector<float> fPuppiWeights_;
 
-  int    fNPV_;             // NPV
   float  fMinPuppiWeight_;
   float  fPVFrac_;
+
+  int    fNPV_;  
   bool   fUseExp_ ;
     
 };
 
+#endif

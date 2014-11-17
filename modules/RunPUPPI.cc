@@ -143,37 +143,37 @@ void RunPUPPI::Process(){
 
       momentum = candidate->Momentum;
       
-      RecoObj curPseudoJet;
-      curPseudoJet.pt  = momentum.Pt();
-      curPseudoJet.eta = momentum.Eta();
-      curPseudoJet.phi = momentum.Phi();
-      curPseudoJet.m   = momentum.M();
+      RecoObj curRecoObj;
+      curRecoObj.pt  = momentum.Pt();
+      curRecoObj.eta = momentum.Eta();
+      curRecoObj.phi = momentum.Phi();
+      curRecoObj.m   = momentum.M();
       particle = static_cast<Candidate*>(candidate->GetCandidates()->Last());
 
       if (candidate->IsRecoPU and candidate->Charge !=0) { // if it comes fromPU vertexes after the resolution smearing and the dZ matching within resolution
-	curPseudoJet.id    = 3;
-	curPseudoJet.vtxId = candidate->IsPU;
-	if(TMath::Abs(candidate->PID) == 11)      curPseudoJet.pfType = 2;
-	else if(TMath::Abs(candidate->PID) == 13) curPseudoJet.pfType = 3;
-	else if(TMath::Abs(candidate->PID) == 22) curPseudoJet.pfType = 4;
-        else curPseudoJet.pfType = 1;
-        curPseudoJet.dZ = particle->Position.Z()-PVZ;
+	curRecoObj.id    = 2;
+	curRecoObj.vtxId = candidate->IsPU;
+	if(TMath::Abs(candidate->PID) == 11)      curRecoObj.pfType = 2;
+	else if(TMath::Abs(candidate->PID) == 13) curRecoObj.pfType = 3;
+	else if(TMath::Abs(candidate->PID) == 22) curRecoObj.pfType = 4;
+        else curRecoObj.pfType = 1;
+        curRecoObj.dZ = particle->Position.Z()-PVZ;
       } 
       else if(!candidate->IsRecoPU and candidate->Charge !=0) {
-	curPseudoJet.id    = 2;  // charge from LV
-        curPseudoJet.vtxId = 1; // from PV
-	if(TMath::Abs(candidate->PID) == 11)      curPseudoJet.pfType = 2;
-	else if(TMath::Abs(candidate->PID) == 13) curPseudoJet.pfType = 3;
-	else if(TMath::Abs(candidate->PID) == 22) curPseudoJet.pfType = 4;
-        else curPseudoJet.pfType = 1;
-        curPseudoJet.dZ = particle->Position.Z()-PVZ;
+	curRecoObj.id    = 1;  // charge from LV
+        curRecoObj.vtxId = 1; // from PV
+	if(TMath::Abs(candidate->PID) == 11)      curRecoObj.pfType = 2;
+	else if(TMath::Abs(candidate->PID) == 13) curRecoObj.pfType = 3;
+	else if(TMath::Abs(candidate->PID) == 22) curRecoObj.pfType = 4;
+        else curRecoObj.pfType = 1;
+        curRecoObj.dZ = particle->Position.Z()-PVZ;
       }
       else {
 	std::cerr<<" RunPUPPI: problem with a charged track --> it has charge 0 "<<std::endl;
         continue;
       }
 
-      puppiInputVector.push_back(curPseudoJet);
+      puppiInputVector.push_back(curRecoObj);
       fInputTotalParticlesArray->Add(candidate);
   }
 
@@ -182,27 +182,27 @@ void RunPUPPI::Process(){
 
       momentum = candidate->Momentum;
 
-      RecoObj curPseudoJet;
-      curPseudoJet.pt  = momentum.Pt();
-      curPseudoJet.eta = momentum.Eta();
-      curPseudoJet.phi = momentum.Phi();
-      curPseudoJet.m   = momentum.M();
+      RecoObj curRecoObj;
+      curRecoObj.pt  = momentum.Pt();
+      curRecoObj.eta = momentum.Eta();
+      curRecoObj.phi = momentum.Phi();
+      curRecoObj.m   = momentum.M();
       particle = static_cast<Candidate*>(candidate->GetCandidates()->Last());
 
       if(candidate->Charge == 0){
-	curPseudoJet.id    = 1; // neutrals have id==1
-	curPseudoJet.vtxId = 0; // neutrals have vtxId==0 
-	if(TMath::Abs(candidate->PID) == 11)      curPseudoJet.pfType = 2;
-	else if(TMath::Abs(candidate->PID) == 13) curPseudoJet.pfType = 3;
-	else if(TMath::Abs(candidate->PID) == 22) curPseudoJet.pfType = 4;
-        else curPseudoJet.pfType = 1;
-        curPseudoJet.dZ = particle->Position.Z()-PVZ;
+	curRecoObj.id    = 0; // neutrals have id==0
+	curRecoObj.vtxId = 0; // neutrals have vtxId==0 
+	if(TMath::Abs(candidate->PID) == 11)      curRecoObj.pfType = 2;
+	else if(TMath::Abs(candidate->PID) == 13) curRecoObj.pfType = 3;
+	else if(TMath::Abs(candidate->PID) == 22) curRecoObj.pfType = 4;
+        else curRecoObj.pfType = 5;
+        curRecoObj.dZ = particle->Position.Z()-PVZ;
       }
       else{
 	std::cerr<<" RunPUPPI: problem with a neutrals cells --> it has charge !=0 "<<std::endl;
         continue;
       }
-      puppiInputVector.push_back(curPseudoJet);
+      puppiInputVector.push_back(curRecoObj);
       fInputTotalParticlesArray->Add(candidate);
   }
 

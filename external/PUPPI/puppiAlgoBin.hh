@@ -18,15 +18,15 @@ class puppiAlgoBin {
     fConeSize_ = 0.;
     fRMSPtMin_ = 0.;
     fRMSScaleFactor_ = 1.0;
-    fNeutralMinE_ = 0.;
+    fNeutralMinE_    = 0.;
     fNeutralPtSlope_ = 0.;
-    fApplyCHS_ = true;
+    fApplyCHS_   = true;
     fUseCharged_ = false ;
     fApplyLowPUCorr_ = false;
     fMetricId_ = 0;
-    fRMS_    = 0.;
-    fMean_   = 0.;
-    fMedian_ = 0.;
+    fRMS_      = 0.;
+    fMean_     = 0.;
+    fMedian_   = 0.;
   };
 
   puppiAlgoBin(const float & etaMin,         const float & etaMax, const float & ptMin, const float & coneSize, const float & RMSPtMin,
@@ -54,9 +54,18 @@ class puppiAlgoBin {
   virtual ~puppiAlgoBin(){};
 
   bool operator == (const puppiAlgoBin & algo2) const {
-    if( fEtaMin_ == algo2.fEtaMin_ and fEtaMax_ == algo2.fEtaMax_ and fApplyCHS_ == algo2.fApplyCHS_ and fUseCharged_ == algo2.fUseCharged_ and fApplyLowPUCorr_ == algo2.fApplyLowPUCorr_
-        and fMetricId_ == algo2.fMetricId_ and fPtMin_ == algo2.fPtMin_ and fConeSize_ == algo2.fConeSize_ and fRMSPtMin_ == algo2.fRMSPtMin_ 
-        and fRMSScaleFactor_ == algo2.fRMSScaleFactor_ and fNeutralMinE_ == algo2.fNeutralMinE_ and fNeutralPtSlope_ == algo2.fNeutralPtSlope_ ) return true;
+    if( fEtaMin_ == algo2.fEtaMin_ and 
+        fEtaMax_ == algo2.fEtaMax_ and 
+        fApplyCHS_ == algo2.fApplyCHS_ and 
+        fUseCharged_ == algo2.fUseCharged_ and 
+        fApplyLowPUCorr_ == algo2.fApplyLowPUCorr_ and 
+        fMetricId_ == algo2.fMetricId_ and 
+        fPtMin_ == algo2.fPtMin_ and 
+        fConeSize_ == algo2.fConeSize_ and 
+        fRMSPtMin_ == algo2.fRMSPtMin_ and 
+        fRMSScaleFactor_ == algo2.fRMSScaleFactor_ and 
+        fNeutralMinE_ == algo2.fNeutralMinE_ and 
+        fNeutralPtSlope_ == algo2.fNeutralPtSlope_ ) return true;
     else return false;
   };
 
@@ -66,24 +75,24 @@ class puppiAlgoBin {
     fPuppiParticlesNULL_.clear();
   
     for(size_t iPart = 0; iPart < puppiParticles.size(); iPart++){ // loop on the puppiParticles                            
-      if(puppiParticles.at(iPart).fPval_ == -999){
+      if(puppiParticles.at(iPart).fPval_ == -999){ // default PVal
         fPuppiParticlesNULL_.push_back(puppiParticles.at(iPart));        
         continue ; 
       }
                                                  
-      if(puppiParticles.at(iPart).fPt_ <  fRMSPtMin_){ 
+      if(puppiParticles.at(iPart).fPt_ <  fRMSPtMin_){  // should be discarded in the RMS computation
         fPuppiParticlesNULL_.push_back(puppiParticles.at(iPart)); 
         continue ; 
       }
      
-      if(puppiParticles.at(iPart).fPt_ < fPtMin_){
+      if(puppiParticles.at(iPart).fPt_ < fPtMin_){ // under the chosen pt cut
         fPuppiParticlesNULL_.push_back(puppiParticles.at(iPart)); 
         continue ; 
       }
-      
-      if(fUseCharged_ && fabs(puppiParticles.at(iPart).fParticleId_) < 1) continue; // id 0 skipped                                                                      
-      if(fUseCharged_ && (fabs(puppiParticles.at(iPart).fParticleId_) >=1 && fabs(puppiParticles.at(iPart).fParticleId_) <=2)) fPuppiParticlesPV_.push_back(puppiParticles.at(iPart));
-      if(fUseCharged_ && fabs(puppiParticles.at(iPart).fParticleId_) < 3) continue;
+
+      // zero are neutral particle, 1 LV charged, 2PU      
+      if(fUseCharged_ && (fabs(puppiParticles.at(iPart).fParticleId_) >=0 && fabs(puppiParticles.at(iPart).fParticleId_) <=1)) fPuppiParticlesPV_.push_back(puppiParticles.at(iPart));
+      if(fUseCharged_ && fabs(puppiParticles.at(iPart).fParticleId_) < 2) continue;
       fPuppiParticlesPU_.push_back(puppiParticles.at(iPart));
     }
   };

@@ -928,18 +928,18 @@ module RunPUPPI RunPUPPI {
   set MinPuppiWeight 0.01
   set UseExp         false
   
-  add EtaMinBin           0.   2.5   3.0
-  add EtaMaxBin           2.5  3.0   10.0
-  add PtMinBin            0.5  0.5   0.5
-  add ConeSizeBin         0.3  0.3   0.3 
-  add RMSPtMinBin         0.1  0.5   0.5
-  add RMSScaleFactorBin   1    1.0   1.0
-  add NeutralMinEBin      0.2  0.2   0.2
-  add NeutralPtSlope      0.02 0.02  0.02
-  add ApplyCHS            true true  true
-  add UseCharged          true false false
-  add ApplyLowPUCorr      true true  true
-  add MetricId            5    0     0
+  add EtaMinBin           0.   2.5   3.0  2.5  3.0
+  add EtaMaxBin           2.5  3.0   10.0 3.0  10.0
+  add PtMinBin            0.   0.5   1.0  0.5  1.0
+  add ConeSizeBin         0.3  0.3   0.3  0.3  0.3
+  add RMSPtMinBin         0.1  0.5   0.5  0.5  0.5
+  add RMSScaleFactorBin   1.0  1.0   1.0  1.0  1.0
+  add NeutralMinEBin      0.2  0.2   0.2  0.2  0.2
+  add NeutralPtSlope      0.02 0.02  0.02 0.02 0.02
+  add ApplyCHS            true true  true true true
+  add UseCharged          true false false false false
+  add ApplyLowPUCorr      true true  true  true  true
+  add MetricId            5    0     0     1     1
 
   set OutputArray weightedparticles
 
