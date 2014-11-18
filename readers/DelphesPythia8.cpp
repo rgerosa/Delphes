@@ -116,43 +116,64 @@ int main(int argc, char *argv[]){
         //--- create output tree ---
         treeWriter = new ExRootTreeWriter(outputFile, "Delphes");
 
-        //--- create gen (lhe level) branch --- // done by Simone --> std::vector for each particle type
+        //--- create gen (lhe level) branch --- 
+        // done by Simone --> std::vector for each particle type  
+        // new branches for the latino tree type flat tree is modified (added) by Deniz
 
         //--- lep number
         branchGen.push_back(treeWriter->NewFloatBranch("lhe_lep_number"));      
 
         //--- leptons
-        branchGen.push_back(treeWriter->NewFloatBranch("lhe_lep_pt"));
-        branchGen.push_back(treeWriter->NewFloatBranch("lhe_lep_eta"));
-        branchGen.push_back(treeWriter->NewFloatBranch("lhe_lep_phi"));
-        branchGen.push_back(treeWriter->NewFloatBranch("lhe_lep_flv"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_lep_pt1"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_lep_eta1"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_lep_phi1"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_lep_pid1"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_lep_pt2"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_lep_eta2"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_lep_phi2"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_lep_pid2"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_lep_pt3"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_lep_eta3"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_lep_phi3"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_lep_pid3"));
         //--- neutrinos
-        branchGen.push_back(treeWriter->NewFloatBranch("lhe_nu_pt"));
-        branchGen.push_back(treeWriter->NewFloatBranch("lhe_nu_eta"));
-        branchGen.push_back(treeWriter->NewFloatBranch("lhe_nu_phi"));
-        branchGen.push_back(treeWriter->NewFloatBranch("lhe_nu_flv"));
+          branchGen.push_back(treeWriter->NewFloatBranch("lhe_nu_pt1"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_nu_eta1"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_nu_phi1"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_nu_pid1"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_nu_pt2"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_nu_eta2"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_nu_phi2"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_nu_pid2"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_nu_pt3"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_nu_eta3"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_nu_phi3"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_nu_pid3"));
 
         //--- gen partons infos
-        branchGen.push_back(treeWriter->NewFloatBranch("lhe_p_pt"));
-        branchGen.push_back(treeWriter->NewFloatBranch("lhe_p_eta"));
-        branchGen.push_back(treeWriter->NewFloatBranch("lhe_p_phi"));
-        branchGen.push_back(treeWriter->NewFloatBranch("lhe_p_flv"));
-        branchGen.push_back(treeWriter->NewFloatBranch("lhe_p_from_W"));
-
-        //--- gen W infos
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_par_pt1"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_par_eta1"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_par_phi1"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_par_pid1"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_par_pt2"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_par_eta2"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_par_phi2"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_par_pid2"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_par_pt3"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_par_eta3"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_par_phi3"));
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_par_pid3"));
+        
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_par_number"));     
+        branchGen.push_back(treeWriter->NewFloatBranch("lhe_nu_number"));     
+		 //--- gen W infos
         branchGen.push_back(treeWriter->NewFloatBranch("lhe_W_pt"));
         branchGen.push_back(treeWriter->NewFloatBranch("lhe_W_eta"));
         branchGen.push_back(treeWriter->NewFloatBranch("lhe_W_phi"));
         branchGen.push_back(treeWriter->NewFloatBranch("lhe_W_mass"));
         branchGen.push_back(treeWriter->NewFloatBranch("lhe_W_pid"));
 
-        //--- gen Graviton infos
-        if(fsignal == 1){
-            branchGen.push_back(treeWriter->NewFloatBranch("lhe_X_pt"));
-            branchGen.push_back(treeWriter->NewFloatBranch("lhe_X_eta"));
-            branchGen.push_back(treeWriter->NewFloatBranch("lhe_X_phi"));
-            branchGen.push_back(treeWriter->NewFloatBranch("lhe_X_mass"));
-        }
+       
         
         //--- deals with the HepMc output of Pythia8 ---> no need to store it
         treeHepMC = new ExRootTreeWriter();
@@ -295,10 +316,10 @@ int main(int argc, char *argv[]){
 		procStopWatch.Stop();
 		   
                 //--- filling the output tree
-		//treeWriter->Fill();
+		treeWriter->Fill();
     
 		//--- logistic 
-		//treeWriter->Clear();
+		treeWriter->Clear();
 		modularDelphes->Clear();
 		readStopWatch.Start();
 	     }
@@ -387,40 +408,73 @@ bool lhe_event_preselection(vector< vector<float> >* LHE_event, float Mjj_cut, i
     }
 
     //---if preselection is passed save lhe infos---
-    std::vector<int>   W_codes;
-    std::vector<float> *n_lep_gen;
-    std::vector<float> *lep_pt, *lep_eta, *lep_phi, *lep_flv;
-    std::vector<float> *nu_pt, *nu_eta, *nu_phi, *nu_flv;
-    std::vector<float> *p_pt, *p_eta, *p_phi, *p_flv, *p_fW;
-    std::vector<float> *W_pt, *W_phi, *W_eta, *W_m, *W_pid;
-    std::vector<float> *x_pt, *x_phi, *x_eta, *x_m;
+    //---changed by deniz
+    
+     int nlepton = 0, nparton = 0, nneutrino = 0 ;
+	
+	vector<float> *n_lep_gen, *n_par_gen, *n_nu_gen;
+    vector<float> *lep_pt1, *lep_eta1, *lep_phi1, *lep_flv1;
+    vector<float> *lep_pt2, *lep_eta2, *lep_phi2, *lep_flv2;
+    vector<float> *lep_pt3, *lep_eta3, *lep_phi3, *lep_flv3;
+
+    vector<float> *nu_pt1, *nu_eta1, *nu_phi1, *nu_flv1;
+    vector<float> *nu_pt2, *nu_eta2, *nu_phi2, *nu_flv2;
+    vector<float> *nu_pt3, *nu_eta3, *nu_phi3, *nu_flv3;
+    
+    vector<float> *p_pt1, *p_eta1, *p_phi1, *p_flv1;
+    vector<float> *p_pt2, *p_eta2, *p_phi2, *p_flv2;
+    vector<float> *p_pt3, *p_eta3, *p_phi3, *p_flv3;
+    
+
+    
+    vector<float> *W_pt, *W_phi, *W_eta, *W_m, *W_pid;
+
 
     n_lep_gen = (std::vector<float>*)((branchVector.at(0))->NewFloatEntry());  
-    lep_pt    = (std::vector<float>*)((branchVector.at(1))->NewFloatEntry());
-    lep_eta   = (std::vector<float>*)((branchVector.at(2))->NewFloatEntry());
-    lep_phi   = (std::vector<float>*)((branchVector.at(3))->NewFloatEntry());
-    lep_flv   = (std::vector<float>*)((branchVector.at(4))->NewFloatEntry());    
-    nu_pt     = (std::vector<float>*)((branchVector.at(5))->NewFloatEntry());
-    nu_eta    = (std::vector<float>*)((branchVector.at(6))->NewFloatEntry());
-    nu_phi    = (std::vector<float>*)((branchVector.at(7))->NewFloatEntry());
-    nu_flv    = (std::vector<float>*)((branchVector.at(8))->NewFloatEntry());
-    p_pt      = (std::vector<float>*)((branchVector.at(9))->NewFloatEntry());
-    p_eta     = (std::vector<float>*)((branchVector.at(10))->NewFloatEntry());
-    p_phi     = (std::vector<float>*)((branchVector.at(11))->NewFloatEntry());
-    p_flv     = (std::vector<float>*)((branchVector.at(12))->NewFloatEntry());
-    p_fW      = (std::vector<float>*)((branchVector.at(13))->NewFloatEntry());
-    W_pt      = (std::vector<float>*)((branchVector.at(14))->NewFloatEntry());
-    W_eta     = (std::vector<float>*)((branchVector.at(15))->NewFloatEntry());
-    W_phi     = (std::vector<float>*)((branchVector.at(16))->NewFloatEntry());
-    W_m       = (std::vector<float>*)((branchVector.at(17))->NewFloatEntry());
-    W_pid     = (std::vector<float>*)((branchVector.at(18))->NewFloatEntry());
-    if( branchVector.size() > 19 ){
-        x_pt  = (std::vector<float>*)((branchVector.at(19))->NewFloatEntry());
-        x_eta = (std::vector<float>*)((branchVector.at(20))->NewFloatEntry());
-        x_phi = (std::vector<float>*)((branchVector.at(21))->NewFloatEntry());
-        x_m   = (std::vector<float>*)((branchVector.at(22))->NewFloatEntry());    
-    }
-
+    lep_pt1 = (vector<float>*)((branchVector.at(1))->NewFloatEntry());
+    lep_eta1 = (vector<float>*)((branchVector.at(2))->NewFloatEntry());
+    lep_phi1 = (vector<float>*)((branchVector.at(3))->NewFloatEntry());
+    lep_flv1 = (vector<float>*)((branchVector.at(4))->NewFloatEntry());    
+    lep_pt2 = (vector<float>*)((branchVector.at(5))->NewFloatEntry());
+    lep_eta2 = (vector<float>*)((branchVector.at(6))->NewFloatEntry());
+    lep_phi2 = (vector<float>*)((branchVector.at(7))->NewFloatEntry());
+    lep_flv2 = (vector<float>*)((branchVector.at(8))->NewFloatEntry());  
+    lep_pt3 = (vector<float>*)((branchVector.at(9))->NewFloatEntry());
+    lep_eta3 = (vector<float>*)((branchVector.at(10))->NewFloatEntry());
+    lep_phi3 = (vector<float>*)((branchVector.at(11))->NewFloatEntry());
+    lep_flv3 = (vector<float>*)((branchVector.at(12))->NewFloatEntry());  
+    nu_pt1 = (vector<float>*)((branchVector.at(13))->NewFloatEntry());
+    nu_eta1 = (vector<float>*)((branchVector.at(14))->NewFloatEntry());
+    nu_phi1 = (vector<float>*)((branchVector.at(15))->NewFloatEntry());
+    nu_flv1 = (vector<float>*)((branchVector.at(16))->NewFloatEntry());
+    nu_pt2 = (vector<float>*)((branchVector.at(17))->NewFloatEntry());
+    nu_eta2 = (vector<float>*)((branchVector.at(18))->NewFloatEntry());
+    nu_phi2 = (vector<float>*)((branchVector.at(19))->NewFloatEntry());
+    nu_flv2 = (vector<float>*)((branchVector.at(20))->NewFloatEntry());
+    nu_pt3 = (vector<float>*)((branchVector.at(21))->NewFloatEntry());
+    nu_eta3 = (vector<float>*)((branchVector.at(22))->NewFloatEntry());
+    nu_phi3 = (vector<float>*)((branchVector.at(23))->NewFloatEntry());
+    nu_flv3 = (vector<float>*)((branchVector.at(24))->NewFloatEntry());
+    p_pt1 = (vector<float>*)((branchVector.at(25))->NewFloatEntry());
+    p_eta1 = (vector<float>*)((branchVector.at(26))->NewFloatEntry());
+    p_phi1 = (vector<float>*)((branchVector.at(27))->NewFloatEntry());
+    p_flv1 = (vector<float>*)((branchVector.at(28))->NewFloatEntry());
+    p_pt2 = (vector<float>*)((branchVector.at(29))->NewFloatEntry());
+    p_eta2 = (vector<float>*)((branchVector.at(30))->NewFloatEntry());
+    p_phi2 = (vector<float>*)((branchVector.at(31))->NewFloatEntry());
+    p_flv2 = (vector<float>*)((branchVector.at(32))->NewFloatEntry());
+    p_pt3 = (vector<float>*)((branchVector.at(33))->NewFloatEntry());
+    p_eta3 = (vector<float>*)((branchVector.at(34))->NewFloatEntry());
+    p_phi3 = (vector<float>*)((branchVector.at(35))->NewFloatEntry());
+    p_flv3 = (vector<float>*)((branchVector.at(36))->NewFloatEntry());
+    n_par_gen = (vector<float>*)((branchVector.at(37))->NewFloatEntry());
+    n_nu_gen = (vector<float>*)((branchVector.at(38))->NewFloatEntry());
+    W_pt      = (vector<float>*)((branchVector.at(39))->NewFloatEntry());
+    W_eta     = (vector<float>*)((branchVector.at(40))->NewFloatEntry());
+    W_phi     = (vector<float>*)((branchVector.at(41))->NewFloatEntry());
+    W_m       = (vector<float>*)((branchVector.at(42))->NewFloatEntry());
+    W_pid     = (vector<float>*)((branchVector.at(43))->NewFloatEntry());
+   
     //---loop on lhe events particle searching for W's---
     for(size_t iPart = 0; iPart < LHE_event->size(); iPart++){ 
         std::vector<float> particle = LHE_event->at(iPart);
@@ -432,55 +486,88 @@ bool lhe_event_preselection(vector< vector<float> >* LHE_event, float Mjj_cut, i
             W_phi->push_back(tmp4vect.Phi());
             W_m->push_back(tmp4vect.M());
             W_pid->push_back(particle.at(0));
-            W_codes.push_back(iPart+1);
         }
 
-        // incoming partons
-        if(branchVector.size() > 19 &&  ((particle.at(1) == 2 && abs(particle.at(0)) == 39) || 
-	   (particle.at(1) == 1 && abs(particle.at(0)) == 25))){
-            x_pt->push_back(tmp4vect.Pt());
-            x_eta->push_back(tmp4vect.Eta());
-            x_phi->push_back(tmp4vect.Phi());
-            x_m->push_back(tmp4vect.M());
+        //---Partons
+        if(particle.at(1) == 1 && ( (particle.at(0) > -7 && particle.at(0) < 7) || abs(particle.at(0)) == 21))
+        {
+        	nparton++;
+        	if(nparton==1){
+            p_pt1->push_back(tmp4vect.Pt());
+            p_eta1->push_back(tmp4vect.Eta());
+            p_phi1->push_back(tmp4vect.Phi());
+            p_flv1->push_back(particle.at(0));
+            }
+           if(nparton==2){
+            p_pt2->push_back(tmp4vect.Pt());
+            p_eta2->push_back(tmp4vect.Eta());
+            p_phi2->push_back(tmp4vect.Phi());
+            p_flv2->push_back(particle.at(0));
+            }
+            if(nparton==3){
+            p_pt3->push_back(tmp4vect.Pt());
+            p_eta3->push_back(tmp4vect.Eta());
+            p_phi3->push_back(tmp4vect.Phi());
+            p_flv3->push_back(particle.at(0));
+            }
+         
         }
 
         //---charged leptons
-        if(particle.at(1) == 1 && (abs(particle.at(0)) == 11 || abs(particle.at(0)) == 13 || abs(particle.at(0)) == 15)){
-            lep_pt->push_back(tmp4vect.Pt());
-            lep_eta->push_back(tmp4vect.Eta());
-            lep_phi->push_back(tmp4vect.Phi());
-            lep_flv->push_back(particle.at(0));
-        }
+        if(particle.at(1) == 1 && (particle.at(0) == 11 || particle.at(0) == -11 || particle.at(0) == 13 || particle.at(0) == -13 || particle.at(0) == 15 || particle.at(0) == -15)){
+			 nlepton++;
+				if(nlepton == 1){
+				lep_pt1->push_back(tmp4vect.Pt());
+				lep_eta1->push_back(tmp4vect.Eta());
+				lep_phi1->push_back(tmp4vect.Phi());
+				lep_flv1->push_back(particle.at(0));
+				}
+				if(nlepton == 2){
+				lep_pt2->push_back(tmp4vect.Pt());
+				lep_eta2->push_back(tmp4vect.Eta());
+				lep_phi2->push_back(tmp4vect.Phi());
+				lep_flv2->push_back(particle.at(0));
+				
+				}
+				if(nlepton == 3){
+				lep_pt3->push_back(tmp4vect.Pt());
+				lep_eta3->push_back(tmp4vect.Eta());
+				lep_phi3->push_back(tmp4vect.Phi());
+				lep_flv3->push_back(particle.at(0));
+				
+				}
+            }
 
         //---neutrinos
-        if(particle.at(1) == 1 && (abs(particle.at(0)) == 12 || abs(particle.at(0)) == 14 || abs(particle.at(0)) == 16)){
-            nu_pt->push_back(tmp4vect.Pt());
-            nu_eta->push_back(tmp4vect.Eta());
-            nu_phi->push_back(tmp4vect.Phi());
-            nu_flv->push_back(particle.at(0));
+        if(particle.at(1) == 1 && (particle.at(0) == 12 || particle.at(0) == -12 || particle.at(0) == 14 || particle.at(0) == -14 || particle.at(0) == 16 || particle.at(0) == -16)){
+        	nneutrino++;
+        	if(nneutrino ==1){
+            nu_pt1->push_back(tmp4vect.Pt());
+            nu_eta1->push_back(tmp4vect.Eta());
+            nu_phi1->push_back(tmp4vect.Phi());
+            nu_flv1->push_back(particle.at(0));
+            }
+            if(nneutrino ==2){
+            nu_pt2->push_back(tmp4vect.Pt());
+            nu_eta2->push_back(tmp4vect.Eta());
+            nu_phi2->push_back(tmp4vect.Phi());
+            nu_flv2->push_back(particle.at(0));
+            }
+             if(nneutrino ==3){
+            nu_pt3->push_back(tmp4vect.Pt());
+            nu_eta3->push_back(tmp4vect.Eta());
+            nu_phi3->push_back(tmp4vect.Phi());
+            nu_flv3->push_back(particle.at(0));
+            }
         }
         
     }
 
-    n_lep_gen->push_back(leptons);
+	n_lep_gen->push_back(nlepton);
+    n_par_gen->push_back(nparton);
+    n_nu_gen->push_back(nneutrino);
 
-    //---loop on lhe events particle---
-    for(size_t iPart = 0; iPart < LHE_event->size(); iPart++){ 
-        std::vector<float> particle = LHE_event->at(iPart);
-        TLorentzVector tmp4vect;
-        tmp4vect.SetPxPyPzE(particle.at(6), particle.at(7), particle.at(8), particle.at(9));
-        // outcoming partons
-        if(particle.at(1) == 1 && ((abs(particle.at(0)) > 0 && abs(particle.at(0)) < 7) || abs(particle.at(0)) == 21)){
-            p_pt->push_back(tmp4vect.Pt());
-            p_eta->push_back(tmp4vect.Eta());
-            p_phi->push_back(tmp4vect.Phi());
-            p_flv->push_back(particle.at(0));
-            if( particle.at(2) == particle.at(3) && (particle.at(2) == W_codes.front() || particle.at(2) == W_codes.back())) p_fW->push_back(1);            
-	    else p_fW->push_back(0);
-        }
-    }
-    
-    return true;
+  
 }
 
 //***************************************************
