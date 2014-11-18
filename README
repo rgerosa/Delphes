@@ -34,7 +34,7 @@ fastjet 3.1.0 version, in case you want another one change FASTJET_TGZ entry. If
 
 Here you have to open by hand the following file contribs.svn and set the following lines: 
     GenericSubtractor                tags/2.0.0-alpha-PUWS14.1
-    RecursiveTools                   tags/1.0.0-alpha
+    RecursiveTools                   tags/1.0.0-alpha1
 
 Then you can move on with the last commands:    
 
