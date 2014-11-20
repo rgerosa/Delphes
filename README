@@ -65,7 +65,6 @@ INSTALL DELPHES
 cd $CMSSW_BASE/src 
 git clone https://github.com/rgerosa/Delphes.git
 cd Delphes
-source scripts/minbias_setup_slc6.sh
 ./configure
 make -j
 
@@ -75,6 +74,7 @@ MINIMUM BIAS SAMPLE GENERATION
 Pythia8 setup hard-coded inside external/MinBiasProduction/genMinBias_14TeV.cpp
 
 produce a hepmc pileup file:
+source external/MinBiasProduction/minbias_library_setup.sh
 ./genMinBias_14TeV number_of_events output_file_name 
 
 ===========================
