@@ -62,7 +62,7 @@ variable correctly and pass this versione to scram do:
 INSTALL DELPHES
 ==========================
 
- 
+cd $CMSSW_BASE/src 
 git clone https://github.com/rgerosa/Delphes.git
 cd Delphes
 ./configure
