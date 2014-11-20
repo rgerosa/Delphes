@@ -196,6 +196,13 @@ endif
 
 SrcSuf = cc
 
+LHAPDF=$(LHAPATH)/../../..
+HEPMC=$(LHAPATH)/../../../../../hepmc/2.06.07-cms
+
+shell export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(PYTHIA8DATA)../lib
+shell export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(LHAPDF)/lib
+shell export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(HEPMC)/lib
+
 FASTJET_BASE_TMP =$(shell scram tool info fastjet | grep FASTJET_BASE)
 FASTJET_BASE     =$(subst FASTJET_BASE=,,$(FASTJET_BASE_TMP))
 FASTJET_LIB_TMP  =$(shell scram tool info fastjet | grep LIB | grep -v LIBDIR)
