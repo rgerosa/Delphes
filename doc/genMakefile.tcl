@@ -196,6 +196,13 @@ endif
 
 SrcSuf = cc
 
+LHAPDF=$(LHAPATH)/../../..
+HEPMC=$(LHAPATH)/../../../../../hepmc/2.06.07-cms
+
+shell export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(PYTHIA8DATA)../lib
+shell export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(LHAPDF)/lib
+shell export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(HEPMC)/lib
+
 FASTJET_BASE_TMP =$(shell scram tool info fastjet | grep FASTJET_BASE)
 FASTJET_BASE     =$(subst FASTJET_BASE=,,$(FASTJET_BASE_TMP))
 FASTJET_LIB_TMP  =$(shell scram tool info fastjet | grep LIB | grep -v LIBDIR)
@@ -296,7 +303,7 @@ puts {
 
 ###
 
-all: $(DELPHES) $(EXECUTABLE)
+all: $(DELPHES) $(EXECUTABLE) genMinBias_14TeV 
 
 display: $(DISPLAY)
 
@@ -416,6 +423,11 @@ $(EXECUTABLE_OBJ): tmp/%.$(ObjSuf): %.cpp
 $(EXECUTABLE): %$(ExeSuf): $(DELPHES_DICT_OBJ) $(DELPHES_OBJ) $(TCL_OBJ)
 	@echo ">> Building $@"
 	@$(LD) $(LDFLAGS) $^ $(DELPHES_LIBS) $(OutPutOpt)$@
+
+genMinBias_14TeV: external/MinBiasProduction/genMinBias_14TeV.cpp
+	@echo ">> Compiling $<"
+	@$(CXX) -o $@ $< -I$(HEPMC)/include -L$(HEPMC)/lib -I$(PYTHIA8DATA)/../include -L$(PYTHIA8DATA)/../lib -I$(LHAPDF)/include -L$(LHAPDF)/lib -lHepMC -lpythia8tohepmc -lpythia8 -lLHAPDF -lgfortran
+
 
 ###
 
