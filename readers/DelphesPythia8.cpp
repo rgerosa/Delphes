@@ -108,7 +108,7 @@ int main(int argc, char *argv[]){
       throw runtime_error(message.str());
     }
 
-    int fsignal=0;        
+    int fsignal = 0;        
     if( argc >= 9){
       fsignal = atoi(argv[8]);
     }
@@ -567,6 +567,7 @@ bool lhe_event_preselection(vector< vector<float> >* LHE_event, float Mjj_cut, i
   n_par_gen->push_back(nparton);
   n_nu_gen->push_back(nneutrino);
 
+  return true;
   
 }
 
@@ -632,7 +633,6 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia* pythia,
 
     candidate->PID = pid;
     pdgCode = TMath::Abs(candidate->PID);
-
     candidate->Status = status;
 
     candidate->M1 = particle.mother1() - 1;

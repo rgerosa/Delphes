@@ -2,15 +2,10 @@
 #define TreeWriter_h
 
 /** \class TreeWriter
- *
  *  Fills ROOT tree branches.
- *
  *  $Date: 2013-05-26 02:00:39 +0200 (Sun, 26 May 2013) $
  *  $Revision: 1123 $
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
- *
  */
 
 #include "classes/DelphesModule.h"
@@ -24,9 +19,8 @@ class TRefArray;
 class Candidate;
 class ExRootTreeBranch;
 
-class TreeWriter: public DelphesModule
-{
-public:
+class TreeWriter: public DelphesModule {
+ public:
 
   TreeWriter();
   ~TreeWriter();
@@ -35,7 +29,7 @@ public:
   void Process();
   void Finish();
 
-private:
+ private:
 
   void FillParticles(Candidate *candidate, TRefArray *array);
 

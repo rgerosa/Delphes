@@ -91,7 +91,7 @@ void Isolation::Init(){
 
   rhoInputArrayName = GetString("RhoInputArray", "");
   if(rhoInputArrayName[0] != '\0'){
-    fRhoInputArray = ImportArray(rhoInputArrayName);
+    fRhoInputArray   = ImportArray(rhoInputArrayName);
     fItRhoInputArray = fRhoInputArray->MakeIterator();
   }
   else{
@@ -116,18 +116,14 @@ void Isolation::Finish(){
 //------------------------------------------------------------------------------
 
 void Isolation::Process(){
+
   Candidate *candidate, *isolation, *object;
   TObjArray *chargedIsolationArray;
   TObjArray *neutralIsolationArray;
-  Double_t   sumCharged, sumNeutral, sum, ratio;
+  Double_t   sumChargedHadron, sumNeutral, sumAllParticles, sumChargedPU, sum, ratio;
   Int_t      counter;
   Double_t   eta = 0.0;
   Double_t   rho = 0.0;
-
-  if(fRhoInputArray && fRhoInputArray->GetEntriesFast() > 0){ // if the rho array is found, save the value
-    candidate = static_cast<Candidate*>(fRhoInputArray->At(0));
-    rho = candidate->Momentum.Pt();
-  }
 
   // select charged isolation objects
   fChargedFilter->Reset();
@@ -147,32 +143,40 @@ void Isolation::Process(){
   while((candidate = static_cast<Candidate*>(fItCandidateInputArray->Next()))){
     const TLorentzVector &candidateMomentum = candidate->Momentum;
     eta = TMath::Abs(candidateMomentum.Eta());
-    // loop over all input tracks
-    sumCharged = 0.0;
+   // loop over all input tracks
+    sumChargedHadron = 0.0;
+    sumChargedPU     = 0.0;
+    sumAllParticles  = 0.0;
     counter    = 0;
     itChargedIsolationArray.Reset();
     while((isolation = static_cast<Candidate*>(itChargedIsolationArray.Next()))){
       const TLorentzVector &isolationMomentum = isolation->Momentum;
-      if(candidateMomentum.DeltaR(isolationMomentum) <= fDeltaRMax && !candidate->Overlaps(isolation)){
-        sumCharged += isolationMomentum.Pt();
+      if(candidateMomentum.DeltaR(isolationMomentum) <= fDeltaRMax && !candidate->Overlaps(isolation)){ // inside the cone and don't overlap
+        sumAllParticles += isolationMomentum.Pt();
+        if((TMath::Abs(isolation->PID) < 11 or TMath::Abs(isolation->PID) > 18) and isolation->Charge !=0){
+	  sumChargedHadron += isolationMomentum.Pt();
+          if(isolation->IsRecoPU != 0) sumChargedPU += isolationMomentum.Pt(); 
+	}
         ++counter;
       }
     }
   
 
     // loop over all input towers
-    sumNeutral = 0.0;
+    sumNeutral   = 0.0;
     counter = 0;
     itNeutralIsolationArray.Reset();
     while((isolation = static_cast<Candidate*>(itNeutralIsolationArray.Next()))){
       const TLorentzVector &isolationMomentum = isolation->Momentum;
+      if(isolation->Charge !=0) continue;
       if(candidateMomentum.DeltaR(isolationMomentum) <= fDeltaRMax && !candidate->Overlaps(isolation)){
-        sumNeutral += isolationMomentum.Pt();
+        sumNeutral      += isolationMomentum.Pt();
+	sumAllParticles += isolationMomentum.Pt();
         ++counter;
       }
     }
 
-    // find rho
+    // find rho asaf of the object eta
     rho = 0.0;
     if(fRhoInputArray){
      fItRhoInputArray->Reset();
@@ -184,11 +188,14 @@ void Isolation::Process(){
     }
 
     // correct sum for pile-up contamination
-    sum = sumCharged + TMath::Max(sumNeutral - TMath::Max(rho,0.0)*fDeltaRMax*fDeltaRMax*TMath::Pi(),0.0);
-
+    sum = sumChargedHadron + TMath::Max(sumNeutral-0.5*TMath::Max(rho,0.0)*sumChargedPU,0.0);
     ratio = sum/candidateMomentum.Pt();
 
-    candidate->IsolationVar = ratio;
+    candidate->IsolationVar        = ratio;
+    candidate->chargedHadronEnergy = sumChargedHadron;
+    candidate->neutralEnergy       = sumNeutral;
+    candidate->chargedPUEnergy     = sumChargedPU;
+    candidate->allParticleEnergy   = sumAllParticles;
 
     if((fUsePTSum && sum > fPTSumMax) || ratio > fPTRatioMax) continue;
     fOutputArray->Add(candidate);

@@ -1,14 +1,8 @@
-
 /** \class ConstituentFilter
- *
  *  Drops all input objects that are not constituents of any jet.
- *
  *  $Date: 2013-04-05 10:19:17 +0200 (Fri, 05 Apr 2013) $
  *  $Revision: 1075 $
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
- *
  */
 
 #include "modules/ConstituentFilter.h"
@@ -38,20 +32,16 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-ConstituentFilter::ConstituentFilter()
-{
-}
+ConstituentFilter::ConstituentFilter(){}
 
 //------------------------------------------------------------------------------
 
-ConstituentFilter::~ConstituentFilter()
-{
-}
+ConstituentFilter::~ConstituentFilter(){}
 
 //------------------------------------------------------------------------------
 
-void ConstituentFilter::Init()
-{
+void ConstituentFilter::Init(){
+
   ExRootConfParam param;
   Long_t i, size;
   const TObjArray *array;
@@ -59,48 +49,41 @@ void ConstituentFilter::Init()
 
   fJetPTMin = GetDouble("JetPTMin", 0.0);
   fConPTMin = GetDouble("ConPTMin", 0.0);
-  fConEMin = GetDouble("ConEMin", 0.0);
+  fConEMin  = GetDouble("ConEMin",  0.0);
 
 
   // import input array(s)
-
   param = GetParam("JetInputArray");
   size = param.GetSize();
-  for(i = 0; i < size; ++i)
-  {
-    array = ImportArray(param[i].GetString());
-    iterator = array->MakeIterator();
 
+  for(i = 0; i < size; ++i){
+    array    = ImportArray(param[i].GetString());
+    iterator = array->MakeIterator();
     fInputList.push_back(iterator);
   }
 
   param = GetParam("ConstituentInputArray");
   size = param.GetSize();
-  for(i = 0; i < size/2; ++i)
-  {
+  for(i = 0; i < size/2; ++i){
     array = ImportArray(param[i*2].GetString());
     iterator = array->MakeIterator();
-
     fInputMap[iterator] = ExportArray(param[i*2 + 1].GetString());;
   }
 }
 
 //------------------------------------------------------------------------------
 
-void ConstituentFilter::Finish()
-{
+void ConstituentFilter::Finish(){
   map< TIterator *, TObjArray * >::iterator itInputMap;
   vector< TIterator * >::iterator itInputList;
   TIterator *iterator;
 
-  for(itInputList = fInputList.begin(); itInputList != fInputList.end(); ++itInputList)
-  {
+  for(itInputList = fInputList.begin(); itInputList != fInputList.end(); ++itInputList){
     iterator = *itInputList;
     if(iterator) delete iterator;
   }
 
-  for(itInputMap = fInputMap.begin(); itInputMap != fInputMap.end(); ++itInputMap)
-  {
+  for(itInputMap = fInputMap.begin(); itInputMap != fInputMap.end(); ++itInputMap){
     iterator = itInputMap->first;
     if(iterator) delete iterator;
   }
@@ -108,8 +91,8 @@ void ConstituentFilter::Finish()
 
 //------------------------------------------------------------------------------
 
-void ConstituentFilter::Process()
-{
+void ConstituentFilter::Process(){
+
   Candidate *jet, *constituent;
   map< TIterator *, TObjArray * >::iterator itInputMap;
   vector< TIterator * >::iterator itInputList;
@@ -117,21 +100,15 @@ void ConstituentFilter::Process()
   TObjArray *array;
 
   // loop over all jet input arrays
-  for(itInputList = fInputList.begin(); itInputList != fInputList.end(); ++itInputList)
-  {
+  for(itInputList = fInputList.begin(); itInputList != fInputList.end(); ++itInputList){
     iterator = *itInputList;
-
     // loop over all jets
     iterator->Reset();
-    while((jet = static_cast<Candidate*>(iterator->Next())))
-    {
+    while((jet = static_cast<Candidate*>(iterator->Next()))){
       TIter itConstituents(jet->GetCandidates());
-
       if(jet->Momentum.Pt() <= fJetPTMin) continue;
-
       // loop over all constituents
-      while((constituent = static_cast<Candidate*>(itConstituents.Next())))
-      {
+      while((constituent = static_cast<Candidate*>(itConstituents.Next()))){
         // set the IsConstituent flag
         constituent->IsConstituent = 1;
       }
@@ -139,18 +116,14 @@ void ConstituentFilter::Process()
   }
 
   // loop over all constituent input arrays
-  for(itInputMap = fInputMap.begin(); itInputMap != fInputMap.end(); ++itInputMap)
-  {
+  for(itInputMap = fInputMap.begin(); itInputMap != fInputMap.end(); ++itInputMap){
     iterator = itInputMap->first;
     array = itInputMap->second;
-
     // loop over all constituents
     iterator->Reset();
-    while((constituent = static_cast<Candidate*>(iterator->Next())))
-    {
+    while((constituent = static_cast<Candidate*>(iterator->Next()))){
       // check the IsConstituent flag
-      if(constituent->IsConstituent && constituent->Momentum.Pt() > fConPTMin && constituent->Momentum.E() > fConEMin)
-      {
+      if(constituent->IsConstituent && constituent->Momentum.Pt() > fConPTMin && constituent->Momentum.E() > fConEMin){
         array->Add(constituent);
       }
     }

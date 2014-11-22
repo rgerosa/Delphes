@@ -81,7 +81,7 @@ void Efficiency::Finish()
 void Efficiency::Process()
 { 
   Candidate *candidate;
-  Double_t pt, eta, phi;
+  Double_t pt, eta;
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
@@ -89,7 +89,6 @@ void Efficiency::Process()
     const TLorentzVector &candidatePosition = candidate->Position;
     const TLorentzVector &candidateMomentum = candidate->Momentum;
     eta = candidatePosition.Eta();
-    phi = candidatePosition.Phi();
     pt = candidateMomentum.Pt();
 
     // apply an efficency formula

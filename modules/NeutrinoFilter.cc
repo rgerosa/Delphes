@@ -78,13 +78,12 @@ void NeutrinoFilter::Finish()
 void NeutrinoFilter::Process()
 {
   Candidate *candidate;
-  Int_t status, pdgCode;
+  Int_t pdgCode;
   Bool_t pass;
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
-    status = candidate->Status;
     pdgCode = TMath::Abs(candidate->PID);
 
     pass = kTRUE;

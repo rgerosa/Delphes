@@ -184,11 +184,20 @@ class Photon: public SortableObject {
   Float_t PT; // photon transverse momentum
   Float_t Eta; // photon pseudorapidity
   Float_t Phi; // photon azimuthal angle
-
   Float_t E; // photon energy
+
+  Int_t Status; // particle status | hepevt.isthep[number]                                                                                                                                 
+  Int_t IsRecoPU; // Assigned by charged hadron subtractor where applicable                                                                                                                
+  Int_t IsPU;
   
   Float_t EhadOverEem; // ratio of the hadronic versus electromagnetic energy deposited in the calorimeter
-  Float_t IsolationVar; 
+
+  Float_t IsolationVar;
+  Float_t TrackIsolationVar;
+  Float_t chargedHadronEnergy;
+  Float_t neutralEnergy;
+  Float_t chargedPUEnergy;
+  Float_t allParticleEnergy;
 
   Float_t TOuter; // time at calorimeter face
 
@@ -211,14 +220,21 @@ class Electron: public SortableObject {
   Float_t Eta; // electron pseudorapidity
   Float_t Phi; // electron azimuthal angle
 
-  Int_t Charge; // electron charge
+  Int_t Status; // particle status | hepevt.isthep[number]                                                                                                                                 
+  Int_t IsRecoPU; // Assigned by charged hadron subtractor where applicable                                                                                                                
+  Int_t IsPU;
 
+
+  Int_t Charge; // electron charge
   Float_t EhadOverEem; // ratio of the hadronic versus electromagnetic energy deposited in the calorimeter
-  Float_t IsolationVar; // Sum of chHadEt, NeutralHadEt, and  GammaEt
+
+  Float_t IsolationVar;
+  Float_t TrackIsolationVar;
   Float_t chargedHadronEnergy;
-  Float_t netrualHadronEnergy;
-  Float_t gammaEnergy;
+  Float_t neutralEnergy;
   Float_t chargedPUEnergy;
+  Float_t allParticleEnergy;
+
 
   Float_t TOuter; // Time at calorimeter face
 
@@ -242,12 +258,18 @@ class Muon: public SortableObject {
   Float_t Eta; // muon pseudorapidity
   Float_t Phi; // muon azimuthal angle
 
-  Int_t Charge; // muon charge
-  Float_t IsolationVar; 
+  Int_t Status; // particle status | hepevt.isthep[number]                                                                                                                                 
+  Int_t IsRecoPU; // Assigned by charged hadron subtractor where applicable                                                                                                                
+  Int_t IsPU;
+
+  Int_t   Charge; // muon charge
+  Float_t IsolationVar;
+  Float_t TrackIsolationVar;
   Float_t chargedHadronEnergy;
-  Float_t netrualHadronEnergy;
-  Float_t gammaEnergy;
+  Float_t neutralEnergy;
   Float_t chargedPUEnergy;
+  Float_t allParticleEnergy;
+
 
   TRef Particle; // reference to generated particle
 
@@ -271,11 +293,12 @@ class IsoTrack: public SortableObject {
   Float_t Phi; // IsoTrack azimuthal angle
 
   Int_t   Charge; // IsoTrack charge
-  Float_t IsolationVar; 
+  Float_t IsolationVar;
+  Float_t TrackIsolationVar;
   Float_t chargedHadronEnergy;
-  Float_t netrualHadronEnergy;
-  Float_t gammaEnergy;
+  Float_t neutralEnergy;
   Float_t chargedPUEnergy;
+  Float_t allParticleEnergy;
 
   Int_t   IsEMCand; // Whether it is a Electron/Muon candidate
 
@@ -298,7 +321,6 @@ class Jet: public SortableObject {
   Float_t PT; // jet transverse momentum
   Float_t Eta; // jet pseudorapidity
   Float_t Phi; // jet azimuthal angle
-
   Float_t Mass; // jet invariant mass
 
   Float_t DeltaEta;  // jet radius in pseudorapidity
@@ -374,20 +396,99 @@ class Jet: public SortableObject {
   float SoftDropEtaSub3;
   float SoftDropPhiSub3;
 
-  Float_t Beta, BetaStar; // dZ;
-  Float_t MeanSqDeltaR, PTD;
-  Int_t   NCharged, NNeutrals;
-  Float_t FracPt[5]; // [0] <--> 0.0 < dR < 0.1,  [1] <--> 0.1 < dR < 0.2,  etc.
-
-
   Float_t AreaX,AreaY,AreaZ,AreaT; // 4-vector area
   
-  UInt_t BTag; // 0 or 1 for a jet that has been tagged as containing a heavy quark
+  UInt_t BTagAlgo;
+  UInt_t BTagPhysics;
+  UInt_t BTagNearest2;
+  UInt_t BTagNearest3;
+  UInt_t BTagHeaviest;
+  UInt_t BTagHighestPt;
+
+  UInt_t flavourAlgo;
+  UInt_t flavourPhysics;
+  UInt_t flavourNearest2;
+  UInt_t flavourNearest3;
+  UInt_t flavourHeaviest;
+  UInt_t flavourHighestPt;
+  
   UInt_t TauTag; // 0 or 1 for a jet that has been tagged as a tau
 
   Int_t Charge; // tau charge
 
   Float_t EhadOverEem; // ratio of the hadronic versus electromagnetic energy deposited in the calorimeter
+
+  // pileup jet ID
+  float dRMean  ;
+  float dR2Mean ;
+  float ptD     ;
+  float sumPt   ;
+  float sumPt2  ;
+
+  float dRMeanEm ;
+  float ptDNe    ;
+  float sumPtNe  ;
+  float nNeutral ;
+  float neuEMfrac ;
+  float dRMeanNeut ;
+  float neuHadfrac ;
+
+  float dRMeanCh ;
+  float ptDCh    ;
+  float sumPtCh  ;
+  float nCharged ;
+
+  float chgEMfrac  ;
+  float chgHadfrac ;
+
+  float betaClassic ;
+  float betaClassicStar ;
+  float beta     ;
+  float betaStar ;
+  float constituents ;
+
+  float dZ ;
+  float d0 ;
+
+  float etaW ;
+  float phiW ;
+  float jetW ;
+
+  float majW ; 
+  float minW ; 
+  float dRLeadCent ;
+  float dRLead2nd ;
+
+  float ptMean ; 
+  float ptRMS ; 
+  float pt2A ; 
+  float sumChPt ; 
+  float sumNePt ;
+  float axis2;
+
+  float leadFrac ; 
+  float secondFrac ; 
+  float thirdFrac ; 
+  float fourthFrac ;
+  float leadChFrac ; 
+  float secondChFrac ; 
+  float thirdChFrac ; 
+  float fourthChFrac ;
+  float leadEmFrac ; 
+  float secondEmFrac ; 
+  float thirdEmFrac ; 
+  float fourthEmFrac ;
+  float leadNeutFrac ; 
+  float secondNeutFrac ; 
+  float thirdNeutFrac ; 
+  float fourthNeutFrac ;
+
+  int pileupIDFlagCutBased;
+
+  std::vector<float> FracPt;
+  std::vector<float> emFracPt;
+  std::vector<float> neutFracPt;
+  std::vector<float> chFracPt;
 
   TRefArray Constituents; // references to constituents
   TRefArray Particles; // references to generated particles
@@ -408,13 +509,15 @@ class Track: public SortableObject  {
  public:  
 
   Int_t PID; // HEP ID number
-
+  Int_t Status; // particle status | hepevt.isthep[number]                                                                                             
+  Int_t IsRecoPU; // Assigned by charged hadron subtractor where applicable
+  Int_t IsPU;
   Int_t Charge; // track charge
 
   Float_t PT; // track transverse momentum
-
   Float_t Eta; // track pseudorapidity
   Float_t Phi; // track azimuthal angle
+  Float_t Mass;
 
   Float_t EtaOuter; // track pseudorapidity at the tracker edge
   Float_t PhiOuter; // track azimuthal angle at the tracker edge
@@ -422,16 +525,12 @@ class Track: public SortableObject  {
   Float_t X; // track vertex position (x component)
   Float_t Y; // track vertex position (y component)
   Float_t Z; // track vertex position (z component)
+  Float_t T; // track vertex time: I think this is cheating, but I guess no more than (X,Y,Z)
 
   Float_t XOuter; // track position (x component) at the tracker edge
   Float_t YOuter; // track position (y component) at the tracker edge
   Float_t ZOuter; // track position (z component) at the tracker edge
 
-  Int_t IsRecoPU; // Assigned by charged hadron subtractor where applicable
-                  // Reflects decision ncoprorating z vertex resolution
-  Int_t IsPU;
-
-  Float_t T; // track vertex time: I think this is cheating, but I guess no more than (X,Y,Z)
   Float_t TOuter; // track time at tracker edge
 
   TRef Particle; // reference to generated particle
@@ -478,44 +577,59 @@ class Tower: public SortableObject  {
 class Candidate: public SortableObject  {
   friend class DelphesFactory;
 
-public:
+ public:
 
   Candidate();
 
+  // Momentum and position
   TLorentzVector Momentum, Position, Area;
 
+  // Generator level info
   Int_t PID;
   Int_t Status;
   Int_t M1, M2, D1, D2;
-
   Int_t Charge;
-
   Float_t Mass;
-
+  
+  // Isolatiom info
   Float_t IsolationVar;
   Float_t TrackIsolationVar;
-
   Float_t chargedHadronEnergy;
-  Float_t netrualHadronEnergy;
-  Float_t gammaEnergy;
+  Float_t neutralEnergy;
   Float_t chargedPUEnergy;
+  Float_t allParticleEnergy;
 
+  // Flag info
   Int_t IsPU;
   Int_t IsRecoPU; // Assigned by charged hadron subtractor where applicable Reflects decision ncoprorating z vertex resolution
-
   Int_t IsConstituent;
   Int_t IsEMCand; // Whether it is a Electron/Muon candidate
   
-  UInt_t BTag;
+
+  // BTagging info
+  UInt_t BTagAlgo;
+  UInt_t BTagPhysics;
+  UInt_t BTagNearest2;
+  UInt_t BTagNearest3;
+  UInt_t BTagHeaviest;
+  UInt_t BTagHighestPt;
+
+  UInt_t flavourAlgo;
+  UInt_t flavourPhysics;
+  UInt_t flavourNearest2;
+  UInt_t flavourNearest3;
+  UInt_t flavourHeaviest;
+  UInt_t flavourHighestPt;
+  
+
+  // Tau tag info
   UInt_t TauTag;
 
+  // Calorimeter info
   Float_t Eem;
   Float_t Ehad;
 
-  Float_t Edges[4];
-  Float_t DeltaEta;
-  Float_t DeltaPhi;
-
+  // Substructure info
   Float_t Tau1; 
   Float_t Tau2; 
   Float_t Tau3; 
@@ -586,19 +700,92 @@ public:
   float SoftDropEtaSub3;
   float SoftDropPhiSub3;
 
-
-  Float_t Beta, BetaStar;
-  Float_t MeanSqDeltaR, PTD;
-  Int_t   NCharged, NNeutrals;
-  Float_t FracPt[5]; // [0] <--> 0.0 < dR < 0.1,  [1] <--> 0.1 < dR < 0.2,  etc.
   Int_t   nTimes;
 
+  // pileup jet ID
+  float dRMean  ;
+  float dR2Mean ;
+  float ptD     ;
+  float sumPt   ;
+  float sumPt2  ;
+
+  float dRMeanEm ;
+  float ptDNe    ;
+  float sumPtNe  ;
+  float nNeutral ;
+  float neuEMfrac ;
+  float dRMeanNeut ;
+  float neuHadfrac ;
+
+  float dRMeanCh ;
+  float ptDCh    ;
+  float sumPtCh  ;
+  float nCharged ;
+
+  float chgEMfrac  ;
+  float chgHadfrac ;
+
+  float betaClassic ;
+  float betaClassicStar ;
+  float beta     ;
+  float betaStar ;
+  float constituents ;
+
+  float dZ ;
+  float d0 ;
+
+  float etaW ;
+  float phiW ;
+  float jetW ;
+
+  float majW ; 
+  float minW ; 
+  float dRLeadCent ;
+  float dRLead2nd ;
+
+  float ptMean ; 
+  float ptRMS ; 
+  float pt2A ; 
+  float sumChPt ; 
+  float sumNePt ;
+  float axis2;
+
+  float leadFrac ; 
+  float secondFrac ; 
+  float thirdFrac ; 
+  float fourthFrac ;
+  float leadChFrac ; 
+  float secondChFrac ; 
+  float thirdChFrac ; 
+  float fourthChFrac ;
+  float leadEmFrac ; 
+  float secondEmFrac ; 
+  float thirdEmFrac ; 
+  float fourthEmFrac ;
+  float leadNeutFrac ; 
+  float secondNeutFrac ; 
+  float thirdNeutFrac ; 
+  float fourthNeutFrac ;
+
+  int pileupIDFlagCutBased;  
+
+  Float_t Edges[4];
+  Float_t DeltaEta;
+  Float_t DeltaPhi;
+
+  std::vector<float> FracPt; 
+  std::vector<float> emFracPt; 
+  std::vector<float> neutFracPt;
+  std::vector<float> chFracPt; 
+
+  // Towers
   std::vector<std::pair<float,float> > ecal_E_t; 
 
+  // helper methods
   static CompBase *fgCompare; 
   const  CompBase *GetCompare() const { return fgCompare; }
 
-  void AddCandidate(Candidate *object);
+  void       AddCandidate(Candidate *object);
   TObjArray *GetCandidates();
 
   Bool_t Overlaps(const Candidate *object) const;
@@ -607,11 +794,10 @@ public:
   virtual TObject *Clone(const char *newname = "") const;
   virtual void     Clear(Option_t* option = ""); 
 
-private:
+ private:
 
   DelphesFactory *fFactory; //!
-  TObjArray *fArray; //!
-  
+  TObjArray *fArray; //!  
   void SetFactory(DelphesFactory *factory) { fFactory = factory; }
 
   ClassDef(Candidate, 1)

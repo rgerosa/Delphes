@@ -61,7 +61,7 @@ void JetExample(const char *inputFile,const char *outputFile)
   TFile *f;
   TTree *rt, *ft, *prt, *pft;
 
-  float ft_BetaStar, ft_MeanSqDeltaR;
+  //  float ft_BetaStar, ft_MeanSqDeltaR;
 
   if (doResTree||doFakeTree||doPuppiResTree||doPuppiFakeTree) {
     f = new TFile(outputFile,"RECREATE");
@@ -89,8 +89,8 @@ void JetExample(const char *inputFile,const char *outputFile)
     ft->Branch("genpt",&ft_genpt,"genpt/F");
     ft->Branch("recpt",&ft_recpt,"recpt/F");
     ft->Branch("dr",&ft_dr,"dr/F");
-    ft->Branch("BetaStar",&ft_BetaStar,"BetaStar/F");
-    ft->Branch("MeanSqDeltaR",&ft_MeanSqDeltaR,"MeanSqDeltaR/F");
+    //    ft->Branch("BetaStar",&ft_BetaStar,"BetaStar/F");
+    //    ft->Branch("MeanSqDeltaR",&ft_MeanSqDeltaR,"MeanSqDeltaR/F");
   }
 
   if (doPuppiFakeTree) {
@@ -201,8 +201,8 @@ void JetExample(const char *inputFile,const char *outputFile)
         ft_receta = jet->Eta;
         ft_dr = 9999.;
         ft_genpt = -1.;
-	ft_BetaStar = jet->BetaStar;
-	ft_MeanSqDeltaR = jet->MeanSqDeltaR;
+	//	ft_BetaStar = jet->BetaStar;
+	//	ft_MeanSqDeltaR = jet->MeanSqDeltaR;
         for (int j = 0 ; j < branchGenJet->GetEntries() ; j++ ) {
           Jet *genjet = (Jet*) branchGenJet->At(j);
           TLorentzVector genp4 = genjet->P4();
@@ -292,8 +292,8 @@ void JetExample(const char *inputFile,const char *outputFile)
 	  cout << "    Area: " << jet->AreaP4().Pt() << endl;
 	  //	  cout << "    Time at calo: " << jet->t0 << endl;
 	  //	  cout << "    Time at calo smeared by 1ps 10ps 20ps 30ps 40ps: " << jet->t1 << " " << jet->t10 << " " << jet->t20 << " " << jet->t30 << " " << jet->t40 << endl;
-	  cout << "    Beta*:" << jet->BetaStar << endl;
-	  cout << "    NCharged: " << jet->NCharged << endl;
+	  //	  cout << "    Beta*:" << jet->BetaStar << endl;
+	  //	  cout << "    NCharged: " << jet->NCharged << endl;
 	  cout << "    Number of constituents: " << jet->Constituents.GetEntries() << endl;
 	  if (branchEFlowTrack && branchEFlowTower && branchEFlowMuon) {
 	    for (int j = 0 ; j < jet->Constituents.GetEntries() ; j++) {

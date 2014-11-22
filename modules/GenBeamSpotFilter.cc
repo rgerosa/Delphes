@@ -78,7 +78,6 @@ void GenBeamSpotFilter::Finish()
 void GenBeamSpotFilter::Process()
 {
   Candidate *candidate;
-  Int_t status, pdgCode;
   Bool_t pass;
   TLorentzVector origin, firstOrigin;
   int N_same = 0;
@@ -89,10 +88,7 @@ void GenBeamSpotFilter::Process()
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
-    status = candidate->Status;
-    pdgCode = TMath::Abs(candidate->PID);
     origin = candidate->Position;
-
     pass = kFALSE;
 
     if (candidate->IsPU == 0 && !fPassedOne) {

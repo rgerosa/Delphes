@@ -51,39 +51,68 @@ private:
   TObjArray *fOutputArray; //!
 
   // only for Safe4V subtraction
+  void *fPluginRho; //!                                                                                                                                                                   
   void *fPlugin; //!                                                                                                                                                                   
-  fastjet::JetDefinition *fDefinition; //!                                                                                                                                                  
-  Int_t fJetAlgorithm;
+
+  fastjet::JetDefinition *fDefinition; //!                                                                                                                                        
+  fastjet::JetDefinition *fDefinitionRho; //!                                                                                                                                   
+ 
+  Int_t    fJetAlgorithmRho;
+  Int_t    fJetAlgorithm;
+
+  Double_t fParameterRRho;
   Double_t fParameterR;
+
+  Double_t fConeRadiusRho;
   Double_t fConeRadius;
+
   Double_t fSeedThreshold;
+  Double_t fSeedThresholdRho;
+
   Double_t fConeAreaFraction;
+  Double_t fConeAreaFractionRho;
+
+  Double_t fAdjacencyCutRho;
   Double_t fAdjacencyCut;
+
   Double_t fOverlapThreshold;
+  Double_t fOverlapThresholdRho;
   
   // --- FastJet Area method --------                                                                                                                                                    
   fastjet::AreaDefinition *fAreaDefinition;
+  fastjet::AreaDefinition *fAreaDefinitionRho;
   Int_t  fAreaAlgorithm;
+  Int_t  fAreaAlgorithmRho;
 
   // -- ghost based areas --                                                                                                                                                      
   Double_t fGhostEtaMax;
+  Double_t fGhostEtaMaxRho;
   Int_t    fRepeat;
+  Int_t    fRepeatRho;
   Int_t    fMaxIterations;
+  Int_t    fMaxIterationsRho;
   Int_t    fMaxPairSize;
+  Int_t    fMaxPairSizeRho;
   Int_t    fIratch;
+  Int_t    fIratchRho;
   Double_t fGhostArea;
+  Double_t fGhostAreaRho;
   Double_t fGridScatter;
+  Double_t fGridScatterRho;
   Double_t fPtScatter;
+  Double_t fPtScatterRho;
   Double_t fMeanGhostPt;
+  Double_t fMeanGhostPtRho;
 
   // -- voronoi areas --                                                                                                                                                                   
   Double_t fEffectiveRfact;
+  Double_t fEffectiveRfactRho;
   std::map< Double_t, Double_t > fEtaRangeMap; //!                                                                                                                                        
+
   TIterator *fItInputArray; //!                                                                                                                                                           
-  const TObjArray *fInputArray; //!                                                                                                                                                      
-
-
-  
+       
+  const TObjArray *fInputArray; //!                                                                                                                                                        
+        
 
   ClassDef(JetPileUpSubtractor, 1)
 };

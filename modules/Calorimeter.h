@@ -2,16 +2,10 @@
 #define Calorimeter_h
 
 /** \class Calorimeter
- *
  *  Fills calorimeter towers, performs calorimeter resolution smearing,
  *  preselects towers hit by photons and creates energy flow objects.
- *
  *  $Date: 2013-09-03 17:54:56 +0200 (Tue, 03 Sep 2013) $
- *  $Revision: 1273 $
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
- *
  */
 
 #include "classes/DelphesModule.h"
@@ -24,7 +18,7 @@ class TObjArray;
 class DelphesFormula;
 class Candidate;
 
-class Calorimeter: public DelphesModule
+class Calorimeter: public DelphesModule 
 {
 public:
 
@@ -40,16 +34,16 @@ private:
   typedef std::map< Long64_t, std::pair< Double_t, Double_t > > TFractionMap; //!
   typedef std::map< Double_t, std::set< Double_t > > TBinMap; //!
 
-  Candidate *fTower;
+  Candidate *fTower; // cadidate
   Double_t fTowerEta, fTowerPhi, fTowerEdges[4];
   Double_t fTowerECalEnergy, fTowerHCalEnergy;
   Double_t fTrackECalEnergy, fTrackHCalEnergy;
-  Int_t fTowerTrackHits, fTowerPhotonHits;
+  Int_t    fTowerTrackHits, fTowerPhotonHits;
 
   Double_t fTimingEMin;
 
   TFractionMap fFractionMap; //!
-  TBinMap fBinMap; //!
+  TBinMap      fBinMap; //!
 
   std::vector < Double_t > fEtaBins;
   std::vector < std::vector < Double_t >* > fPhiBins;

@@ -285,7 +285,7 @@ void LHCOConverter::AnalyseTau(ExRootTreeBranch *branch)
 
   element->Mass = fDblParam[3];
 
-  element->BTag = 0;
+  element->BTagAlgo = 0;
   element->TauTag = 1;
 
   element->Charge = fDblParam[4] < 0 ? -1 : 1;
@@ -311,7 +311,7 @@ void LHCOConverter::AnalyseJet(ExRootTreeBranch *branch)
 /*
   element->Ntrk = TMath::Abs(Int_t(fDblParam[4]));
 */
-  element->BTag = Int_t(fDblParam[5]);
+  element->BTagAlgo = Int_t(fDblParam[5]);
   element->TauTag = 0;
 
   element->Charge = 0;

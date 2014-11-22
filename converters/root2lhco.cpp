@@ -370,7 +370,7 @@ void LHCOWriter::AnalyseJets()
     fDblParam[2] = element->PT;
     fDblParam[3] = element->Mass;
     fDblParam[4] = counter;
-    fDblParam[5] = element->BTag;
+    fDblParam[5] = element->BTagAlgo;
     fDblParam[6] = element->EhadOverEem;
 
     Write();

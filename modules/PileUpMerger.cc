@@ -121,23 +121,20 @@ void PileUpMerger::Process()
 
   allEntries = fReader->GetEntries();
 
-  for(event = 0; event < poisson; ++event)
-  {
-    do
-    {
+  for(event = 0; event < poisson; ++event){
+    do{
       entry = TMath::Nint(gRandom->Rndm()*allEntries);
     }
     while(entry >= allEntries);
 
     fReader->ReadEntry(entry);
 
-    dz = gRandom->Gaus(0.0, fZVertexSpread);
+    dz   = gRandom->Gaus(0.0, fZVertexSpread);
     dphi = gRandom->Uniform(-TMath::Pi(), TMath::Pi());
-    dt = gRandom->Gaus(0., fZVertexSpread*(mm/ns)/c_light);
+    dt   = gRandom->Gaus(0., fZVertexSpread*(mm/ns)/c_light);
+ 
+    while(fReader->ReadParticle(pid, x, y, z, t, px, py, pz, e)){
 
-
-    while(fReader->ReadParticle(pid, x, y, z, t, px, py, pz, e))
-    {
       candidate = factory->NewCandidate();
 
       // Get rid of BS position in PU
@@ -145,8 +142,7 @@ void PileUpMerger::Process()
       x = x - fInputBSX;
       y = y - fInputBSY;
 
-      candidate->PID = pid;
-
+      candidate->PID    = pid;
       candidate->Status = 1;
 
       pdgParticle = pdg->GetParticle(pid);

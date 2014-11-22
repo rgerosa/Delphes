@@ -25,7 +25,7 @@ void GeneralExample(const char *inputFile, const char *outputFile)
   // Get pointers to branches used in this analysis
   TClonesArray *branchGenJet = treeReader->UseBranch("GenJet");
   TClonesArray *branchJet = treeReader->UseBranch("Jet");
-  TClonesArray *branchPuppiJet = treeReader->UseBranch("PuppiJet");
+  //  TClonesArray *branchPuppiJet = treeReader->UseBranch("PuppiJet");
   TClonesArray *branchRho = treeReader->UseBranch("Rho");
   TClonesArray *branchGlobalRho = treeReader->UseBranch("GlobalRho");
   TClonesArray *branchNPU = treeReader->UseBranch("NPU");
@@ -40,7 +40,7 @@ void GeneralExample(const char *inputFile, const char *outputFile)
   TClonesArray *branchEFlowMuon = treeReader->UseBranch("EFlowMuon");
   TClonesArray *branchGenParticle = treeReader->UseBranch("Particle");
   TClonesArray *branchBeamSpotParticle = treeReader->UseBranch("BeamSpotParticle");
-  TClonesArray *branchGenParticleWithPU = treeReader->UseBranch("ParticleWithPU");
+  //  TClonesArray *branchGenParticleWithPU = treeReader->UseBranch("ParticleWithPU");
 
   TClonesArray *branchMissingET = treeReader->UseBranch("MissingET");
   TClonesArray *branchGenMissingET = treeReader->UseBranch("GenMissingET");
@@ -215,15 +215,15 @@ void GeneralExample(const char *inputFile, const char *outputFile)
 	  cout << "  Jet " << i << endl;
 	  cout << "    pT: " << jet->PT << endl;
 	  cout << "    Eta: " << jet->Eta << endl;
-	  cout << "    BTag: " << bool(jet->BTag&1) << " | " << bool(jet->BTag&2) << endl;
+	  cout << "    BTag: " << bool(jet->BTagAlgo&1) << " | " << bool(jet->BTagAlgo&2) << endl;
           cout << "    TauTag: " << jet->TauTag << endl;
 	  //	  cout << "    Area: " << jet->AreaP4().Pt() << endl;
 	  cout << "    Jet Pileup ID" << endl;
-	  cout << "      Beta*: " << jet->BetaStar << endl;
+	  //	  cout << "      Beta*: " << jet->BetaStar << endl;
 	  cout << "      Fractional pT in annuli (<0.1, 0.1-0.2, ..., 0.4-0.5) " << jet->FracPt[0] << " " << jet->FracPt[1] << " " << jet->FracPt[2] << " " << jet->FracPt[3] << " " << jet->FracPt[4] << endl;
-	  cout << "      <dR^2>: " << jet->MeanSqDeltaR << endl;
-          cout << "      NNeutrals: " << jet->NNeutrals << endl;
-	  cout << "      NCharged: " << jet->NCharged << endl;
+	  //	  cout << "      <dR^2>: " << jet->MeanSqDeltaR << endl;
+	  //          cout << "      NNeutrals: " << jet->NNeutrals << endl;
+	  //	  cout << "      NCharged: " << jet->NCharged << endl;
 	  cout << "    Number of constituents: " << jet->Constituents.GetEntries() << endl;
 	  if (listJetTowers && branchEFlowTrack && branchEFlowTower && branchEFlowMuon) {
 	    for (int j = 0 ; j < jet->Constituents.GetEntries() ; j++) {

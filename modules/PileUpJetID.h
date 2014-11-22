@@ -1,25 +1,17 @@
 #ifndef PileUpJetID_h
 #define PileUpJetID_h
 
-/** \class PileUpJetID
- *
- *  CMS PileUp Jet ID Variables
- *
- *  \author S. Zenz
- *
- */
-
-
 #include "classes/DelphesModule.h"
+#include "TMatrixDSym.h"
 
 #include <deque>
 
 class TObjArray;
 class DelphesFormula;
 
-class PileUpJetID: public DelphesModule
-{
-public:
+class PileUpJetID: public DelphesModule {
+
+ public:
 
   PileUpJetID();
   ~PileUpJetID();
@@ -27,83 +19,64 @@ public:
   void Init();
   void Process();
   void Finish();
+  void assign(const std::vector<float> &, float &, float &, float &, float &);
+  std::pair<int,int> getJetIdKey(float jetPt, float jetEta);
+  int computeCutIDflag(float,float,float,float,float);
 
-private:
+ private:
 
   Double_t fJetPTMin;
   Double_t fParameterR;
 
-  Double_t fMeanSqDeltaRMaxBarrel; // |eta| < 1.5
-  Double_t fBetaMinBarrel; // |eta| < 2.5
-  Double_t fMeanSqDeltaRMaxEndcap; // 1.5 < |eta| < 4.0
-  Double_t fBetaMinEndcap; // 1.5 < |eta| < 4.0
-  Double_t fMeanSqDeltaRMaxForward; // |eta| > 4.0
+  Int_t    fUseConstituents; 
 
-  Double_t fNeutralPTMin;
-  Double_t fJetPTMinForNeutrals;
+  std::vector<double> fCones ;
 
-  /*
-JAY
----
+  std::vector<double> Pt010_Tight_betaStar ;
+  std::vector<double> Pt1020_Tight_betaStar ;
+  std::vector<double> Pt2030_Tight_betaStar ;
+  std::vector<double> Pt3050_Tight_betaStar ;
 
-|Eta|<1.5
+  std::vector<double> Pt010_Medium_betaStar ;
+  std::vector<double> Pt1020_Medium_betaStar ;
+  std::vector<double> Pt2030_Medium_betaStar ;
+  std::vector<double> Pt3050_Medium_betaStar ;
 
-meanSqDeltaR betaStar SigEff BgdEff
-0.13 0.92 96% 8%
-0.13 0.95 97% 16%
-0.13 0.97 98% 27%
+  std::vector<double> Pt010_Loose_betaStar ;
+  std::vector<double> Pt1020_Loose_betaStar ;
+  std::vector<double> Pt2030_Loose_betaStar ;
+  std::vector<double> Pt3050_Loose_betaStar;
 
-|Eta|>1.5
+  std::vector<double> Pt010_Tight_RMS ;
+  std::vector<double> Pt1020_Tight_RMS ;
+  std::vector<double> Pt2030_Tight_RMS ;
+  std::vector<double> Pt3050_Tight_RMS ;
 
-meanSqDeltaR betaStar SigEff BgdEff
-0.14 0.91 95% 15%
-0.14 0.94 97% 19%
-0.14 0.97 98% 29%
+  std::vector<double> Pt010_Medium_RMS ;
+  std::vector<double> Pt1020_Medium_RMS ;
+  std::vector<double> Pt2030_Medium_RMS ;
+  std::vector<double> Pt3050_Medium_RMS ;
 
-BRYAN
------
+  std::vector<double> Pt010_Loose_RMS ;
+  std::vector<double> Pt1020_Loose_RMS ;
+  std::vector<double> Pt2030_Loose_RMS ;
+  std::vector<double> Pt3050_Loose_RMS;
 
-Barrel (MeanSqDR, Beta, sig eff, bg eff): 
-0.10, 0.08, 90%, 8%
-0.11, 0.12, 90%, 6%
-0.13, 0.16, 89%, 5%
-
-Endcap (MeanSqDR, Beta, sig eff, bg eff):
-0.07, 0.06, 89%, 4%
-0.08, 0.08, 92%, 6%
-0.09, 0.08, 95%, 10%
-0.10, 0.08, 97%, 13%
-
-SETH GUESSES FOR |eta| > 4.0
-----------------------------
-
-MeanSqDeltaR 
-0.07 
-0.10 
-0.14 
-0.2
-  */
-
-  // If set to true, may have weird results for PFCHS
-  // If set to false, uses everything within dR < fParameterR even if in other jets &c.
-  // Results should be very similar for PF
-  Int_t fUseConstituents; 
-
-  Bool_t fAverageEachTower;
-
+  Float_t pileUpIDCut_betaStar [3][4][4];
+  Float_t pileUpIDCut_RMS [3][4][4];
+ 
   TIterator *fItJetInputArray; //!
-
-  const TObjArray *fJetInputArray; //!
-
-  const TObjArray *fTrackInputArray; // SCZ
-  const TObjArray *fNeutralInputArray; 
-
   TIterator *fItTrackInputArray; // SCZ
   TIterator *fItNeutralInputArray; // SCZ
+  TIterator *fItPVInputArray; //!                                                                                                                                                     
+
+  const TObjArray *fJetInputArray; //!
+  const TObjArray *fTrackInputArray; // SCZ
+  const TObjArray *fNeutralInputArray; 
+  const TObjArray *fPVInputArray; //!                                                                                                                                                 
 
   TObjArray *fOutputArray; //!
   TObjArray *fNeutralsInPassingJets; // SCZ
-
 
   ClassDef(PileUpJetID, 2)
 };

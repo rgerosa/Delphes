@@ -101,7 +101,6 @@ void ModifyBeamSpot::Process()
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
     const TLorentzVector &candidatePosition = candidate->Position;
-
     if (currentPU < 0 || currentPU != candidate->IsPU) {
       //cout << "SCZ Debug: currentPU=" << currentPU << " candidate->IsPU=" << candidate->IsPU << " so throwing new numbers" << endl;
 
@@ -119,8 +118,6 @@ void ModifyBeamSpot::Process()
       // Not exactly right but it seems to be what CMSSW does
       currentZ = gRandom->Gaus(0., fZVertexSpread);
       currentT = gRandom->Gaus(0., fZVertexSpread*(mm/ns)/c_light);
-
-      //      cout << "SCZ Debug: currentZ currentT " << currentZ << " " << currentT << endl;
     }
 
     // For now simply keep X, Y - they looked okish
@@ -141,7 +138,6 @@ void ModifyBeamSpot::Process()
     candidate = static_cast<Candidate*>(candidate->Clone());
     candidate->Position.SetXYZT(X,Y,Z,T);
     candidate->AddCandidate(mother);
- 
     fOutputArray->Add(candidate);
 
   }

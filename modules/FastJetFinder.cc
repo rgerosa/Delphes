@@ -222,7 +222,6 @@ void FastJetFinder::Process(){
       fastjet::JetMedianBackgroundEstimator estimator(select_rapidity,*fDefinition,*fAreaDefinition);
       estimator.set_particles(inputList);
       rho = estimator.rho();
-
       //store rho
       candidate = factory->NewCandidate();
       candidate->Momentum.SetPtEtaPhiE(rho, 0.0, 0.0, rho);

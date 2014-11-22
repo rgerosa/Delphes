@@ -105,7 +105,7 @@ void ParticlePropagator::Process()
   Double_t t_z, t_r, t_ra, t_rb;
   Double_t tmp, discr, discr2;
   Double_t delta, gammam, omega, asinrho;
-  Double_t ang_mom, rcu, rc2, dxy, xd, yd, zd;
+  Double_t ang_mom, rcu, rc2, xd, yd, dxy, zd;
   
   const Double_t c_light = 2.99792458E8;
 

@@ -34,7 +34,7 @@ private:
   Double_t fPTRatioMax;
   Double_t fPTSumMax;
 
-  Bool_t   fUsePTSum;
+  Bool_t              fUsePTSum;
   IsolationClassifier *fClassifier; //!
 
   ExRootFilter *fNeutralFilter;

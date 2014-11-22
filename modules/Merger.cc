@@ -61,8 +61,8 @@ void Merger::Init()
   TIterator *iterator;
 
   size = param.GetSize();
-  for(i = 0; i < size; ++i)
-  {
+
+  for(i = 0; i < size; ++i){
     array = ImportArray(param[i].GetString());
     iterator = array->MakeIterator();
 
@@ -131,7 +131,7 @@ void Merger::Process()
   
   candidate->Position.SetXYZT(0.0, 0.0, 0.0, 0.0);
   candidate->Momentum = momentum;
-  
+ 
   fMomentumOutputArray->Add(candidate);
 
   candidate = factory->NewCandidate();

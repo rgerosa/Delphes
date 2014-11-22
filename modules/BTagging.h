@@ -16,7 +16,7 @@
  */
 
 #include "classes/DelphesModule.h"
-
+#include "classes/DelphesClasses.h"
 #include <map>
 
 class TObjArray;
@@ -25,9 +25,9 @@ class DelphesFormula;
 class ExRootFilter;
 class BTaggingPartonClassifier;
 
-class BTagging: public DelphesModule
-{
-public:
+class BTagging: public DelphesModule {
+
+ public:
 
   BTagging();
   ~BTagging();
@@ -36,25 +36,26 @@ public:
   void Process();
   void Finish();
 
-private:
+  void GetAlgoFlavour(Candidate* jet, TIter & itPartonArray);  
+  void GetPhysicsFlavour(Candidate* jet, TIter & itPartonArray);  
+
+ private:
 
   Int_t fBitNumber;
-
   Double_t fDeltaR;
-
   std::map< Int_t, DelphesFormula * > fEfficiencyMap; //!
   
   BTaggingPartonClassifier *fClassifier; //!
   
   ExRootFilter *fFilter;
 
-  TIterator *fItPartonInputArray; //!
-  
+  TIterator *fItPartonInputArray; //!  
   TIterator *fItJetInputArray; //!
+  TIterator *fItParticleInputArray; //!
 
-  const TObjArray *fPartonInputArray; //!
-  
+  const TObjArray *fPartonInputArray; //! 
   const TObjArray *fJetInputArray; //!
+  const TObjArray *fParticleInputArray; //!
 
   ClassDef(BTagging, 1)
 };

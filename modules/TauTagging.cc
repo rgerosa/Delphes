@@ -181,7 +181,7 @@ void TauTagging::Process()
 {
   Candidate *jet, *tau, *daughter;
   TLorentzVector tauMomentum;
-  Double_t pt, eta, phi;
+  Double_t pt, eta;
   TObjArray *tauArray;
   map< Int_t, DelphesFormula * >::iterator itEfficiencyMap;
   DelphesFormula *formula;
@@ -203,7 +203,6 @@ void TauTagging::Process()
     pdgCode = 0;
     charge = gRandom->Uniform() > 0.5 ? 1 : -1;
     eta = jetMomentum.Eta();
-    phi = jetMomentum.Phi();
     pt = jetMomentum.Pt();
 
     // loop over all input taus

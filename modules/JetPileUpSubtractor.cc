@@ -1,14 +1,9 @@
-
 /** \class JetPileUpSubtractor
- *
  *  Subtract pile-up contribution from jets using the fastjet area method
- *
  *  $Date: 2012-11-18 15:57:08 +0100 (Sun, 18 Nov 2012) $
  *  $Revision: 814 $
- *
  *  \author M. Selvaggi - UCL, Louvain-la-Neuve
- *
- */
+*/
 
 #include "modules/JetPileUpSubtractor.h"
 
@@ -75,20 +70,19 @@ JetPileUpSubtractor::~JetPileUpSubtractor(){
 void JetPileUpSubtractor::Init(){
 
   // import input array(s)
-  fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
+  fJetInputArray   = ImportArray(GetString("InputArray","FastJetFinder/jets"));
   fItJetInputArray = fJetInputArray->MakeIterator();
 
-  // import input array(s)
-  fInputArray = ImportArray(GetString("InputArray", "Calorimeter/towers"));
-  fItInputArray = fJetInputArray->MakeIterator();
-
-  fRhoInputArray = ImportArray(GetString("RhoInputArray", "Rho/rho"));
+  fRhoInputArray   = ImportArray(GetString("RhoInputArray", "Rho/rho"));
   fItRhoInputArray = fRhoInputArray->MakeIterator();
 
+  fInputArray   = ImportArray(GetString("InputArray","EFlowMerger/eflow"));
+  fItInputArray = fInputArray->MakeIterator();
 
   fSafe4VAreaSubtraction = GetBool("doSafe4VAreaSubtraction", false);
-
-  JetDefinition::Plugin *plugin = NULL;
+  
+  JetDefinition::Plugin *plugin    = NULL;
+  JetDefinition::Plugin *pluginRho = NULL;
 
   fJetPTMin = GetDouble("JetPTMin", 20.0);
 
@@ -100,30 +94,47 @@ void JetPileUpSubtractor::Init(){
   for(i = 0; i < size/2; ++i) fEtaRangeMap[param[i*2].GetDouble()] = param[i*2 + 1].GetDouble();
 
   // define algorithm                                                                                                                                                                
-  fJetAlgorithm = GetInt("JetAlgorithm", 6);
-  fParameterR   = GetDouble("ParameterR", 0.5);
+  fJetAlgorithm     = GetInt("JetAlgorithm", 6);
+  fJetAlgorithmRho  = GetInt("JetAlgorithmRho", 4);
+  fParameterR       = GetDouble("ParameterR", 0.5);
+  fParameterRRho    = GetDouble("ParameterRRho", 0.4);
   fConeRadius       = GetDouble("ConeRadius", 0.5);
+  fConeRadiusRho    = GetDouble("ConeRadiusRho", 0.5);
   fSeedThreshold    = GetDouble("SeedThreshold", 1.0);
+  fSeedThresholdRho = GetDouble("SeedThresholdRho", 1.0);
   fConeAreaFraction = GetDouble("ConeAreaFraction", 1.0);
+  fConeAreaFractionRho = GetDouble("ConeAreaFractionRho", 1.0);
   fMaxIterations    = GetInt("MaxIterations", 100);
+  fMaxIterationsRho = GetInt("MaxIterationsRho", 100);
   fMaxPairSize      = GetInt("MaxPairSize", 2);
+  fMaxPairSizeRho   = GetInt("MaxPairSizeRho", 2);
   fIratch           = GetInt("Iratch", 1);
+  fIratchRho        = GetInt("IratchRho", 1);
   fAdjacencyCut     = GetDouble("AdjacencyCut", 2.0);
-  fOverlapThreshold = GetDouble("OverlapThreshold", 0.75);
+  fAdjacencyCutRho  = GetDouble("AdjacencyCutRho", 2.0);
+  fOverlapThresholdRho = GetDouble("OverlapThresholdRho", 0.75);
 
   // ---  Jet Area Parameters ---                                                                                                                                                        
-  fAreaAlgorithm  = GetInt("AreaAlgorithm", 0);
+  fAreaAlgorithm    = GetInt("AreaAlgorithm", 0);
+  fAreaAlgorithmRho = GetInt("AreaAlgorithmRho", 0);
 
   // - ghost based areas -                                                                                                                                                              
-  fGhostEtaMax = GetDouble("GhostEtaMax", 5.0);
-  fRepeat      = GetInt("Repeat", 1);
-  fGhostArea   = GetDouble("GhostArea", 0.01);
-  fGridScatter = GetDouble("GridScatter", 1.0);
-  fPtScatter   = GetDouble("PtScatter", 0.1);
-  fMeanGhostPt = GetDouble("MeanGhostPt", 1.0E-100);
+  fGhostEtaMax    = GetDouble("GhostEtaMax", 5.0);
+  fGhostEtaMaxRho = GetDouble("GhostEtaMaxRho", 5.0);
+  fRepeat         = GetInt("Repeat", 1);
+  fRepeatRho      = GetInt("RepeatRho", 1);
+  fGhostArea      = GetDouble("GhostArea", 0.01);
+  fGhostAreaRho   = GetDouble("GhostAreaRho", 0.01);
+  fGridScatter    = GetDouble("GridScatter", 1.0);
+  fGridScatterRho = GetDouble("GridScatterRho", 1.0);
+  fPtScatter      = GetDouble("PtScatter", 0.1);
+  fPtScatterRho   = GetDouble("PtScatterRho", 0.1);
+  fMeanGhostPt    = GetDouble("MeanGhostPt", 1.0E-100);
+  fMeanGhostPtRho = GetDouble("MeanGhostPtRho", 1.0E-100);
 
-  // - voronoi based areas -                                                                                                                                                                
-  fEffectiveRfact = GetDouble("EffectiveRfact", 1.0);
+  // - voronoi based areas -                                                                                                                                                               
+  fEffectiveRfactRho = GetDouble("EffectiveRfactRho", 1.0);
+  fEffectiveRfact    = GetDouble("EffectiveRfact", 1.0);
 
   switch(fAreaAlgorithm){
   case 1:
@@ -144,6 +155,28 @@ void JetPileUpSubtractor::Init(){
   default:
   case 0:
     fAreaDefinition = new fastjet::AreaDefinition(active_area_explicit_ghosts,GhostedAreaSpec(fGhostEtaMax,fRepeat,fGhostArea, fGridScatter, fPtScatter, fMeanGhostPt));
+    break;
+  }
+
+  switch(fAreaAlgorithmRho){
+  case 1:
+    fAreaDefinitionRho = new fastjet::AreaDefinition(active_area_explicit_ghosts,GhostedAreaSpec(fGhostEtaMaxRho,fRepeatRho,fGhostAreaRho,fGridScatterRho,fPtScatterRho,fMeanGhostPtRho));
+    break;
+  case 2:
+    fAreaDefinitionRho = new fastjet::AreaDefinition(one_ghost_passive_area,GhostedAreaSpec(fGhostEtaMaxRho,fRepeatRho,fGhostAreaRho,fGridScatterRho,fPtScatterRho,fMeanGhostPtRho));
+    break;
+  case 3:
+    fAreaDefinitionRho = new fastjet::AreaDefinition(passive_area,GhostedAreaSpec(fGhostEtaMaxRho,fRepeatRho,fGhostAreaRho,fGridScatterRho,fPtScatterRho,fMeanGhostPtRho));
+    break;
+  case 4:
+    fAreaDefinitionRho = new fastjet::AreaDefinition(VoronoiAreaSpec(fEffectiveRfactRho));
+    break;
+  case 5:
+    fAreaDefinitionRho = new fastjet::AreaDefinition(active_area, GhostedAreaSpec(fGhostEtaMax,fRepeat,fGhostArea,fGridScatter,fPtScatter,fMeanGhostPt));
+    break;
+  default:
+  case 0:
+    fAreaDefinitionRho = new fastjet::AreaDefinition(active_area_explicit_ghosts,GhostedAreaSpec(fGhostEtaMax,fRepeatRho,fGhostAreaRho,fGridScatterRho,fPtScatterRho,fMeanGhostPtRho));
     break;
   }
 
@@ -172,6 +205,32 @@ void JetPileUpSubtractor::Init(){
     break;
   }
 
+  switch(fJetAlgorithmRho){
+  case 1:
+    pluginRho      = new fastjet::CDFJetCluPlugin(fSeedThresholdRho,fConeRadiusRho,fAdjacencyCutRho,fMaxIterationsRho,fIratchRho,fOverlapThresholdRho);
+    fDefinitionRho = new fastjet::JetDefinition(pluginRho);
+    break;
+  case 2:
+    pluginRho      = new fastjet::CDFMidPointPlugin(fSeedThresholdRho,fConeRadiusRho,fConeAreaFractionRho,fMaxPairSizeRho,fMaxIterationsRho,fOverlapThresholdRho);
+    fDefinitionRho = new fastjet::JetDefinition(pluginRho);
+    break;
+  case 3:
+    pluginRho      = new fastjet::SISConePlugin(fConeRadiusRho,fOverlapThresholdRho,fMaxIterationsRho,fJetPTMin);
+    fDefinitionRho = new fastjet::JetDefinition(pluginRho);
+    break;
+  case 4:
+    fDefinitionRho = new fastjet::JetDefinition(fastjet::kt_algorithm,fParameterRRho);
+    break;
+  case 5:
+    fDefinitionRho = new fastjet::JetDefinition(fastjet::cambridge_algorithm,fParameterRRho);
+    break;
+  default:
+  case 6:
+    fDefinitionRho = new fastjet::JetDefinition(fastjet::antikt_algorithm, fParameterRRho);
+    break;
+  }
+
+  fPluginRho = pluginRho;
   fPlugin = plugin;
   ClusterSequence::print_banner();
 
@@ -189,7 +248,10 @@ void JetPileUpSubtractor::Finish(){
   if(fItInputArray)   delete fItInputArray;
   if(fDefinition)     delete fDefinition;
   if(fAreaDefinition) delete fAreaDefinition;
+  if(fDefinitionRho)     delete fDefinitionRho;
+  if(fAreaDefinitionRho) delete fAreaDefinitionRho;
   if(fPlugin) delete static_cast<JetDefinition::Plugin*>(fPlugin);
+  if(fPluginRho) delete static_cast<JetDefinition::Plugin*>(fPluginRho);
 }
 
 //------------------------------------------------------------------------------
@@ -206,7 +268,6 @@ void JetPileUpSubtractor::Process(){
 
   DelphesFactory *factory = GetFactory();
 
-
   // loop over all input candidates
   if(not fSafe4VAreaSubtraction){
 
@@ -217,7 +278,6 @@ void JetPileUpSubtractor::Process(){
     momentum = candidate->Momentum;
     area     = candidate->Area; // take the jet area
     eta      = TMath::Abs(momentum.Eta());
-
     // find rho
     rho = 0.0;
 
@@ -244,7 +304,6 @@ void JetPileUpSubtractor::Process(){
   else{
 
     // calculate the correction 4V safe subtraction
-
     // loop over input particle objects                                                                                                                                                    
     fItInputArray->Reset();
     number = 0;
@@ -262,56 +321,50 @@ void JetPileUpSubtractor::Process(){
     std::vector<fastjet::JetMedianBackgroundEstimator*> bge_rho ;
     std::vector<fastjet::JetMedianBackgroundEstimator*> bge_rhom ;
     std::vector<BackgroundJetPtMDensity*> m_density;
-
-    fastjet::ClusterSequenceArea *sequence = new ClusterSequenceArea(inputList, *fDefinition, *fAreaDefinition);
+    bge_rho.clear();
+    bge_rhom.clear();
+    m_density.clear();    
+    
+    fastjet::ClusterSequenceArea *sequenceRho = new ClusterSequenceArea(inputList, *fDefinitionRho, *fAreaDefinitionRho);
 
     for(itEtaRangeMap = fEtaRangeMap.begin(); itEtaRangeMap != fEtaRangeMap.end(); ++itEtaRangeMap){
       Selector select_rapidity = SelectorAbsRapRange(itEtaRangeMap->first, itEtaRangeMap->second); // define an eta region                                                                 
-      bge_rho.push_back(new fastjet::JetMedianBackgroundEstimator(select_rapidity, *sequence));
-      bge_rhom.push_back(new fastjet::JetMedianBackgroundEstimator(select_rapidity, *sequence));
+      bge_rho.push_back(new fastjet::JetMedianBackgroundEstimator(select_rapidity, *sequenceRho));
+      bge_rhom.push_back(new fastjet::JetMedianBackgroundEstimator(select_rapidity,*sequenceRho));
       m_density.push_back(new BackgroundJetPtMDensity);
       bge_rhom.back()->set_jet_density_class(m_density.back());
     }
-    
-    // Loop on input jets and build corrected jets
-    fItJetInputArray->Reset();
-    contrib::SafeAreaSubtractor* area_subtractor = 0;
-    std::vector<PseudoJet> outputJets ;
-    while((candidate = static_cast<Candidate*>(fItJetInputArray->Next()))){
-      momentum = candidate->Momentum;
-      PseudoJet jet (momentum.Px(), momentum.Py(), momentum.Pz(), momentum.E());
-      jet.set_user_index(number);
 
+    fastjet::ClusterSequenceArea *sequence = new ClusterSequenceArea(inputList, *fDefinition, *fAreaDefinition);
+    std::vector<fastjet::PseudoJet> jetList = sequence->inclusive_jets(fJetPTMin);
+
+    contrib::SafeAreaSubtractor* area_subtractor = 0;
+    std::vector<PseudoJet> subtractedJets ;
+
+    for( size_t iJet = 0; iJet < jetList.size(); iJet++){
       // select the right eta region
       int EtaRegion = 0 ; 
       for(itEtaRangeMap = fEtaRangeMap.begin(); itEtaRangeMap != fEtaRangeMap.end(); ++itEtaRangeMap){
        Selector select_rapidity = SelectorAbsRapRange(itEtaRangeMap->first, itEtaRangeMap->second); // define an eta region                                                                
-       if(select_rapidity.pass(jet)){
+       if(select_rapidity.pass(jetList.at(iJet))){
 	 area_subtractor = new contrib::SafeAreaSubtractor(bge_rho.at(EtaRegion),bge_rhom.at(EtaRegion));
-         outputJets.push_back((*area_subtractor)(jet));
+         subtractedJets.push_back((*area_subtractor)(jetList.at(iJet)));
          break;
        }
        ++EtaRegion;
       }
     } 
-    
-    bge_rho.clear();
-    bge_rhom.clear();
-    m_density.clear();    
-    
-    // take inclusive jets with a pt cut applied                                                                                                                                           
-    outputJets = sorted_by_pt(sequence->inclusive_jets(fJetPTMin));
 
     // loop over all jets and export them                                                                                                                                          
     detaMax = 0.0;
     dphiMax = 0.0;
 
     // Loop on the outputjets after clustering                                                                                                                                     
-    PseudoJet area ;
-    
-    for(std::vector<PseudoJet>::const_iterator itOutputList = outputJets.begin(); itOutputList != outputJets.end(); ++itOutputList){
+    PseudoJet area ;    
+    for(std::vector<PseudoJet>::const_iterator itOutputList = subtractedJets.begin(); itOutputList != subtractedJets.end(); ++itOutputList){
 
-      // set momentum                                                                                                                                                                      
+      // set momentum                                                                                               
+      if((*itOutputList).pt() < fJetPTMin) continue ;                                                                       
       momentum.SetPxPyPzE(itOutputList->px(), itOutputList->py(), itOutputList->pz(), itOutputList->E());
       area.reset(0.0, 0.0, 0.0, 0.0);
       if(fAreaDefinition) area = itOutputList->area_4vector(); // take the jet aarea                                                                                                       
@@ -489,7 +542,7 @@ void JetPileUpSubtractor::Process(){
     }
 
     if(sequence) delete sequence ;
+    if(sequenceRho) delete sequenceRho ;
     if(area_subtractor) delete  area_subtractor;
-    
   }
 }
