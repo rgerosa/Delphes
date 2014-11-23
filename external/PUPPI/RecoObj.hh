@@ -28,7 +28,6 @@ public:
 #endif
 
 // Only need 4-vector and ID
-// id = 1:   neutral
-// id = 0; neutral from pileup (not defined/used)
-// id = 2; charged from PV
-// id = 3; charged not from PV
+// id = 0:   neutral
+// id = 1; charged from PV
+// id = 2; charged not from PV
