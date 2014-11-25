@@ -51,7 +51,7 @@ set ExecutionPath {
   PileUpJetID
 
   PhotonEfficiency
-  PhotonIsolation
+  PhotonIsolation 
 
   ElectronEfficiency 
   ElectronIsolation 
@@ -59,34 +59,28 @@ set ExecutionPath {
   MuonEfficiency
   MuonIsolation  
 
+  RunPUPPI
+  PuppiRhoKt4
+  PuppiRhoGridFastJet
+  PuppiJetFinder
+
+  PuppiJetPileUpSubtractor
+  PuppiJetPileUpSubtractorGrid
+  PuppiJetPileUpSubtractor4VArea
+
+  PuppiBTaggingLoose
+  PuppiBTaggingMedium
+  PuppiBTaggingTight
+
+  PuppiPileUpJetID
+
   GenMissingET
   MissingET
+  PuppiMissingET
   
   TreeWriter
 
 }
-
-
-
-#  RunPUPPI
-#  PuppiRhoKt4
-#  PuppiRhoGridFastJet
-#  PuppiJetFinder
-#  PuppiJetPileUpSubtractor
-#  PuppiJetPileUpSubtractorGrid
-#  PuppiJetPileUpSubtractor4VArea
-
-#  PuppiMissingET
-
-
-#  PuppiBTaggingLoose
-#  PuppiBTaggingMedium
-#  PuppiBTaggingTight
-
-#  PuppiPileUpJetID
-
-
-
 
 # PileUpJetIDMissingET  
 # ConstituentFilter
@@ -880,7 +874,7 @@ module FastJetFinder GenJetFinderNoNu {
   # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
   set JetAlgorithm 6
   set ParameterR 0.4  
-  set JetPTMin 5.0
+  set JetPTMin 10.0
 }
 
 ### -sum of all particles after filtering neutrinos
@@ -904,7 +898,7 @@ module RunPUPPI RunPUPPI {
   ## define puppi algorithm parameters (more than one for the same eta region is possible) 
   add EtaMinBin           0.   2.5   3.0  2.5  3.0
   add EtaMaxBin           2.5  3.0   10.0 3.0  10.0
-  add PtMinBin            0.   0.5   1.0  0.5  1.0
+  add PtMinBin            0.1  0.5   1.0  0.5  1.0
   add ConeSizeBin         0.3  0.3   0.3  0.3  0.3
   add RMSPtMinBin         0.1  0.5   0.5  0.5  0.5
   add RMSScaleFactorBin   1.0  1.0   1.0  1.0  1.0
@@ -915,7 +909,9 @@ module RunPUPPI RunPUPPI {
   add ApplyLowPUCorr      true true  true  true  true
   add MetricId            5    0     0     1     1
   ## output name
-  set OutputArray weightedparticles
+  set OutputArray PuppiParticles
+  set OutputArrayTracks   puppiTracks
+  set OutputArrayNeutrals puppiNeutrals
 } 
 
 #####################
@@ -923,14 +919,14 @@ module RunPUPPI RunPUPPI {
 #####################
 
 module FastJetFinder PuppiJetFinder {
-  set InputArray RunPUPPI/weightedparticles
+  set InputArray RunPUPPI/PuppiParticles
   set OutputArray jets
   # area algorithm: 0 Do not compute area, 1 Active area explicit ghosts, 2 One ghost passive area, 3 Passive area, 4 Voronoi, 5 Active area
   set AreaAlgorithm 1
   # jet algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
   set JetAlgorithm 6
-  set ParameterR 0.4
-  set JetPTMin 10.
+  set ParameterR   0.4
+  set JetPTMin     10.
 }
 
 #####################################
@@ -938,7 +934,7 @@ module FastJetFinder PuppiJetFinder {
 #####################################
 
 module FastJetFinder PuppiRhoKt4 {
-  set InputArray RunPUPPI/weightedparticles
+  set InputArray RunPUPPI/PuppiParticles
   ## compute rho clustering the event  
   set ComputeRho     true
   ## not compute rho using the grid
@@ -947,18 +943,18 @@ module FastJetFinder PuppiRhoKt4 {
   set AreaAlgorithm 1
   # jet algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
   set JetAlgorithm 4
-  set ParameterR 0.4
-  set GhostEtaMax 5.0
-  set RhoEtaMax 5.0  
+  set ParameterR   0.4
+  set GhostEtaMax  5.0
+  set RhoEtaMax    5.0  
   add RhoEtaRange 0.0 2.5
   add RhoEtaRange 2.5 5.0
-  set JetPTMin 0.0
+  set JetPTMin     0.0
 }
 
 
 module FastJetFinder PuppiRhoGridFastJet {
   ## take as input the particle flow particles
-  set InputArray RunPUPPI/weightedparticles
+  set InputArray RunPUPPI/PuppiParticles
   ## compute rho clustering the event  
   set ComputeRho     false
   ## not compute rho using the grid
@@ -1007,7 +1003,7 @@ module JetPileUpSubtractor PuppiJetPileUpSubtractor4VArea { ## make the rho corr
   set doSafe4VAreaSubtraction true
   set JetPTMin      10.0
   ## use this info only if doSafe4VAreaSubtraction is set to true
-  set InputArray    EFlowMerger/eflow
+  set InputArray    RunPUPPI/PuppiParticles
   # area algorithm: 0 Do not compute area, 1 Active area explicit ghosts, 2 One ghost passive area, 3 Passive area, 4 Voronoi, 5 Active area
   set AreaAlgorithmRho 1
   # jet algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
@@ -1017,16 +1013,16 @@ module JetPileUpSubtractor PuppiJetPileUpSubtractor4VArea { ## make the rho corr
   set RhoEtaMaxRho    5.0
 
   # area algorithm: 0 Do not compute area, 1 Active area explicit ghosts, 2 One ghost passive area, 3 Passive area, 4 Voronoi, 5 Active area                                       
-  set AreaAlgorithm 1
+  set AreaAlgorithm   1
   # jet algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt                                                                                                
-  set JetAlgorithm 6
-  set ParameterR   0.4
+  set JetAlgorithm    6
+  set ParameterR      0.4
 
 
   ## eta bins for rho evaluation
   add RhoEtaRange 0.0 2.5
-  add RhoEtaRange 2.5 4.0
-  add RhoEtaRange 4.0 5.0
+  add RhoEtaRange 2.5 3.0
+  add RhoEtaRange 3.0 10.0
 }
 
 #####################
@@ -1044,7 +1040,7 @@ module Merger MissingET {
 ###############
 
 module Merger PuppiMissingET {
-  add InputArray RunPUPPI/weightedparticles
+  add InputArray RunPUPPI/PuppiParticles
   set MomentumOutputArray momentum
 }
 
@@ -2366,8 +2362,8 @@ module PileUpJetID PileUpJetID {
 
 module PileUpJetID PuppiPileUpJetID {
   set JetInputArray     PuppiJetPileUpSubtractor/jets
-  set TrackInputArray   Calorimeter/eflowTracks
-  set NeutralInputArray Calorimeter/eflowTowers
+  set TrackInputArray   RunPUPPI/puppiTracks
+  set NeutralInputArray RunPUPPI/puppiNeutrals
   set PVInputArray      ModifyBeamSpot/PV
 
   set OutputArray   jets
@@ -2513,19 +2509,19 @@ module TreeWriter TreeWriter {
   add Branch PileUpJetID/jets JetPUID Jet
 
   ## PUPPI
-  #add Branch RunPUPPI/weightedparticles puppiParticles GenParticle
-  #add Branch PuppiRhoKt4/rho            PuppiRhoKt4 Rho
-  #add Branch PuppiRhoGridFastJet/rho    PuppiRhoGridFastJet Rho
-
-  #add Branch PuppiJetPileUpSubtractor/jets PuppiJet Jet
-  #add Branch PuppiJetPileUpSubtractorGrid/jets PuppiJet Jet
-  #add Branch PuppiJetPileUpSubtractor4VArea/jets PuppiJet4VArea Jet
-  #add Branch PuppiPileUpJetID/jets PuppiJetPUID Jet
+  add Branch RunPUPPI/PuppiParticles puppiParticles GenParticle
+  add Branch PuppiRhoKt4/rho         PuppiRhoKt4 Rho
+  add Branch PuppiRhoGridFastJet/rho PuppiRhoGridFastJet Rho
+  add Branch PuppiJetFinder/jets     RawPuppiJet Jet
+  add Branch PuppiJetPileUpSubtractor/jets PuppiJet Jet
+  add Branch PuppiJetPileUpSubtractorGrid/jets PuppiJetGrid Jet
+  add Branch PuppiJetPileUpSubtractor4VArea/jets PuppiJet4VArea Jet
+  add Branch PuppiPileUpJetID/jets PuppiJetPUID Jet
 
   ## MET
   add Branch GenMissingET/momentum GenMissingET MissingET
   add Branch MissingET/momentum MissingET MissingET
-  #add Branch PuppiMissingET/momentum PuppiMissingET MissingET
+  add Branch PuppiMissingET/momentum PuppiMissingET MissingET
 
   ## photons and leptons
   add Branch ElectronIsolation/electrons Electron Electron

@@ -53,6 +53,7 @@ puppiCleanContainer::puppiCleanContainer(std::vector<RecoObj> inParticles,
         if(fRecoParticles_[i].id == 2) fChargedNoPV_.push_back(curPseudoJet);
         if(fRecoParticles_[i].id >= 0) fPVFrac_++ ;
 	if(fNPV_ < fRecoParticles_[i].vtxId) fNPV_ = fRecoParticles_[i].vtxId;
+
     }
 
     fPVFrac_ = double(fChargedPV_.size())/fPVFrac_;
@@ -67,19 +68,23 @@ std::vector<fastjet::PseudoJet> puppiCleanContainer::puppiEvent(){
     // output particles
     std::vector<fastjet::PseudoJet> particles;
     particles.clear();
-
+  
     // calculate puppi metric, RMS and mean value for all the algorithms
     for(size_t iPuppiAlgo = 0; iPuppiAlgo < puppiAlgo_.size(); iPuppiAlgo++){
       getRMSAvg(iPuppiAlgo,fPFParticles_,fChargedPV_); // give all the particles in the event and the charged one
     }
-    
+  
+    int npart = 0;  
     // Loop on all the incoming particles
     for(size_t iPart = 0; iPart < fPFParticles_.size(); iPart++) {
 
       float pWeight = 1; // default weight
       std::vector<int> pPupId = getPuppiId(fPFParticles_[iPart].pt(),fPFParticles_[iPart].eta(),puppiAlgo_); // take into account only algo eta
-      
-      // acceptance check
+
+      //////////////////////////////////////////      
+      // acceptance check of the puppi algorithm
+      //////////////////////////////////////////      
+
       if(pPupId.empty()) { // out acceptance... no algorithm found
         fPuppiWeights_.push_back(pWeight); // take the particle as it is
         fastjet::PseudoJet curjet(pWeight*fPFParticles_[iPart].px(),pWeight*fPFParticles_[iPart].py(),pWeight*fPFParticles_[iPart].pz(),pWeight*fPFParticles_[iPart].e());    
@@ -87,11 +92,13 @@ std::vector<fastjet::PseudoJet> puppiCleanContainer::puppiEvent(){
         particles.push_back(curjet); // fill the output collection                                                                                                            
 	continue; //go to the next particle
       }
-
-      // PT check
-      for(size_t iAlgo = 0; iAlgo < pPupId.size(); iAlgo++){ // loop on all the available algo for that region
+      
+      ///////////////      
+      //  PT check //
+      ///////////////      
+      for(size_t iAlgo = 0; iAlgo < pPupId.size(); iAlgo++){ // loop on all the available algo for that region       
 	if(fPFParticles_.at(iPart).pt() < puppiAlgo_.at(pPupId.at(iAlgo)).fPtMin_){ // low momentum particles should be cut by puppi method
-	pWeight *= 0; // if this particle is under the pT threshold of one the algorithm, put the weight as zero
+	pWeight = 0; // if this particle is under the pT threshold of one the algorithm, put the weight as zero      
 	break;
 	}
       }
@@ -100,8 +107,11 @@ std::vector<fastjet::PseudoJet> puppiCleanContainer::puppiEvent(){
         fPuppiWeights_.push_back(0); // puppi weight is zero
         continue;
       }
-    
-      // fill the p-values for Z-vertex
+ 
+      /////////////////////////////////////      
+      // fill the p-values for Z-vertex //
+      /////////////////////////////////////      
+
       double pChi2 = 0;   
       if(fUseExp_){ // use vertex-z resolution
        //Compute an Experimental Puppi Weight with delta Z info (very simple example)
@@ -111,11 +121,16 @@ std::vector<fastjet::PseudoJet> puppiCleanContainer::puppiEvent(){
        }
       }
       
+
+      /////////////////////////////////////      
       // found  the particle in all the algorithm
+      /////////////////////////////////////      
+
       std::vector<puppiParticle> partTmp ; // temp puppi particle vector; make a clone of the same particle for all the algo in which it is contained
       partTmp.clear();
 
       for(size_t iAlgo = 0; iAlgo < pPupId.size(); iAlgo++){ // loop on all the algo found
+
        int found = 0;  //  found index
        if(fabs(fPFParticles_[iPart].user_index()) <= 1 and puppiAlgo_.at(pPupId.at(iAlgo)).fUseCharged_){ // charged or neutral from PV
 	 for(size_t puppiIt = 0 ; puppiIt < puppiAlgo_.at(pPupId.at(iAlgo)).fPuppiParticlesPV_.size(); puppiIt++){ // Loop on PV particles
@@ -136,7 +151,10 @@ std::vector<fastjet::PseudoJet> puppiCleanContainer::puppiEvent(){
 	}
        }
       
+      /////////////////////////////////////      
        // means that is inside the NULL vector for some reasons
+      /////////////////////////////////////      
+
        if(found == 0){
 	for(size_t puppiIt = 0; puppiIt < puppiAlgo_.at(pPupId.at(iAlgo)).fPuppiParticlesNULL_.size(); puppiIt++){
           if(puppiAlgo_.at(pPupId.at(iAlgo)).fPuppiParticlesNULL_.at(puppiIt).fPosition_ == int(iPart)){
@@ -147,8 +165,9 @@ std::vector<fastjet::PseudoJet> puppiCleanContainer::puppiEvent(){
 	}
        }
       }
-      
+
       if(partTmp.size() != pPupId.size()){ // not found the particle in one of the algorithms 
+        pWeight = 1 ;
 	fPuppiWeights_.push_back(pWeight);
         fastjet::PseudoJet curjet( pWeight*fPFParticles_[iPart].px(), pWeight*fPFParticles_[iPart].py(), pWeight*fPFParticles_[iPart].pz(), pWeight*fPFParticles_[iPart].e());    
         curjet.set_user_index(fPFParticles_[iPart].user_index());                                                                                                      
@@ -156,17 +175,28 @@ std::vector<fastjet::PseudoJet> puppiCleanContainer::puppiEvent(){
         continue;
       }
       
-      //check the Pval  
+      /////////////////////////////////////      
+      //Check the Pval  
+      /////////////////////////////////////      
+
+      bool badPVal = false ;
       for(size_t iPuppi = 0; iPuppi < partTmp.size() ; iPuppi++){
 	if(partTmp.at(iPuppi).fPval_ == -999){ // if the default is found as PVal, leave the particle as it is in the output
+	 pWeight = 1 ;
+         badPVal = true ;
+	}
+      }
+
+      if(badPVal){
  	 fPuppiWeights_.push_back(pWeight);
          fastjet::PseudoJet curjet( pWeight*fPFParticles_[iPart].px(), pWeight*fPFParticles_[iPart].py(), pWeight*fPFParticles_[iPart].pz(), pWeight*fPFParticles_[iPart].e());    
          curjet.set_user_index(fPFParticles_[iPart].user_index());                                                                                                      
          particles.push_back(curjet);                                                                                                                                                
          continue;
-	}
+	
       }
 
+      
       // compute combining the weight for all the algorithm
       pWeight = compute(pChi2,partTmp,puppiAlgo_,pPupId);      
       
@@ -181,9 +211,9 @@ std::vector<fastjet::PseudoJet> puppiCleanContainer::puppiEvent(){
       
       //threshold cut on the neutral Pt
       for(size_t iPuppi = 0; iPuppi < pPupId.size(); iPuppi++){
-        if(fPFParticles_[iPart].user_index() == 1 && puppiAlgo_.at(pPupId.at(iPuppi)).fApplyCHS_ ) pWeight = 1; // charged from LV
+        if(fPFParticles_[iPart].user_index() == 1 && puppiAlgo_.at(pPupId.at(iPuppi)).fApplyCHS_ ) pWeight = 1; // charged from LV 
         if(fPFParticles_[iPart].user_index() == 2 && puppiAlgo_.at(pPupId.at(iPuppi)).fApplyCHS_ ) pWeight = 0; // charged from PU
-	if(pWeight*fPFParticles_[iPart].pt() < getNeutralPtCut(puppiAlgo_.at(pPupId.at(iPuppi)).fNeutralMinE_,puppiAlgo_.at(pPupId.at(iPuppi)).fNeutralPtSlope_,fNPV_) && fPFParticles_[iPart].user_index() == 1 ) // if don't pass one of the algo neutral pt condition the particle is cut
+	if(pWeight*fPFParticles_[iPart].pt() < getNeutralPtCut(puppiAlgo_.at(pPupId.at(iPuppi)).fNeutralMinE_,puppiAlgo_.at(pPupId.at(iPuppi)).fNeutralPtSlope_,fNPV_) && fPFParticles_[iPart].user_index() == 0 ) // if don't pass one of the algo neutral pt condition the particle is cut
        pWeight = 0; 
       }
 
@@ -191,13 +221,15 @@ std::vector<fastjet::PseudoJet> puppiCleanContainer::puppiEvent(){
 
       //Now get rid of the thrown out weights for the particle collection
       if(pWeight == 0) continue; // if zero don't fill the particle in the output
+      npart++;
 
       //Produce
       fastjet::PseudoJet curjet( pWeight*fPFParticles_[iPart].px(), pWeight*fPFParticles_[iPart].py(), pWeight*fPFParticles_[iPart].pz(), pWeight*fPFParticles_[iPart].e());           
-      curjet.set_user_index(fPFParticles_[iPart].user_index());                                                                                                                            
+      curjet.set_user_index(iPart);                                                                                                                            
       particles.push_back(curjet);
+      
     }
-
+    
     return particles;
       
 }
@@ -209,14 +241,13 @@ void puppiCleanContainer::getRMSAvg(const int & iPuppiAlgo, std::vector<fastjet:
   puppiParticles.clear();
 
   // Loop on all the particles of the event  
+    
   for(size_t iPart = 0; iPart < particlesAll.size(); iPart++ ) { 
 
     float pVal    = -999;
     bool  pPupId  = isGoodPuppiId(particlesAll[iPart].pt(),particlesAll[iPart].eta(),puppiAlgo_.at(iPuppiAlgo)); // get the puppi id algo asaf of eta and phi of the particle
-
     // does not exsist and algorithm for this particle, store -999 as pVal
     if(pPupId == false) continue;
-
     // apply CHS in puppi metric computation -> use only LV hadrons to compute the metric for each particle
     if(puppiAlgo_.at(iPuppiAlgo).fUseCharged_)  
        pVal = goodVar(particlesAll[iPart], chargedPV,    puppiAlgo_.at(iPuppiAlgo).fMetricId_,puppiAlgo_.at(iPuppiAlgo).fConeSize_);
@@ -232,7 +263,6 @@ void puppiCleanContainer::getRMSAvg(const int & iPuppiAlgo, std::vector<fastjet:
   
   // set the puppi particles for the algorithm
   puppiAlgo_.at(iPuppiAlgo).setPuppiParticles(puppiParticles);
-
   // compute RMS, median and mean value  
   computeMedRMS(iPuppiAlgo);
   
@@ -369,7 +399,7 @@ float puppiCleanContainer::getNeutralPtCut(const float & fNeutralMinE, const flo
 std::vector<int> puppiCleanContainer::getPuppiId(const float & pt, const float & eta, const std::vector<puppiAlgoBin> & puppiAlgos){
   std::vector<int> PuppiId ;
   for(size_t iPuppiAlgo = 0; iPuppiAlgo < puppiAlgos.size() ; iPuppiAlgo++){
-    if(fabs(eta) < puppiAlgos[iPuppiAlgo].fEtaMin_) continue;
+    if(fabs(eta) <= puppiAlgos[iPuppiAlgo].fEtaMin_) continue;
     if(fabs(eta) > puppiAlgos[iPuppiAlgo].fEtaMax_) continue;
     PuppiId.push_back(int(iPuppiAlgo));
   }
@@ -378,7 +408,7 @@ std::vector<int> puppiCleanContainer::getPuppiId(const float & pt, const float &
 
 //check if a particle is good for an Algo definition
 bool puppiCleanContainer::isGoodPuppiId(const float & pt, const float & eta, const puppiAlgoBin & puppiAlgo){
-  if(fabs(eta) < puppiAlgo.fEtaMin_) return false;
+  if(fabs(eta) <= puppiAlgo.fEtaMin_) return false;
   if(fabs(eta) > puppiAlgo.fEtaMax_) return false;
   return true;
 
@@ -397,6 +427,8 @@ float puppiCleanContainer::compute(const float & chi2, const std::vector<puppiPa
 
   for( size_t iAlgo = 0; iAlgo < pPupId.size(); iAlgo++){
 
+    if(puppiAlgos.at(pPupId.at(iAlgo)).fPuppiParticlesPU_.size() + puppiAlgos.at(pPupId.at(iAlgo)).fPuppiParticlesPV_.size()  == 0) return 1; 
+
     if(iAlgo > 0 ){
       float pPVal = ROOT::Math::chisquared_cdf(lVal,lNDOF); // take a chi2 value since the should be multiplied (multiply weight and not summing chi2)
       lPVal *= pPVal;
@@ -405,7 +437,6 @@ float puppiCleanContainer::compute(const float & chi2, const std::vector<puppiPa
     }
 
     if(puppiAlgos.at(pPupId.at(iAlgo)).fMetricId_ == -1) continue;
-    if(puppiAlgos.at(pPupId.at(iAlgo)).fPuppiParticlesPU_.size() + puppiAlgos.at(pPupId.at(iAlgo)).fPuppiParticlesPV_.size()  == 0) return 1; 
 
     float pVal = particles.at(iAlgo).fPval_ ;
 

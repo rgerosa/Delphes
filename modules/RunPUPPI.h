@@ -28,7 +28,6 @@ class RunPUPPI: public DelphesModule {
   const TObjArray *fTrackInputArray;
   const TObjArray *fNeutralInputArray; //!
   const TObjArray *fPVInputArray; //!                                                                                                                                                     
-  TObjArray *fInputTotalParticlesArray;
  
   // puppi parameters
   float fMinPuppiWeight;
@@ -48,6 +47,8 @@ class RunPUPPI: public DelphesModule {
   std::vector<int>   fMetricId;
 
   TObjArray *fOutputArray;
+  TObjArray *fOutputTrackArray;
+  TObjArray *fOutputNeutralArray;
 
   ClassDef(RunPUPPI, 1)
 };

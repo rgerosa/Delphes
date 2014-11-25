@@ -30,6 +30,7 @@ RunPUPPI::~RunPUPPI(){}
 
 void RunPUPPI::Init(){
 
+  // input collection
   fTrackInputArray     = ImportArray(GetString("TrackInputArray", "Calorimeter/towers"));
   fItTrackInputArray   = fTrackInputArray->MakeIterator();
   fNeutralInputArray   = ImportArray(GetString("NeutralInputArray", "Calorimeter/towers"));
@@ -37,8 +38,7 @@ void RunPUPPI::Init(){
   fPVInputArray        = ImportArray(GetString("PVInputArray", "PV"));
   fPVItInputArray      = fPVInputArray->MakeIterator();
 
-  fInputTotalParticlesArray = new TObjArray();
-  fInputTotalParticlesArray->SetName("fInputTotalParticlesArray"),
+
   // puppi parameters                                     
   fMinPuppiWeight = GetFloat("MinPuppiWeight",0.01);
   fUseExp         = GetBool("UseExp",false);
@@ -104,7 +104,9 @@ void RunPUPPI::Init(){
   for(int iMap = 0; iMap < param.GetSize(); ++iMap) fMetricId.push_back(param[iMap].GetInt());
 
   // create output array
-  fOutputArray = ExportArray(GetString("OutputArray", "weightedparticles"));
+  fOutputArray        = ExportArray(GetString("OutputArray", "puppiParticles"));
+  fOutputTrackArray   = ExportArray(GetString("OutputArrayTracks", "puppiTracks"));
+  fOutputNeutralArray = ExportArray(GetString("OutputArrayNeutrals", "puppiNeutrals"));
 }
 
 //------------------------------------------------------------------------------
@@ -112,7 +114,6 @@ void RunPUPPI::Init(){
 void RunPUPPI::Finish(){
   if(fItTrackInputArray)   delete fItTrackInputArray;
   if(fItNeutralInputArray) delete fItNeutralInputArray;
-  if(fInputTotalParticlesArray) delete fInputTotalParticlesArray;
 }
 
 //------------------------------------------------------------------------------
@@ -128,7 +129,9 @@ void RunPUPPI::Process(){
   fItTrackInputArray->Reset();
   fItNeutralInputArray->Reset();
   fPVItInputArray->Reset();
-  fInputTotalParticlesArray->Clear();
+
+  std::vector<Candidate> InputParticles;
+  InputParticles.clear();
 
   // take the leading vertex 
   float PVZ = 0.;
@@ -147,9 +150,8 @@ void RunPUPPI::Process(){
       curRecoObj.pt  = momentum.Pt();
       curRecoObj.eta = momentum.Eta();
       curRecoObj.phi = momentum.Phi();
-      curRecoObj.m   = momentum.M();
+      curRecoObj.m   = momentum.M();      
       particle = static_cast<Candidate*>(candidate->GetCandidates()->Last());
-
       if (candidate->IsRecoPU and candidate->Charge !=0) { // if it comes fromPU vertexes after the resolution smearing and the dZ matching within resolution
 	curRecoObj.id    = 2;
 	curRecoObj.vtxId = candidate->IsPU;
@@ -174,7 +176,7 @@ void RunPUPPI::Process(){
       }
 
       puppiInputVector.push_back(curRecoObj);
-      fInputTotalParticlesArray->Add(candidate);
+      InputParticles.push_back(*candidate);
   }
 
   // Loop on neutral calo cells 
@@ -188,6 +190,7 @@ void RunPUPPI::Process(){
       curRecoObj.phi = momentum.Phi();
       curRecoObj.m   = momentum.M();
       particle = static_cast<Candidate*>(candidate->GetCandidates()->Last());
+
 
       if(candidate->Charge == 0){
 	curRecoObj.id    = 0; // neutrals have id==0
@@ -203,7 +206,7 @@ void RunPUPPI::Process(){
         continue;
       }
       puppiInputVector.push_back(curRecoObj);
-      fInputTotalParticlesArray->Add(candidate);
+      InputParticles.push_back(*candidate);
   }
 
   // Create algorithm list for puppi
@@ -242,15 +245,18 @@ void RunPUPPI::Process(){
 
   // Loop on final particles
   for (std::vector<fastjet::PseudoJet>::iterator it = puppiParticles.begin() ; it != puppiParticles.end() ; it++) {
-    candidate = factory->NewCandidate();    
-    if(it->user_index() <= fInputTotalParticlesArray->GetSize()){
-      candidate = static_cast<Candidate*>(fInputTotalParticlesArray->At(it->user_index()));
+    if(it->user_index() <= int(InputParticles.size())){      
+      candidate = factory->NewCandidate();
+      candidate = dynamic_cast<Candidate*>(InputParticles.at(it->user_index()).Clone());
+      candidate->Momentum.SetXYZT(it->px(),it->py(),it->pz(),it->e());
+      fOutputArray->Add(candidate);
+      if( puppiInputVector.at(it->user_index()).id == 1 or puppiInputVector.at(it->user_index()).id == 2) fOutputTrackArray->Add(candidate);
+      else if (puppiInputVector.at(it->user_index()).id == 0) fOutputNeutralArray->Add(candidate);
     }
     else{ 
       std::cerr<<" particle not found in the input Array --> skip "<<std::endl;
       continue;
     }     
-    candidate->Momentum.SetXYZT(it->px(),it->py(),it->pz(),it->e());
-    fOutputArray->Add(candidate);
   }
+
 }

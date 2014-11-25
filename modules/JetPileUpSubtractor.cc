@@ -70,7 +70,7 @@ JetPileUpSubtractor::~JetPileUpSubtractor(){
 void JetPileUpSubtractor::Init(){
 
   // import input array(s)
-  fJetInputArray   = ImportArray(GetString("InputArray","FastJetFinder/jets"));
+  fJetInputArray   = ImportArray(GetString("JetInputArray","FastJetFinder/jets"));
   fItJetInputArray = fJetInputArray->MakeIterator();
 
   fRhoInputArray   = ImportArray(GetString("RhoInputArray", "Rho/rho"));

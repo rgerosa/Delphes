@@ -163,7 +163,7 @@ void GeneralExample(const char *inputFile, const char *outputFile)
 
       for (int i = 0 ; i < branchElectron->GetEntries() ; i++) {
 	Electron *ele = (Electron*) branchElectron->At(i);
-	cout << "    Electron " << i << ": PT Eta Phi Isolation " << ele->PT << " " << ele->Eta << " " << ele->Phi << " " << ele->IsolationVar << endl;
+	cout << "    Electron " << i << ": PT Eta Phi Isolation " << ele->PT << " " << ele->Eta << " " << ele->Phi << " " << ele->IsolationVarDBeta << endl;
 	GenParticle *part = (GenParticle*) ele->Particle.GetObject();
 	if (part) {
 	  cout << "      Electron matches to generated particle with Status code" << part->Status << " generator particle PID Pt Eta Phi Z T (at origin) "  << part->PID << " "
@@ -175,12 +175,12 @@ void GeneralExample(const char *inputFile, const char *outputFile)
 
       for (int i = 0 ; i < branchPhoton->GetEntries() ; i++) {
         Photon *pho = (Photon*) branchPhoton->At(i);
-        cout << "    Photon " << i << ": PT Eta Phi Isolation T " << pho->PT << " " << pho->Eta << " " << pho->Phi << " " << pho->IsolationVar << " " << pho->TOuter << endl;
+        cout << "    Photon " << i << ": PT Eta Phi Isolation T " << pho->PT << " " << pho->Eta << " " << pho->Phi << " " << pho->IsolationVarDBeta << " " << pho->TOuter << endl;
       }
 
       for (int i = 0 ; i < branchMuon->GetEntries() ; i++) {
         Muon *mu = (Muon*) branchMuon->At(i);
-        cout << "    Muon " << i << ": PT Eta Phi Isolation " << mu->PT << " " << mu->Eta << " " << mu->Phi << " " << mu->IsolationVar << endl;
+        cout << "    Muon " << i << ": PT Eta Phi Isolation " << mu->PT << " " << mu->Eta << " " << mu->Phi << " " << mu->IsolationVarDBeta << endl;
       }
 
       for (int i = 0 ; i < branchGenJet->GetEntries() ; i++) {
