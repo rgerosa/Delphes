@@ -46,6 +46,7 @@ class TreeWriter: public DelphesModule {
   void ProcessScalarHT(ExRootTreeBranch *branch, TObjArray *array);
   void ProcessRho(ExRootTreeBranch *branch, TObjArray *array);
   void ProcessWeight(ExRootTreeBranch *branch, TObjArray *array);
+  void ProcessLHEParticles(ExRootTreeBranch *branch, TObjArray *array);
 
 #ifndef __CINT__
   typedef void (TreeWriter::*TProcessMethod)(ExRootTreeBranch *, TObjArray *); //!

@@ -12,7 +12,8 @@
 #include "classes/DelphesFactory.h"
 #include "classes/SortableObject.h"
 
-CompBase *GenParticle::fgCompare = 0;
+CompBase *GenParticle::fgCompare = CompPT<GenParticle>::Instance();
+CompBase *LHEParticle::fgCompare = CompPT<LHEParticle>::Instance();
 CompBase *Photon::fgCompare   = CompPT<Photon>::Instance();
 CompBase *Electron::fgCompare = CompPT<Electron>::Instance();
 CompBase *Muon::fgCompare     = CompPT<Muon>::Instance();
@@ -24,6 +25,13 @@ CompBase *Candidate::fgCompare = CompMomentumPt<Candidate>::Instance();
 
 //------------------------------------------------------------------------------
 TLorentzVector GenParticle::P4(){
+  TLorentzVector vec;
+  vec.SetPxPyPzE(Px, Py, Pz, E);
+  return vec;
+}
+
+//------------------------------------------------------------------------------
+TLorentzVector LHEParticle::P4(){
   TLorentzVector vec;
   vec.SetPxPyPzE(Px, Py, Pz, E);
   return vec;
@@ -91,11 +99,11 @@ Candidate::Candidate() :
   Area    (0.0, 0.0, 0.0, 0.0),
   PID(0), Status(0), M1(-1), M2(-1), D1(-1), D2(-1),
   Charge(0), Mass(0.0),
-  IsolationVar(0), TrackIsolationVar(0),
+  IsolationVarDBeta(0), IsolationVarRhoCorr(0), TrackIsolationVar(0),
   chargedHadronEnergy(0),neutralEnergy(0),chargedPUEnergy(0),allParticleEnergy(0),
   IsPU(0), IsRecoPU(0),IsConstituent(0),IsEMCand(0), 
-  BTagAlgo(0),BTagPhysics(0),BTagNearest2(0),BTagNearest3(0),BTagHeaviest(0),BTagHighestPt(0),
-  flavourAlgo(0),flavourPhysics(0),flavourNearest2(0),flavourNearest3(0),flavourHeaviest(0),flavourHighestPt(0),
+  BTagAlgo(0),BTagDefault(0),BTagPhysics(0),BTagNearest2(0),BTagNearest3(0),BTagHeaviest(0),BTagHighestPt(0),
+  flavourAlgo(0),flavourDefault(0),flavourPhysics(0),flavourNearest2(0),flavourNearest3(0),flavourHeaviest(0),flavourHighestPt(0),
   TauTag(0), Eem(0.0), Ehad(0.0),
   Tau1(-999), Tau2(-999), Tau3(-999),
   NSubJetsTrimmed(-999),
@@ -181,7 +189,8 @@ void Candidate::Copy(TObject &obj) const{
 
   object.PID = PID;
   object.Status = Status;
-  object.IsolationVar = IsolationVar;
+  object.IsolationVarDBeta   = IsolationVarDBeta;
+  object.IsolationVarRhoCorr = IsolationVarRhoCorr;
   object.TrackIsolationVar = TrackIsolationVar;
   object.M1 = M1;
   object.M2 = M2;
@@ -198,13 +207,16 @@ void Candidate::Copy(TObject &obj) const{
   object.allParticleEnergy = allParticleEnergy;
   object.IsConstituent = IsConstituent;
 
-  object.BTagAlgo = BTagAlgo;
-  object.BTagPhysics = BTagPhysics;
-  object.BTagNearest2 = BTagNearest2;
-  object.BTagNearest3 = BTagNearest3;
+  object.BTagAlgo      = BTagAlgo;
+  object.BTagDefault   = BTagDefault;
+  object.BTagPhysics   = BTagPhysics;
+  object.BTagNearest2  = BTagNearest2;
+  object.BTagNearest3  = BTagNearest3;
   object.BTagHeaviest  = BTagHeaviest;
   object.BTagHighestPt = BTagHighestPt;
-  object.flavourAlgo = flavourAlgo;
+
+  object.flavourAlgo    = flavourAlgo;
+  object.flavourDefault = flavourDefault;
   object.flavourPhysics = flavourPhysics;
   object.flavourNearest2 = flavourNearest2;
   object.flavourNearest3 = flavourNearest3;
@@ -376,7 +388,8 @@ void Candidate::Clear(Option_t* option){
   ResetBit(kIsReferenced);
   PID     = 0;
   Status = 0;
-  IsolationVar =0.;
+  IsolationVarDBeta   = 0.;
+  IsolationVarRhoCorr = 0.;
   TrackIsolationVar =0.;
   M1 = -1; M2 = -1; D1 = -1; D2 = -1;
   Charge = 0;
@@ -389,13 +402,17 @@ void Candidate::Clear(Option_t* option){
   neutralEnergy       = 0;
   chargedPUEnergy     = 0; 
   allParticleEnergy   = 0; 
+
   BTagAlgo         = 0;
+  BTagDefault      = 0;
   BTagPhysics      = 0;
   BTagNearest2     = 0;
   BTagNearest3     = 0;
   BTagHeaviest     = 0;
   BTagHighestPt    = 0;
+
   flavourAlgo      = 0;
+  flavourDefault   = 0;
   flavourPhysics   = 0;
   flavourNearest2  = 0;
   flavourNearest3  = 0;

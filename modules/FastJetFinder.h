@@ -71,6 +71,8 @@ private:
   // -- voronoi areas --
   Double_t fEffectiveRfact;
 
+  Double_t fParticlePTMin;
+
   std::map< Double_t, Double_t > fEtaRangeMap; //!
 
   TIterator *fItInputArray; //!

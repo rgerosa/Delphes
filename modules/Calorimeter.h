@@ -18,8 +18,7 @@ class TObjArray;
 class DelphesFormula;
 class Candidate;
 
-class Calorimeter: public DelphesModule 
-{
+class Calorimeter: public DelphesModule {
 public:
 
   Calorimeter();
@@ -55,6 +54,10 @@ private:
 
   std::vector < Double_t > fTrackECalFractions;
   std::vector < Double_t > fTrackHCalFractions;
+
+  std::vector<int> fParticlePDGId ;
+  std::vector<int> fTrackPDGId ;
+
 
   DelphesFormula *fECalResolutionFormula; //!
   DelphesFormula *fHCalResolutionFormula; //!

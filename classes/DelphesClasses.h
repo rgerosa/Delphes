@@ -138,6 +138,47 @@ class GenParticle: public SortableObject{
 };
 
 //---------------------------------------------------------------------------
+class LHEParticle: public SortableObject{
+  public:
+
+  Int_t PID;    // particle HEP ID number | hepevt.idhep[number]
+  Int_t Status; // particle status | hepevt.isthep[number]
+  Int_t IsPU;   // 0 or 1 for particles from pile-up interactions // Reflects decision ncoprorating z vertex resolution  
+  
+  Int_t M1; // particle 1st mother | hepevt.jmohep[number][0] - 1
+  Int_t M2; // particle 2nd mother | hepevt.jmohep[number][1] - 1
+
+  Int_t D1; // particle 1st daughter | hepevt.jdahep[number][0] - 1
+  Int_t D2; // particle last daughter | hepevt.jdahep[number][1] - 1
+
+  Int_t Charge; // particle charge
+  Float_t Mass; // particle mass
+
+  Float_t E; // particle energy | hepevt.phep[number][3]
+  Float_t Px; // particle momentum vector (x component) | hepevt.phep[number][0]
+  Float_t Py; // particle momentum vector (y component) | hepevt.phep[number][1]
+  Float_t Pz; // particle momentum vector (z component) | hepevt.phep[number][2]
+
+  Float_t PT; // particle transverse momentum
+  Float_t Eta; // particle pseudorapidity
+  Float_t Phi; // particle azimuthal angle
+
+  Float_t Rapidity; // particle rapidity
+
+  Float_t T; // particle vertex position (t component) | hepevt.vhep[number][3]
+  Float_t X; // particle vertex position (x component) | hepevt.vhep[number][0]
+  Float_t Y; // particle vertex position (y component) | hepevt.vhep[number][1]
+  Float_t Z; // particle vertex position (z component) | hepevt.vhep[number][2]
+
+  static CompBase *fgCompare; //!
+  const CompBase *GetCompare() const { return fgCompare; }
+  
+  TLorentzVector P4();
+
+  ClassDef(LHEParticle, 1)
+};
+
+//---------------------------------------------------------------------------
 
 class MissingET: public TObject{
  public:
@@ -192,7 +233,8 @@ class Photon: public SortableObject {
   
   Float_t EhadOverEem; // ratio of the hadronic versus electromagnetic energy deposited in the calorimeter
 
-  Float_t IsolationVar;
+  Float_t IsolationVarDBeta;
+  Float_t IsolationVarRhoCorr;
   Float_t TrackIsolationVar;
   Float_t chargedHadronEnergy;
   Float_t neutralEnergy;
@@ -228,7 +270,8 @@ class Electron: public SortableObject {
   Int_t Charge; // electron charge
   Float_t EhadOverEem; // ratio of the hadronic versus electromagnetic energy deposited in the calorimeter
 
-  Float_t IsolationVar;
+  Float_t IsolationVarDBeta;
+  Float_t IsolationVarRhoCorr;
   Float_t TrackIsolationVar;
   Float_t chargedHadronEnergy;
   Float_t neutralEnergy;
@@ -263,7 +306,8 @@ class Muon: public SortableObject {
   Int_t IsPU;
 
   Int_t   Charge; // muon charge
-  Float_t IsolationVar;
+  Float_t IsolationVarDBeta;
+  Float_t IsolationVarRhoCorr;
   Float_t TrackIsolationVar;
   Float_t chargedHadronEnergy;
   Float_t neutralEnergy;
@@ -397,8 +441,9 @@ class Jet: public SortableObject {
   float SoftDropPhiSub3;
 
   Float_t AreaX,AreaY,AreaZ,AreaT; // 4-vector area
-  
+
   UInt_t BTagAlgo;
+  UInt_t BTagDefault;
   UInt_t BTagPhysics;
   UInt_t BTagNearest2;
   UInt_t BTagNearest3;
@@ -406,6 +451,7 @@ class Jet: public SortableObject {
   UInt_t BTagHighestPt;
 
   UInt_t flavourAlgo;
+  UInt_t flavourDefault;
   UInt_t flavourPhysics;
   UInt_t flavourNearest2;
   UInt_t flavourNearest3;
@@ -592,7 +638,8 @@ class Candidate: public SortableObject  {
   Float_t Mass;
   
   // Isolatiom info
-  Float_t IsolationVar;
+  Float_t IsolationVarDBeta;
+  Float_t IsolationVarRhoCorr;
   Float_t TrackIsolationVar;
   Float_t chargedHadronEnergy;
   Float_t neutralEnergy;
@@ -608,6 +655,7 @@ class Candidate: public SortableObject  {
 
   // BTagging info
   UInt_t BTagAlgo;
+  UInt_t BTagDefault;
   UInt_t BTagPhysics;
   UInt_t BTagNearest2;
   UInt_t BTagNearest3;
@@ -615,6 +663,7 @@ class Candidate: public SortableObject  {
   UInt_t BTagHighestPt;
 
   UInt_t flavourAlgo;
+  UInt_t flavourDefault;
   UInt_t flavourPhysics;
   UInt_t flavourNearest2;
   UInt_t flavourNearest3;

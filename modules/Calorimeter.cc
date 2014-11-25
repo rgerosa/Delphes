@@ -51,8 +51,7 @@ Calorimeter::~Calorimeter(){
 
   if(fECalResolutionFormula) delete fECalResolutionFormula;
   if(fHCalResolutionFormula) delete fHCalResolutionFormula;
-
-  if(fTowerTrackArray) delete fTowerTrackArray;
+  if(fTowerTrackArray)   delete fTowerTrackArray;
   if(fItTowerTrackArray) delete fItTowerTrackArray;
 }
 
@@ -70,9 +69,11 @@ void Calorimeter::Init(){
   // read eta and phi bins
   param = GetParam("EtaPhiBins");
   size = param.GetSize();
+
   fBinMap.clear();
   fEtaBins.clear();
   fPhiBins.clear();
+
   for(i = 0; i < size/2; ++i){
 
     paramEtaBins = param[i*2];
@@ -127,10 +128,13 @@ void Calorimeter::Init(){
   fItTrackInputArray = fTrackInputArray->MakeIterator();
 
   // create output arrays
-  fTowerOutputArray = ExportArray(GetString("TowerOutputArray", "towers"));
+  // calo tower output
+  fTowerOutputArray  = ExportArray(GetString("TowerOutputArray", "towers"));
+  // photons 
   fPhotonOutputArray = ExportArray(GetString("PhotonOutputArray", "photons"));
-
+  // track for particle flow
   fEFlowTrackOutputArray = ExportArray(GetString("EFlowTrackOutputArray", "eflowTracks"));
+  // tower for particle flow
   fEFlowTowerOutputArray = ExportArray(GetString("EFlowTowerOutputArray", "eflowTowers"));
 
   // For timing
@@ -173,7 +177,7 @@ void Calorimeter::Process(){
   vector< Double_t >::iterator itPhiBin;
   vector< Double_t > *phiBins;
 
-  vector< Long64_t >::iterator itTowerHits;
+  vector<Long64_t>::iterator itTowerHits;
 
   DelphesFactory *factory = GetFactory();
   fTowerHits.clear();
@@ -181,12 +185,56 @@ void Calorimeter::Process(){
   fTowerHCalFractions.clear();
   fTrackECalFractions.clear();
   fTrackHCalFractions.clear();
+  fParticlePDGId.clear();
+  fTrackPDGId.clear();
 
+
+  // loop over all tracks
+  fItTrackInputArray->Reset();
+  number = -1;
+  while((track = static_cast<Candidate*>(fItTrackInputArray->Next()))){
+
+    const TLorentzVector &trackPosition = track->Position;
+    ++number;
+
+    pdgCode = TMath::Abs(track->PID);
+
+    itFractionMap = fFractionMap.find(pdgCode);
+    if(itFractionMap == fFractionMap.end()){
+      itFractionMap = fFractionMap.find(0);
+    }
+
+    ecalFraction = itFractionMap->second.first;
+    hcalFraction = itFractionMap->second.second;
+
+    fTrackECalFractions.push_back(ecalFraction);
+    fTrackHCalFractions.push_back(hcalFraction);
+    fTrackPDGId.push_back(pdgCode);
+ 
+    // find eta bin [1, fEtaBins.size - 1]
+    itEtaBin = lower_bound(fEtaBins.begin(), fEtaBins.end(), trackPosition.Eta());
+    if(itEtaBin == fEtaBins.begin() || itEtaBin == fEtaBins.end()) continue;
+    etaBin = distance(fEtaBins.begin(), itEtaBin);
+
+    // phi bins for given eta bin
+    phiBins = fPhiBins[etaBin];
+
+    // find phi bin [1, phiBins.size - 1]
+    itPhiBin = lower_bound(phiBins->begin(), phiBins->end(), trackPosition.Phi());
+    if(itPhiBin == phiBins->begin() || itPhiBin == phiBins->end()) continue;
+    phiBin = distance(phiBins->begin(), itPhiBin);
+
+    flags = 1; // charged tracks flags equal one add to the tower hits
+ 
+    // make tower hit {16-bits for eta bin number, 16-bits for phi bin number, 8-bits for flags, 24-bits for track number}
+    towerHit = (Long64_t(etaBin) << 48) | (Long64_t(phiBin) << 32) | (Long64_t(flags) << 24) | Long64_t(number);
+
+    fTowerHits.push_back(towerHit);
+ }
 
   // loop over all particles of the event
   fItParticleInputArray->Reset();
   number = -1;
-
   while((particle = static_cast<Candidate*>(fItParticleInputArray->Next()))){
 
     const TLorentzVector &particlePosition = particle->Position;
@@ -204,6 +252,7 @@ void Calorimeter::Process(){
     // fill tower fraction vectors
     fTowerECalFractions.push_back(ecalFraction);
     fTowerHCalFractions.push_back(hcalFraction);
+    fParticlePDGId.push_back(pdgCode);
 
     if(ecalFraction < 1.0E-9 && hcalFraction < 1.0E-9) continue;
 
@@ -228,51 +277,10 @@ void Calorimeter::Process(){
     fTowerHits.push_back(towerHit); // fill tower hit vectors
   }
 
-  // loop over all tracks
-  fItTrackInputArray->Reset();
-  number = -1;
-  while((track = static_cast<Candidate*>(fItTrackInputArray->Next()))){
-
-    const TLorentzVector &trackPosition = track->Position;
-    ++number;
-
-    pdgCode = TMath::Abs(track->PID);
-
-    itFractionMap = fFractionMap.find(pdgCode);
-    if(itFractionMap == fFractionMap.end()){
-      itFractionMap = fFractionMap.find(0);
-    }
-
-    ecalFraction = itFractionMap->second.first;
-    hcalFraction = itFractionMap->second.second;
-
-    fTrackECalFractions.push_back(ecalFraction);
-    fTrackHCalFractions.push_back(hcalFraction);
-
-    // find eta bin [1, fEtaBins.size - 1]
-    itEtaBin = lower_bound(fEtaBins.begin(), fEtaBins.end(), trackPosition.Eta());
-    if(itEtaBin == fEtaBins.begin() || itEtaBin == fEtaBins.end()) continue;
-    etaBin = distance(fEtaBins.begin(), itEtaBin);
-
-    // phi bins for given eta bin
-    phiBins = fPhiBins[etaBin];
-
-    // find phi bin [1, phiBins.size - 1]
-    itPhiBin = lower_bound(phiBins->begin(), phiBins->end(), trackPosition.Phi());
-    if(itPhiBin == phiBins->begin() || itPhiBin == phiBins->end()) continue;
-    phiBin = distance(phiBins->begin(), itPhiBin);
-
-    flags = 1; // charged tracks flags equal one add to the tower hits
- 
-    // make tower hit {16-bits for eta bin number, 16-bits for phi bin number, 8-bits for flags, 24-bits for track number}
-    towerHit = (Long64_t(etaBin) << 48) | (Long64_t(phiBin) << 32) | (Long64_t(flags) << 24) | Long64_t(number);
-
-    fTowerHits.push_back(towerHit);
-  }
 
   // all hits are sorted first by eta bin number, then by phi bin number,
   // then by flags and then by particle or track number
-  sort(fTowerHits.begin(), fTowerHits.end()); // sort the hit
+  sort(fTowerHits.begin(),fTowerHits.end()); // sort the hit
 
   // loop over all hits
   towerEtaPhi = 0;
@@ -282,12 +290,14 @@ void Calorimeter::Process(){
     flags     = (towerHit >> 24) & 0x00000000000000FFLL; // take the flag
     number    = (towerHit) & 0x0000000000FFFFFFLL;       // take the number
     hitEtaPhi = towerHit >> 32;
-    if(towerEtaPhi != hitEtaPhi){  // first time hit
+    if(towerEtaPhi != hitEtaPhi){  // first time hit, no  more than once since we have sorted tower as a function of eta and phi hits
+
       // switch to next tower
       towerEtaPhi = hitEtaPhi;
       // finalize previous tower
       FinalizeTower();
-      // create new tower
+
+      // create new tower using the calorimeter information
       fTower = factory->NewCandidate();
       // store which type of particle it belongs to
       phiBin = (towerHit >> 32) & 0x000000000000FFFFLL;
@@ -299,6 +309,7 @@ void Calorimeter::Process(){
       fTowerEta = 0.5*(fEtaBins[etaBin - 1] + fEtaBins[etaBin]);
       fTowerPhi = 0.5*((*phiBins)[phiBin - 1] + (*phiBins)[phiBin]);
 
+      // take the edges of the tower
       fTowerEdges[0] = fEtaBins[etaBin - 1];
       fTowerEdges[1] = fEtaBins[etaBin];
       fTowerEdges[2] = (*phiBins)[phiBin - 1];
@@ -335,6 +346,7 @@ void Calorimeter::Process(){
 
       ecalEnergy = momentum.E() * fTrackECalFractions[number];
       hcalEnergy = momentum.E() * fTrackHCalFractions[number];
+     
 
       fTrackECalEnergy += ecalEnergy;
       fTrackHCalEnergy += hcalEnergy;
@@ -352,7 +364,7 @@ void Calorimeter::Process(){
 
       fTowerTrackArray->Add(track);
 
-      continue;
+      continue; // go to the next hit
     }
 
     // check for photon and electron hits in current tower
@@ -365,6 +377,7 @@ void Calorimeter::Process(){
     ecalEnergy = momentum.E() * fTowerECalFractions[number];
     hcalEnergy = momentum.E() * fTowerHCalFractions[number];
 
+ 
     fTowerECalEnergy += ecalEnergy;
     fTowerHCalEnergy += hcalEnergy;
 
@@ -381,6 +394,8 @@ void Calorimeter::Process(){
 	
       }
     }
+
+    fTower->PID = fParticlePDGId.at(number);
 
     fTower->AddCandidate(particle);
   }
@@ -443,9 +458,10 @@ void Calorimeter::FinalizeTower(){
 
   // fill calorimeter towers and photon candidates
   if(energy > 0.0){
-    if(fTowerPhotonHits > 0 && fTowerTrackHits == 0){
+    if(fTowerPhotonHits > 0 && fTowerTrackHits == 0){      
       fPhotonOutputArray->Add(fTower);
     }
+        
     fTowerOutputArray->Add(fTower);
   }
 

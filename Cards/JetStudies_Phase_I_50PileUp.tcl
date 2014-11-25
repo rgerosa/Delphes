@@ -36,6 +36,7 @@ set ExecutionPath {
   RhoGridFastJet
 
   FastJetFinder
+  TrackJetFinder
   GenJetFinder
 
   JetPileUpSubtractor
@@ -82,6 +83,7 @@ set ExecutionPath {
   TreeWriter
 
 }
+
 
 
 # PileUpJetIDMissingET  
@@ -1037,9 +1039,9 @@ module Efficiency PhotonEfficiency {
 module Isolation PhotonIsolation {
   # particle for which calculate the isolation
   set CandidateInputArray        PhotonEfficiency/photons 
-  # neutral and charged particles for the whole event (after CHS)
+  # neutral and charged particles for the whole event (no CHS applied)
   set NeutralIsolationInputArray Calorimeter/eflowTowers
-  set ChargedIsolationInputArray TrackPileUpSubtractor/eflowTracks
+  set ChargedIsolationInputArray Calorimeter/eflowTracks 
   # select a rho for the isolation
   set RhoInputArray RhoKt4/rho
   # output array
@@ -1095,7 +1097,7 @@ module Efficiency ElectronEfficiency {
 module Isolation ElectronIsolation {
   set CandidateInputArray        ElectronEfficiency/electrons
   set NeutralIsolationInputArray Calorimeter/eflowTowers
-  set ChargedIsolationInputArray TrackPileUpSubtractor/eflowTracks
+  set ChargedIsolationInputArray Calorimeter/eflowTracks 
   set RhoInputArray RhoKt4/rho
   set OutputArray electrons
   set DeltaRMax 0.3
@@ -1130,7 +1132,7 @@ module Efficiency MuonEfficiency {
 module Isolation MuonIsolation {
   set CandidateInputArray MuonEfficiency/muons
   set NeutralIsolationInputArray Calorimeter/eflowTowers
-  set ChargedIsolationInputArray TrackPileUpSubtractor/eflowTracks
+  set ChargedIsolationInputArray Calorimeter/eflowTracks 
   set RhoInputArray RhoKt4/rho
   set OutputArray muons
   set DeltaRMax 0.3
@@ -1164,6 +1166,7 @@ module TauTagging TauTagging {
 module BTagging BTaggingLoose {
   set PartonInputArray   Delphes/partons
   set ParticleInputArray Delphes/allParticles
+  set LHEPartonInputArray Delphes/LHEParticles
   set JetInputArray      JetPileUpSubtractor/jets
   set BitNumber     0
   ## delta R and min PT for flavour association
@@ -1350,6 +1353,7 @@ module BTagging BTaggingMedium {
 
   set PartonInputArray   Delphes/partons
   set ParticleInputArray Delphes/allParticles
+  set LHEPartonInputArray Delphes/LHEParticles
   set JetInputArray      JetPileUpSubtractor/jets
 
   set BitNumber    1
@@ -1534,6 +1538,7 @@ module BTagging BTaggingTight {
 
   set PartonInputArray   Delphes/partons
   set ParticleInputArray Delphes/allParticles
+  set LHEPartonInputArray Delphes/LHEParticles
   set JetInputArray      JetPileUpSubtractor/jets
 
   set BitNumber 2
@@ -1722,6 +1727,7 @@ module BTagging BTaggingTight {
 module BTagging PuppiBTaggingLoose {
   set PartonInputArray   Delphes/partons
   set ParticleInputArray Delphes/allParticles
+  set LHEPartonInputArray Delphes/LHEParticles
   set JetInputArray      PuppiJetPileUpSubtractor/jets
   set BitNumber     0
   ## delta R and min PT for flavour association
@@ -1908,6 +1914,7 @@ module BTagging PuppiBTaggingMedium {
 
   set PartonInputArray   Delphes/partons
   set ParticleInputArray Delphes/allParticles
+  set LHEPartonInputArray Delphes/LHEParticles
   set JetInputArray      PuppiJetPileUpSubtractor/jets
 
   set BitNumber    1
@@ -2092,6 +2099,7 @@ module BTagging PuppiBTaggingTight {
 
   set PartonInputArray   Delphes/partons
   set ParticleInputArray Delphes/allParticles
+  set LHEPartonInputArray Delphes/LHEParticles
   set JetInputArray      PuppiJetPileUpSubtractor/jets
 
   set BitNumber 2
@@ -2425,6 +2433,9 @@ module TreeWriter TreeWriter {
 
   ## NPU after Pileup Merging
   add Branch PileUpMerger/NPU NPU ScalarHT
+
+  ## LHE particles
+  add Branch Delphes/LHEParticles LHEParticles LHEParticle
 
   ## gen particles after vertex smearing 
   #add Branch GenBeamSpotFilter/beamSpotParticles GenBeamSpotParticles GenParticle

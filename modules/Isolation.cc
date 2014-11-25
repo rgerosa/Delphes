@@ -120,7 +120,7 @@ void Isolation::Process(){
   Candidate *candidate, *isolation, *object;
   TObjArray *chargedIsolationArray;
   TObjArray *neutralIsolationArray;
-  Double_t   sumChargedHadron, sumNeutral, sumAllParticles, sumChargedPU, sum, ratio;
+  Double_t   sumChargedHadron, sumNeutral, sumAllParticles, sumChargedPU, sumDBeta, ratioDBeta, sumRhoCorr, ratioRhoCorr;
   Int_t      counter;
   Double_t   eta = 0.0;
   Double_t   rho = 0.0;
@@ -188,16 +188,19 @@ void Isolation::Process(){
     }
 
     // correct sum for pile-up contamination
-    sum = sumChargedHadron + TMath::Max(sumNeutral-0.5*TMath::Max(rho,0.0)*sumChargedPU,0.0);
-    ratio = sum/candidateMomentum.Pt();
+    sumDBeta = sumChargedHadron + TMath::Max(sumNeutral-0.5*sumChargedPU,0.0);
+    sumRhoCorr = sumChargedHadron - TMath::Max(sumNeutral-TMath::Max(rho,0.0)*fDeltaRMax*fDeltaRMax*TMath::Pi(),0.0);
+    ratioDBeta = sumDBeta/candidateMomentum.Pt();
+    ratioRhoCorr = sumRhoCorr/candidateMomentum.Pt();
 
-    candidate->IsolationVar        = ratio;
+    candidate->IsolationVarDBeta   = ratioDBeta;
+    candidate->IsolationVarRhoCorr = ratioRhoCorr;
     candidate->chargedHadronEnergy = sumChargedHadron;
     candidate->neutralEnergy       = sumNeutral;
     candidate->chargedPUEnergy     = sumChargedPU;
     candidate->allParticleEnergy   = sumAllParticles;
 
-    if((fUsePTSum && sum > fPTSumMax) || ratio > fPTRatioMax) continue;
+    if((fUsePTSum && sumDBeta > fPTSumMax) || ratioDBeta > fPTRatioMax) continue;
     fOutputArray->Add(candidate);
   }
 }

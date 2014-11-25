@@ -1,13 +1,8 @@
 /** \class TreeWriter
- *
  *  Fills ROOT tree branches.
- *
  *  $Date: 2013-05-16 16:28:38 +0200 (Thu, 16 May 2013) $
  *  $Revision: 1115 $
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
- *
  */
 
 #include "modules/TreeWriter.h"
@@ -60,6 +55,7 @@ void TreeWriter::Init() {
   fClassMap[ScalarHT::Class()]    = &TreeWriter::ProcessScalarHT;
   fClassMap[Rho::Class()]         = &TreeWriter::ProcessRho;
   fClassMap[IsoTrack::Class()]    = &TreeWriter::ProcessIsoTracks;
+  fClassMap[LHEParticle::Class()] = &TreeWriter::ProcessLHEParticles;
 
   TBranchMap::iterator itBranchMap;
   map< TClass *, TProcessMethod >::iterator itClassMap;
@@ -330,7 +326,8 @@ void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, TObjArray *array){
     entry->IsRecoPU = candidate->IsRecoPU;
     entry->IsPU     = candidate->IsPU;
 
-    entry->IsolationVar = candidate->IsolationVar;
+    entry->IsolationVarDBeta   = candidate->IsolationVarDBeta;
+    entry->IsolationVarRhoCorr = candidate->IsolationVarRhoCorr;
     entry->chargedHadronEnergy = candidate->chargedHadronEnergy;
     entry->neutralEnergy       = candidate->neutralEnergy;
     entry->chargedPUEnergy     = candidate->chargedPUEnergy;
@@ -372,7 +369,8 @@ void TreeWriter::ProcessElectrons(ExRootTreeBranch *branch, TObjArray *array){
     entry->IsRecoPU = candidate->IsRecoPU;
     entry->IsPU     = candidate->IsPU;
 
-    entry->IsolationVar = candidate->IsolationVar;
+    entry->IsolationVarDBeta   = candidate->IsolationVarDBeta;
+    entry->IsolationVarRhoCorr = candidate->IsolationVarRhoCorr;
     entry->chargedHadronEnergy = candidate->chargedHadronEnergy;
     entry->neutralEnergy       = candidate->neutralEnergy;
     entry->chargedPUEnergy     = candidate->chargedPUEnergy;
@@ -420,7 +418,8 @@ void TreeWriter::ProcessMuons(ExRootTreeBranch *branch, TObjArray *array){
     entry->IsRecoPU = candidate->IsRecoPU;
     entry->IsPU     = candidate->IsPU;
 
-    entry->IsolationVar = candidate->IsolationVar;
+    entry->IsolationVarDBeta   = candidate->IsolationVarDBeta;
+    entry->IsolationVarRhoCorr = candidate->IsolationVarRhoCorr;
     entry->chargedHadronEnergy = candidate->chargedHadronEnergy;
     entry->neutralEnergy       = candidate->neutralEnergy;
     entry->chargedPUEnergy     = candidate->chargedPUEnergy;
@@ -582,6 +581,7 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array){
     entry->TauTag = candidate->TauTag;
 
     entry->BTagAlgo      = candidate->BTagAlgo;
+    entry->BTagDefault      = candidate->BTagDefault;
     entry->BTagPhysics   = candidate->BTagPhysics;
     entry->BTagNearest2  = candidate->BTagNearest2;
     entry->BTagNearest3  = candidate->BTagNearest3;
@@ -589,6 +589,7 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array){
     entry->BTagHighestPt = candidate->BTagHighestPt;
 
     entry->flavourAlgo      = candidate->flavourAlgo;
+    entry->flavourDefault      = candidate->flavourDefault;
     entry->flavourPhysics   = candidate->flavourPhysics;
     entry->flavourNearest2  = candidate->flavourNearest2;
     entry->flavourNearest3  = candidate->flavourNearest3;
@@ -736,6 +737,61 @@ void TreeWriter::ProcessRho(ExRootTreeBranch *branch, TObjArray *array){
       entry->Edges[1] = candidate->Edges[1];
     }
 }
+
+// -----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+void TreeWriter::ProcessLHEParticles(ExRootTreeBranch *branch, TObjArray *array){
+
+  TIter iterator(array);
+  Candidate *candidate = 0;
+  GenParticle *entry = 0;
+  Double_t pt, signPz, cosTheta, eta, rapidity;
+
+  // loop over all particles
+  iterator.Reset();
+  while((candidate = static_cast<Candidate*>(iterator.Next()))){
+    const TLorentzVector &momentum = candidate->Momentum;
+    const TLorentzVector &position = candidate->Position;
+
+    entry = static_cast<GenParticle*>(branch->NewEntry()); // create the output branch
+    entry->SetBit(kIsReferenced);
+    entry->SetUniqueID(candidate->GetUniqueID()); // take the id of the candidate we are looking at 
+
+    pt       = momentum.Pt();
+    cosTheta = TMath::Abs(momentum.CosTheta());
+    signPz   = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
+    eta      = (cosTheta == 1.0 ? signPz*999.9 : momentum.Eta());
+    rapidity = (cosTheta == 1.0 ? signPz*999.9 : momentum.Rapidity());
+
+    // store the info in the output branch
+    entry->PID    = candidate->PID; // pdgId 
+    entry->Status = candidate->Status; // status written in the LHE file
+    entry->IsPU   = candidate->IsPU;
+    entry->M1     = candidate->M1;
+    entry->M2     = candidate->M2;
+    entry->D1     = candidate->D1;
+    entry->D2     = candidate->D2;
+    entry->Charge = candidate->Charge;
+    entry->Mass   = candidate->Mass;
+
+    entry->E  = momentum.E();
+    entry->Px = momentum.Px();
+    entry->Py = momentum.Py();
+    entry->Pz = momentum.Pz();
+
+    entry->Eta = eta;
+    entry->Phi = momentum.Phi();
+    entry->PT  = pt;
+    entry->Rapidity = rapidity;
+
+    entry->X = position.X();
+    entry->Y = position.Y();
+    entry->Z = position.Z();
+    entry->T = position.T();
+  }
+}
+
 
 //------------------------------------------------------------------------------
 

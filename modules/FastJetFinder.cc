@@ -92,6 +92,7 @@ void FastJetFinder::Init(){
   fOverlapThreshold = GetDouble("OverlapThreshold", 0.75);
 
   fJetPTMin = GetDouble("JetPTMin", 10.0);
+  fParticlePTMin = GetDouble("ParticlePTMin", 0);
 
   // ---  Jet Area Parameters ---
   fAreaAlgorithm  = GetInt("AreaAlgorithm", 0);
@@ -206,6 +207,7 @@ void FastJetFinder::Process(){
     }
 
     momentum = candidate->Momentum;
+    if(momentum.Pt() < fParticlePTMin) continue ;
     fastjet::PseudoJet jet (momentum.Px(), momentum.Py(), momentum.Pz(), momentum.E());
     jet.set_user_index(number);
     inputList.push_back(jet);
@@ -284,7 +286,7 @@ void FastJetFinder::Process(){
     for(itInputList = jetParticles.begin(); itInputList != jetParticles.end(); ++itInputList){
 
       // Take the original constistuen from delphes particle array
-      constituent = static_cast<Candidate*>(fInputArray->At(itInputList->user_index()));
+      constituent = static_cast<Candidate*>(fInputArray->At(itInputList->user_index()));      
       deta = TMath::Abs(momentum.Eta()-constituent->Momentum.Eta());
       dphi = TMath::Abs(momentum.DeltaPhi(constituent->Momentum));
       if(deta > detaMax) detaMax = deta;

@@ -1,11 +1,6 @@
 /** \class ModifyBeamSpot
- *
- *  
- *
- *
  *  \author S. Zenz
- *
- */
+*/
 
 #include "modules/ModifyBeamSpot.h"
 
@@ -38,8 +33,6 @@ static const double m = 1000.*mm;
 static const double ns  = 1.;
 static const double s = 1.e+9 *ns;
 static const double c_light   = 2.99792458e+8 * m/s;
-
-
 
 
 using namespace std;

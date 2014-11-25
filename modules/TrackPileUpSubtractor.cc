@@ -1,14 +1,8 @@
-
 /** \class TrackPileUpSubtractor
- *
  *  Subtract pile-up contribution from tracks.
- *
  *  $Date: 2013-03-24 21:25:01 +0100 (Sun, 24 Mar 2013) $
  *  $Revision: 1073 $
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
- *
  */
 
 #include "modules/TrackPileUpSubtractor.h"
@@ -53,6 +47,7 @@ TrackPileUpSubtractor::~TrackPileUpSubtractor()
 void TrackPileUpSubtractor::Init()
 {
   fZVertexResolution  = GetDouble("ZVertexResolution", 0.005)*1.0E3;
+  fPTMin              = GetDouble("PTMin", 0.);
 
   // import arrays with output from other modules
 
@@ -124,7 +119,9 @@ void TrackPileUpSubtractor::Process()
 	candidate->IsRecoPU = 1;
       } else {
 	candidate->IsRecoPU = 0;
-	array->Add(candidate);
+        if( candidate->Momentum.Pt() > fPTMin)
+ 	 array->Add(candidate);
+        else continue;
       }
     }
   }
