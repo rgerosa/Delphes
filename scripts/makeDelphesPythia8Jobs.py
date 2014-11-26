@@ -71,8 +71,6 @@ def writeJobs(workingdir,executable,configCard,inputdir,inputPUdir,outputname,eo
     nentries = 0;
     ## loop on the list
     for ifile in listoffiles:
-     ## avoid to many jobs
-     if jobid > options.njobmax and options.njobmax != 0: break; 
      ## discover how many LHE events are there      
      res = commands.getstatusoutput("(./countEvents "+ifile+")");
      if res[0] == 0 : 
@@ -96,6 +94,8 @@ def writeJobs(workingdir,executable,configCard,inputdir,inputPUdir,outputname,eo
 
      for i in range(njobs):
       ## create job directory         
+      ## avoid to many jobs
+      if jobid > options.njobmax and options.njobmax != 0: break; 
       jobdir = '%s/JOB_%d'%(workingdir,jobid)
       os.system("mkdir -p "+jobdir)        
 
