@@ -212,7 +212,7 @@ FASTJET_LIBDIR   =$(subst LIBDIR=,,$(FASTJET_LIBDIR_TMP))
 FASTJET_INCLUDE_TMP  =$(shell scram tool info fastjet | grep INCLUDE)
 FASTJET_INCLUDE  =$(subst INCLUDE=,,$(FASTJET_INCLUDE_TMP))
 
-CXXFLAGS += $(ROOTCFLAGS) -Wno-write-strings -D_FILE_OFFSET_BITS=64 -DDROP_CGAL -I. -Iexternal -Iexternal/tcl -I$(FASTJET_INCLUDE)
+CXXFLAGS += $(ROOTCFLAGS) -Wno-write-strings -D_FILE_OFFSET_BITS=64 -DDROP_CGAL -I. -Iexternal -Iexternal/tcl -I$(FASTJET_INCLUDE)  -Iexternal/LHEActions
 
 DELPHES_LIBS = $(shell $(RC) --libs) -lEG $(SYSLIBS)
 DISPLAY_LIBS = $(shell $(RC) --evelibs) $(SYSLIBS)
@@ -303,7 +303,7 @@ puts {
 
 ###
 
-all: $(DELPHES) $(EXECUTABLE) genMinBias_14TeV 
+all: $(DELPHES) $(EXECUTABLE) genMinBias_14TeV countEvents
 
 display: $(DISPLAY)
 
@@ -427,6 +427,10 @@ $(EXECUTABLE): %$(ExeSuf): $(DELPHES_DICT_OBJ) $(DELPHES_OBJ) $(TCL_OBJ)
 genMinBias_14TeV: external/MinBiasProduction/genMinBias_14TeV.cpp
 	@echo ">> Compiling $<"
 	@$(CXX) -o $@ $< -I$(HEPMC)/include -L$(HEPMC)/lib -I$(PYTHIA8DATA)/../include -L$(PYTHIA8DATA)/../lib -I$(LHAPDF)/include -L$(LHAPDF)/lib -lHepMC -lpythia8tohepmc -lpythia8 -lLHAPDF -lgfortran
+
+countEvents: external/LHEActions/countEvents.cpp
+	@echo ">> Compiling $<"
+	@$(CXX) $(CXXFLAGS) -o $@ $< 
 
 
 ###
