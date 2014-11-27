@@ -188,9 +188,9 @@ void Isolation::Process(){
     }
 
     // correct sum for pile-up contamination
-    sumDBeta = sumChargedHadron + TMath::Max(sumNeutral-0.5*sumChargedPU,0.0);
-    sumRhoCorr = sumChargedHadron - TMath::Max(sumNeutral-TMath::Max(rho,0.0)*fDeltaRMax*fDeltaRMax*TMath::Pi(),0.0);
-    ratioDBeta = sumDBeta/candidateMomentum.Pt();
+    sumDBeta   = sumChargedHadron + TMath::Max(sumNeutral-0.5*sumChargedPU,0.0);
+    sumRhoCorr = sumChargedHadron + TMath::Max(sumNeutral-TMath::Max(rho,0.0)*fDeltaRMax*fDeltaRMax*TMath::Pi(),0.0);
+    ratioDBeta   = sumDBeta/candidateMomentum.Pt();
     ratioRhoCorr = sumRhoCorr/candidateMomentum.Pt();
 
     candidate->IsolationVarDBeta   = ratioDBeta;

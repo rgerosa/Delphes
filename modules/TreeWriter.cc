@@ -745,7 +745,7 @@ void TreeWriter::ProcessLHEParticles(ExRootTreeBranch *branch, TObjArray *array)
 
   TIter iterator(array);
   Candidate *candidate = 0;
-  GenParticle *entry = 0;
+  LHEParticle *entry = 0;
   Double_t pt, signPz, cosTheta, eta, rapidity;
 
   // loop over all particles
@@ -754,7 +754,7 @@ void TreeWriter::ProcessLHEParticles(ExRootTreeBranch *branch, TObjArray *array)
     const TLorentzVector &momentum = candidate->Momentum;
     const TLorentzVector &position = candidate->Position;
 
-    entry = static_cast<GenParticle*>(branch->NewEntry()); // create the output branch
+    entry = static_cast<LHEParticle*>(branch->NewEntry()); // create the output branch
     entry->SetBit(kIsReferenced);
     entry->SetUniqueID(candidate->GetUniqueID()); // take the id of the candidate we are looking at 
 

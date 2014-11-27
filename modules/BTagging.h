@@ -18,8 +18,6 @@ class TObjArray;
 class DelphesFormula;
 
 class ExRootFilter;
-class BTaggingPartonClassifier;
-class BTaggingLHEPartonClassifier;
 
 class BTagging: public DelphesModule {
 
@@ -32,30 +30,15 @@ class BTagging: public DelphesModule {
   void Process();
   void Finish();
 
-  void GetAlgoFlavour(Candidate* jet, TIter & itPartonArray, TIter & itLHEPartonArray);  
-  void GetPhysicsFlavour(Candidate* jet, TIter & itPartonArray, TIter & itLHEPartonArray);  
-
  private:
 
-  Int_t fBitNumber;
-  Double_t fDeltaR;
-  std::map< Int_t, DelphesFormula * > fEfficiencyMap; //!
-  
-  BTaggingPartonClassifier *fClassifier; //!
-  BTaggingLHEPartonClassifier *fClassifierLHE; //!
-  
-  ExRootFilter *fFilter;
-  ExRootFilter *fFilterLHE;
+  std::map< Int_t, DelphesFormula * > fEfficiencyMapLoose; //!
+  std::map< Int_t, DelphesFormula * > fEfficiencyMapMedium; //!
+  std::map< Int_t, DelphesFormula * > fEfficiencyMapTight; //!
 
-  TIterator *fItPartonInputArray; //!  
-  TIterator *fItLHEPartonInputArray; //!  
   TIterator *fItJetInputArray; //!
-  TIterator *fItParticleInputArray; //!
 
-  const TObjArray *fPartonInputArray; //! 
-  const TObjArray *fLHEPartonInputArray; //! 
   const TObjArray *fJetInputArray; //!
-  const TObjArray *fParticleInputArray; //!
 
   ClassDef(BTagging, 1)
 };

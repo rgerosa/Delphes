@@ -15,6 +15,7 @@
  */
 
 #include "classes/DelphesModule.h"
+#include "TRandom3.h"
 
 class TObjArray;
 class DelphesPileUpReader;
@@ -47,6 +48,8 @@ private:
   TObjArray *fOutputArray; //!
 
   TObjArray *fNPUOutputArray; //!                                                                                                                                                    
+  TRandom3* fRand;
+
   ClassDef(PileUpMerger, 2)
 };
 

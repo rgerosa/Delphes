@@ -68,6 +68,9 @@ std::vector<fastjet::PseudoJet> puppiCleanContainer::puppiEvent(){
     // output particles
     std::vector<fastjet::PseudoJet> particles;
     particles.clear();
+
+    std::vector<int> pPupId ; 
+    std::vector<puppiParticle> partTmp ; // temp puppi particle vector; make a clone of the same particle for all the algo in which it is contained
   
     // calculate puppi metric, RMS and mean value for all the algorithms
     for(size_t iPuppiAlgo = 0; iPuppiAlgo < puppiAlgo_.size(); iPuppiAlgo++){
@@ -75,11 +78,13 @@ std::vector<fastjet::PseudoJet> puppiCleanContainer::puppiEvent(){
     }
   
     int npart = 0;  
+
     // Loop on all the incoming particles
     for(size_t iPart = 0; iPart < fPFParticles_.size(); iPart++) {
 
       float pWeight = 1; // default weight
-      std::vector<int> pPupId = getPuppiId(fPFParticles_[iPart].pt(),fPFParticles_[iPart].eta(),puppiAlgo_); // take into account only algo eta
+      pPupId.clear();
+      pPupId = getPuppiId(fPFParticles_[iPart].pt(),fPFParticles_[iPart].eta(),puppiAlgo_); // take into account only algo eta
 
       //////////////////////////////////////////      
       // acceptance check of the puppi algorithm
@@ -125,10 +130,7 @@ std::vector<fastjet::PseudoJet> puppiCleanContainer::puppiEvent(){
       /////////////////////////////////////      
       // found  the particle in all the algorithm
       /////////////////////////////////////      
-
-      std::vector<puppiParticle> partTmp ; // temp puppi particle vector; make a clone of the same particle for all the algo in which it is contained
       partTmp.clear();
-
       for(size_t iAlgo = 0; iAlgo < pPupId.size(); iAlgo++){ // loop on all the algo found
 
        int found = 0;  //  found index

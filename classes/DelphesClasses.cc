@@ -564,6 +564,11 @@ void Candidate::Clear(Option_t* option){
   SoftDropPhiSub3 = -999;
   SoftDropPtSub3  = -999;
 
+  FracPt.clear();
+  emFracPt.clear();
+  neutFracPt.clear();
+  chFracPt.clear();
+
 }
 
 

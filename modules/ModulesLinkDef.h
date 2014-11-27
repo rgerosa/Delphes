@@ -36,7 +36,7 @@
 #include "modules/Cloner.h"
 #include "modules/Weighter.h"
 #include "modules/ExampleModule.h"
-
+#include "modules/JetFlavourAssociation.h"
 //#include "modules/CleansedJetFinder.h"
 #include "modules/PileUpJetID.h"
 #include "modules/ModifyBeamSpot.h"
@@ -70,6 +70,7 @@
 #pragma link C++ class PileUpMerger+;
 #pragma link C++ class JetPileUpSubtractor+;
 #pragma link C++ class TrackPileUpSubtractor+;
+#pragma link C++ class JetFlavourAssociation+;
 #pragma link C++ class ConstituentFilter+;
 #pragma link C++ class StatusPidFilter+;
 #pragma link C++ class Cloner+;

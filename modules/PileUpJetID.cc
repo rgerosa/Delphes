@@ -202,10 +202,10 @@ void PileUpJetID::Init(){
 //------------------------------------------------------------------------------
 
 void PileUpJetID::Finish(){
-  if(fItJetInputArray) delete fItJetInputArray;
-  if(fItTrackInputArray) delete fItTrackInputArray;
+  if(fItJetInputArray)     delete fItJetInputArray;
+  if(fItTrackInputArray)   delete fItTrackInputArray;
   if(fItNeutralInputArray) delete fItNeutralInputArray;
-  if(fItPVInputArray) delete fItPVInputArray;
+  if(fItPVInputArray)      delete fItPVInputArray;
   fCones.clear();
 }
 
@@ -217,22 +217,59 @@ void PileUpJetID::Process(){
   TLorentzVector momentum, area;
 
   // loop over all input candidates
-  fItJetInputArray->Reset();
-  while((jetCandidate = static_cast<Candidate*>(fItJetInputArray->Next()))){
 
+  fItJetInputArray->Reset();
+
+  std::vector<float> FracPt, emFracPt, neutFracPt, chFracPt;
+
+  FracPt.assign(fCones.size(),0.);
+  emFracPt.assign(fCones.size(),0.);
+  neutFracPt.assign(fCones.size(),0.);
+  chFracPt.assign(fCones.size(),0.);
+
+  std::vector<float> frac, fracCh, fracEm, fracNeut;
+
+  // Loop on the constituent of each jet
+  Candidate leadCand, trailCand, secondCand;
+  Candidate leadCandEM;
+  Candidate leadCandNeutral;
+  Candidate leadCandCh;
+
+  TMatrixDSym covMatrix(2); 
+
+  while((jetCandidate = static_cast<Candidate*>(fItJetInputArray->Next()))){
+    
     momentum = jetCandidate->Momentum;
     area     = jetCandidate->Area;
 
-    jetCandidate->FracPt.clear();
-    jetCandidate->emFracPt.clear();
-    jetCandidate->neutFracPt.clear();
-    jetCandidate->chFracPt.clear();
+    // clean the collections
+    jetCandidate->FracPt.clear();     
+    jetCandidate->emFracPt.clear();     
+    jetCandidate->neutFracPt.clear();     
+    jetCandidate->chFracPt.clear();     
 
-    jetCandidate->FracPt.resize(fCones.size());
-    jetCandidate->emFracPt.resize(fCones.size());
-    jetCandidate->neutFracPt.resize(fCones.size());
-    jetCandidate->chFracPt.resize(fCones.size());
+    covMatrix = 0.;
 
+    leadCand.Clear();
+    trailCand.Clear(); 
+    secondCand.Clear();
+    leadCandEM.Clear();
+    leadCandNeutral.Clear();
+    leadCandCh.Clear();
+   
+    for( size_t iFrac = 0; iFrac < FracPt.size() ; iFrac++){
+      FracPt.at(iFrac)     = 0;
+      emFracPt.at(iFrac)   = 0;
+      neutFracPt.at(iFrac) = 0;
+      chFracPt.at(iFrac)   = 0;
+    }
+
+    frac.clear(); fracCh.clear(); fracEm.clear(); fracNeut.clear();
+
+    float sumTkPt = 0.;
+    float sum_deta = 0.;
+    float sum_dphi  = 0.;
+    
     jetCandidate->dRMean  = 0.;
     jetCandidate->dR2Mean = 0.;
     jetCandidate->ptD     = 0.;
@@ -288,21 +325,6 @@ void PileUpJetID::Process(){
     jetCandidate->thirdNeutFrac = 0; 
     jetCandidate->fourthNeutFrac = 0;
     jetCandidate->pileupIDFlagCutBased = 0;
- 
-    TMatrixDSym covMatrix(2); covMatrix = 0.;
- 
-    // Loop on the constituent of each jet
-    Candidate leadCand, trailCand, secondCand;
-    Candidate leadCandEM;
-    Candidate leadCandNeutral;
-    Candidate leadCandCh;
-
-    std::vector<float> frac, fracCh, fracEm, fracNeut;
-
-    float sumTkPt = 0.;
-
-    float sum_deta = 0.;
-    float sum_dphi  = 0.;
 
     if (fUseConstituents) {
       TIter itConstituents(jetCandidate->GetCandidates());      
@@ -337,11 +359,11 @@ void PileUpJetID::Process(){
 	size_t iCone = std::lower_bound(fCones.begin(),fCones.end(),candDr)-fCones.begin();        
 	frac.push_back(candPtFrac);
 
-	if( iCone < fCones.size()) jetCandidate->FracPt[iCone] += candPt;
+	if( iCone < fCones.size()) FracPt[iCone] += candPt;
 	
         if( TMath::Abs(constituent->PID) == 22){ // look for gamma
 	  if(candPt > leadCandEM.Momentum.Pt()) leadCandEM = *constituent; 
-          if(iCone  < fCones.size() ) jetCandidate->emFracPt[iCone] += candPt; 
+          if(iCone  < fCones.size() ) FracPt[iCone] += candPt; 
           fracEm.push_back(candPtFrac);
           jetCandidate->dRMeanEm  += candPtDr;
           jetCandidate->ptDNe     += candPt*candPt;
@@ -353,7 +375,7 @@ void PileUpJetID::Process(){
         else if(constituent->Charge == 0 and TMath::Abs(constituent->PID) > 18 and TMath::Abs(constituent->PID) !=21 and TMath::Abs(constituent->PID) !=22 and 
                 TMath::Abs(constituent->PID) !=25){ // look for neutral hadrons
  	          if(candPt > leadCandNeutral.Momentum.Pt()) leadCandNeutral = *constituent; 
-                  if(iCone < fCones.size()) jetCandidate->neutFracPt[iCone] += candPt;
+                  if(iCone < fCones.size()) jetCandidate->FracPt[iCone] += candPt;
                   fracNeut.push_back(candPtFrac);
                   jetCandidate->dRMeanNeut += candPtDr;
                   jetCandidate->ptDNe      += candPt*candPt;
@@ -364,7 +386,7 @@ void PileUpJetID::Process(){
 
         else if(constituent->Charge != 0){ // look for charged particles
  	     if(candPt > leadCandCh.Momentum.Pt()) leadCandCh = *constituent; 
-             if(iCone  < fCones.size()) jetCandidate->chFracPt[iCone] += candPt;
+             if(iCone  < fCones.size()) chFracPt[iCone] += candPt;
              fracCh.push_back(candPtFrac);
 
              jetCandidate->dRMeanCh  += candPtDr;
@@ -392,6 +414,7 @@ void PileUpJetID::Process(){
 	
       }
     }
+
     else {
       // Not using constituents, using dr
       fItTrackInputArray->Reset();
@@ -427,13 +450,13 @@ void PileUpJetID::Process(){
 
 	 size_t iCone = std::lower_bound(fCones.begin(),fCones.end(),candDr)-fCones.begin();        
 	 frac.push_back(candPtFrac);
-	 if( iCone < fCones.size()) jetCandidate->FracPt[iCone] += candPt;
+	 if( iCone < fCones.size()) FracPt[iCone] += candPt;
 
          if( TMath::Abs(constituent->PID) == 22) continue; // should be a problem
          if(constituent->Charge == 0) continue;
 
  	 if(candPt > leadCandCh.Momentum.Pt()) leadCandCh = *constituent; 
-         if(iCone  < fCones.size()) jetCandidate->chFracPt[iCone] += candPt;
+         if(iCone  < fCones.size()) chFracPt[iCone] += candPt;
          fracCh.push_back(candPtFrac);
 
          jetCandidate->dRMeanCh  += candPtDr;
@@ -457,7 +480,7 @@ void PileUpJetID::Process(){
 	  trailCand = *constituent; 
 	}      
       }
-    
+
       fItNeutralInputArray->Reset();
       while ((constituent = static_cast<Candidate*>(fItNeutralInputArray->Next()))) { // Loop on neutral PF jetCandidates
 	if (constituent->Momentum.DeltaR(jetCandidate->Momentum) < fParameterR) { // check within the jet
@@ -491,13 +514,13 @@ void PileUpJetID::Process(){
 
 	 size_t iCone = std::lower_bound(fCones.begin(),fCones.end(),candDr)-fCones.begin();        
 	 frac.push_back(candPtFrac);
-	 if( iCone < fCones.size()) jetCandidate->FracPt[iCone] += candPt;
+	 if( iCone < fCones.size()) FracPt[iCone] += candPt;
 
          if(constituent->Charge != 0 ) continue; // in principle should be a problem
 
          if( TMath::Abs(constituent->PID) == 22){ // look for gamma
 	  if(candPt > leadCandEM.Momentum.Pt()) leadCandEM = *constituent; 
-          if(iCone  < fCones.size() ) jetCandidate->emFracPt[iCone] += candPt; 
+          if(iCone  < fCones.size() ) emFracPt[iCone] += candPt; 
           fracEm.push_back(candPtFrac);
           jetCandidate->dRMeanEm  += candPtDr;
           jetCandidate->ptDNe     += candPt*candPt;
@@ -509,7 +532,7 @@ void PileUpJetID::Process(){
          else if(constituent->Charge == 0 and TMath::Abs(constituent->PID) > 18 and TMath::Abs(constituent->PID) !=21 and TMath::Abs(constituent->PID) !=22 and 
                  TMath::Abs(constituent->PID) !=25){ // look for neutral hadrons
  	          if(candPt > leadCandNeutral.Momentum.Pt()) leadCandNeutral = *constituent; 
-                  if(iCone < fCones.size()) jetCandidate->neutFracPt[iCone] += candPt;
+                  if(iCone < fCones.size()) neutFracPt[iCone] += candPt;
                   fracNeut.push_back(candPtFrac);
                   jetCandidate->dRMeanNeut += candPtDr;
                   jetCandidate->ptDNe      += candPt*candPt;
@@ -538,13 +561,11 @@ void PileUpJetID::Process(){
     jetCandidate->chgHadfrac /= jetCandidate->Momentum.E();
     jetCandidate->neuHadfrac /= jetCandidate->Momentum.E();
      
-    jetCandidate->constituents = jetCandidate->GetCandidates()->GetSize();
-
+    jetCandidate->constituents = jetCandidate->nCharged + jetCandidate->nNeutral;
      
     jetCandidate->dZ = fabs(jetCandidate->Position.Z()-dynamic_cast<Candidate*>(fPVInputArray->At(0))->Position.Z());
     jetCandidate->d0 = (-jetCandidate->Position.X()*dynamic_cast<Candidate*>(fPVInputArray->At(0))->Position.Y()+jetCandidate->Position.Y()*dynamic_cast<Candidate*>(fPVInputArray->At(0))->Position.X())/jetCandidate->Position.Pt();
     
-
     std::sort(frac.begin(),frac.end(),std::greater<float>());
     std::sort(fracCh.begin(),fracCh.end(),std::greater<float>());
     std::sort(fracEm.begin(),fracEm.end(),std::greater<float>());
@@ -559,7 +580,7 @@ void PileUpJetID::Process(){
     assign(fracCh,  jetCandidate->leadChFrac,  jetCandidate->secondChFrac,  jetCandidate->thirdChFrac,  jetCandidate->fourthChFrac);
     assign(fracEm,  jetCandidate->leadEmFrac,  jetCandidate->secondEmFrac,  jetCandidate->thirdEmFrac,  jetCandidate->fourthEmFrac);
     assign(fracNeut,jetCandidate->leadNeutFrac,jetCandidate->secondNeutFrac,jetCandidate->thirdNeutFrac,jetCandidate->fourthNeutFrac);
-
+    
     covMatrix(0,0) /= jetCandidate->sumPt2;
     covMatrix(0,1) /= jetCandidate->sumPt2;
     covMatrix(1,1) /= jetCandidate->sumPt2;
@@ -573,11 +594,12 @@ void PileUpJetID::Process(){
     jetCandidate->phiW = sqrt(covMatrix(1,1));
     jetCandidate->jetW = 0.5*(jetCandidate->etaW+jetCandidate->phiW);
 
-    TVectorD eigVals(2); 
+    TVectorD eigVals(2);
     eigVals = TMatrixDSymEigen(covMatrix).GetEigenValues();
     jetCandidate->majW = 0.; jetCandidate->minW = 0.; jetCandidate->dRLeadCent = 0.;
     jetCandidate->majW = sqrt(fabs(eigVals(0)));
     jetCandidate->minW = sqrt(fabs(eigVals(1)));
+
     if(jetCandidate->majW < jetCandidate->minW ) std::swap(jetCandidate->majW,jetCandidate->minW);
     jetCandidate->dRLeadCent = jetCandidate->Momentum.DeltaR(leadCand.Momentum);
     jetCandidate->dRLead2nd  = 0.; 
@@ -588,13 +610,18 @@ void PileUpJetID::Process(){
     jetCandidate->dRMeanCh   /= jetCandidate->Momentum.Pt();
     jetCandidate->dR2Mean    /= jetCandidate->sumPt2;
 
+    jetCandidate->FracPt     = FracPt ;
+    jetCandidate->emFracPt   = emFracPt;
+    jetCandidate->neutFracPt = neutFracPt;
+    jetCandidate->chFracPt   = chFracPt;
+
     for(size_t iCone = 0; iCone < fCones.size(); ++iCone){
         jetCandidate->FracPt[iCone]     /= jetCandidate->Momentum.Pt();
 	jetCandidate->emFracPt[iCone]   /= jetCandidate->Momentum.Pt();
 	jetCandidate->neutFracPt[iCone] /= jetCandidate->Momentum.Pt();
 	jetCandidate->chFracPt[iCone]   /= jetCandidate->Momentum.Pt();
     }
-    
+
     double ptMean = jetCandidate->sumPt/jetCandidate->constituents;
     double ptRMS  = 0;
     for(unsigned int i0 = 0; i0 < frac.size(); i0++) ptRMS+=(frac[i0]-ptMean)*(frac[i0]-ptMean);
@@ -633,12 +660,18 @@ void PileUpJetID::Process(){
     float delta = sqrt(fabs((a-b)*(a-b)+4*c*c));
     if(a+b-delta > 0) jetCandidate->axis2 = sqrt(0.5*(a+b-delta));
     else jetCandidate->axis2 = 0;
-
+    
     jetCandidate->pileupIDFlagCutBased = computeCutIDflag(jetCandidate->betaClassicStar,jetCandidate->dR2Mean,fPVInputArray->GetSize(),jetCandidate->Momentum.Pt(),jetCandidate->Momentum.Eta());
     
     // fill output jetCandidate without cutting
     fOutputArray->Add(jetCandidate);    
   }
+
+  FracPt.clear();
+  emFracPt.clear();
+  neutFracPt.clear();
+  chFracPt.clear();
+
 }
 
 

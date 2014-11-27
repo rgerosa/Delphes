@@ -85,6 +85,9 @@ void PileUpMerger::Init()
   // create output arrays
   fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
   fNPUOutputArray = ExportArray(GetString("NPUOutputArray", "NPU"));
+
+  fRand = new TRandom3();
+
 }
 
 //------------------------------------------------------------------------------
@@ -116,25 +119,29 @@ void PileUpMerger::Process()
   }
 
   factory = GetFactory();
-
-  poisson = gRandom->Poisson(fMeanPileUp);
+  //  poisson = gRandom->Poisson(fMeanPileUp);
+  poisson = fRand->Poisson(fMeanPileUp);
 
   allEntries = fReader->GetEntries();
 
-  for(event = 0; event < poisson; ++event){
-    do{
-      entry = TMath::Nint(gRandom->Rndm()*allEntries);
+  for(event = 0; event < poisson; ++event)
+  {
+    do
+    {
+      //entry = TMath::Nint(gFRandom->Rndm()*allEntries);
+      entry = TMath::Nint(fRand->Rndm()*allEntries);
     }
     while(entry >= allEntries);
 
     fReader->ReadEntry(entry);
 
-    dz   = gRandom->Gaus(0.0, fZVertexSpread);
-    dphi = gRandom->Uniform(-TMath::Pi(), TMath::Pi());
-    dt   = gRandom->Gaus(0., fZVertexSpread*(mm/ns)/c_light);
- 
-    while(fReader->ReadParticle(pid, x, y, z, t, px, py, pz, e)){
+    dz = fRand->Gaus(0.0, fZVertexSpread);
+    dphi = fRand->Uniform(-TMath::Pi(), TMath::Pi());
+    dt = fRand->Gaus(0., fZVertexSpread*(mm/ns)/c_light);
 
+
+    while(fReader->ReadParticle(pid, x, y, z, t, px, py, pz, e))
+    {
       candidate = factory->NewCandidate();
 
       // Get rid of BS position in PU
@@ -142,7 +149,8 @@ void PileUpMerger::Process()
       x = x - fInputBSX;
       y = y - fInputBSY;
 
-      candidate->PID    = pid;
+      candidate->PID = pid;
+
       candidate->Status = 1;
 
       pdgParticle = pdg->GetParticle(pid);
