@@ -101,7 +101,7 @@ Candidate::Candidate() :
   Charge(0), Mass(0.0),
   IsolationVarDBeta(0), IsolationVarRhoCorr(0), TrackIsolationVar(0),
   chargedHadronEnergy(0),neutralEnergy(0),chargedPUEnergy(0),allParticleEnergy(0),
-  IsPU(0), IsRecoPU(0),IsConstituent(0),IsEMCand(0), 
+  IsPU(0), IsRecoPU(0),IsConstituent(0),IsEMCand(0),IsFakeObject(0), 
   BTagAlgo(0),BTagDefault(0),BTagPhysics(0),BTagNearest2(0),BTagNearest3(0),BTagHeaviest(0),BTagHighestPt(0),
   flavourAlgo(0),flavourDefault(0),flavourPhysics(0),flavourNearest2(0),flavourNearest3(0),flavourHeaviest(0),flavourHighestPt(0),
   TauTag(0), Eem(0.0), Ehad(0.0),
@@ -201,6 +201,7 @@ void Candidate::Copy(TObject &obj) const{
   object.IsPU = IsPU;
   object.IsRecoPU = IsRecoPU;
   object.IsEMCand = IsEMCand;
+  object.IsFakeObject = IsFakeObject;
   object.chargedHadronEnergy = chargedHadronEnergy;
   object.neutralEnergy = neutralEnergy;
   object.chargedPUEnergy = chargedPUEnergy;
@@ -398,6 +399,7 @@ void Candidate::Clear(Option_t* option){
   IsRecoPU = 0;
   IsConstituent = 0;
   IsEMCand = 0;
+  IsFakeObject = 0;
   chargedHadronEnergy = 0;
   neutralEnergy       = 0;
   chargedPUEnergy     = 0; 

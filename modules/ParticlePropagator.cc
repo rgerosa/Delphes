@@ -1,18 +1,13 @@
 
 /** \class ParticlePropagator
- *
  *  Propagates charged and neutral particles
  *  from a given vertex to a cylinder defined by its radius,
  *  its half-length, centered at (0,0,0) and with its axis
  *  oriented along the z-axis.
- *
  *  $Date: 2014-04-16 16:08:33 +0200 (Wed, 16 Apr 2014) $
  *  $Revision: 1367 $
- *
- *
  *  \author P. Demin - UCL, Louvain-la-Neuve
- *
- */
+*/
 
 #include "modules/ParticlePropagator.h"
 
@@ -42,31 +37,25 @@ using namespace std;
 //------------------------------------------------------------------------------
 
 ParticlePropagator::ParticlePropagator() :
-  fItInputArray(0)
-{
-}
+  fItInputArray(0){}
 
 //------------------------------------------------------------------------------
 
-ParticlePropagator::~ParticlePropagator()
-{
-}
+ParticlePropagator::~ParticlePropagator(){}
 
 //------------------------------------------------------------------------------
 
-void ParticlePropagator::Init()
-{
-  fRadius = GetDouble("Radius", 1.0);
-  fRadius2 = fRadius*fRadius;
+void ParticlePropagator::Init(){
+
+  fRadius     = GetDouble("Radius", 1.0);
+  fRadius2    = fRadius*fRadius;
   fHalfLength = GetDouble("HalfLength", 3.0);
   fBz = GetDouble("Bz", 0.0);
-  if(fRadius < 1.0E-2)
-  {
+  if(fRadius < 1.0E-2){
     cout << "ERROR: magnetic field radius is too low\n";
     return;
   }
-  if(fHalfLength < 1.0E-2)
-  {
+  if(fHalfLength < 1.0E-2){
     cout << "ERROR: magnetic field length is too low\n";
     return;
   }
@@ -86,8 +75,7 @@ void ParticlePropagator::Init()
 
 //------------------------------------------------------------------------------
 
-void ParticlePropagator::Finish()
-{
+void ParticlePropagator::Finish(){
   if(fItInputArray) delete fItInputArray;
 }
 
@@ -105,7 +93,7 @@ void ParticlePropagator::Process()
   Double_t t_z, t_r, t_ra, t_rb;
   Double_t tmp, discr, discr2;
   Double_t delta, gammam, omega, asinrho;
-  Double_t ang_mom, rcu, rc2, xd, yd, dxy, zd;
+  Double_t rcu, rc2, xd, yd ;
   
   const Double_t c_light = 2.99792458E8;
 
@@ -222,13 +210,7 @@ void ParticlePropagator::Process()
       xd  = ( rc2 > 0.0 ) ? xd / rc2 : -999;
       yd  = y_c*(-rcu*r_c + rc2);
       yd  = ( rc2 > 0.0 ) ? yd / rc2 : -999;
-      zd  = z + (TMath::Sqrt(xd*xd+yd*yd) - TMath::Sqrt(x*x+y*y))*pz/pt;
 
-      // calculate impact paramater
-      ang_mom = (xd*py - yd*px);
-      dxy = ang_mom/pt;
-    
-         
       // 3. time evaluation t = TMath::Min(t_r, t_z)
       //    t_r : time to exit from the sides
       //    t_z : time to exit from the front or the back

@@ -100,10 +100,8 @@ def writeJobs(workingdir,executable,configCard,inputdir,inputPUdir,outputname,eo
       os.system("mkdir -p "+jobdir)        
 
       firstEvent = 0;
-      lastEvent  = options.eventsPerJob ;
       if i != 0: 
           firstEvent = options.eventsPerJob*i+1;
-          lastEvent  = options.eventsPerJob*(i+1);
 
       ## copy the config file in the job dir and sobstitute the pileup file
       os.system("cp %s %s/temp.tcl"%(configCard,jobdir));                       
@@ -126,7 +124,7 @@ def writeJobs(workingdir,executable,configCard,inputdir,inputPUdir,outputname,eo
       jobscript.write('scp '+os.getcwd()+"/"+executable+" ./ \n"); 
       jobscript.write('if ( \n')
       jobscript.write('\t touch %s/subJob_%d.run \n'%(jobdir,jobid))     
-      jobscript.write('\t ./%s %s %s %s %d %d %d %d'%(executable,jobdir+"/"+str(configName[len(configName)-1]),str(fileName[len(fileName)-1]),outputname+"_"+str(jobid)+".root",options.mjjcut,options.filter,firstEvent,lastEvent));      
+      jobscript.write('\t ./%s %s %s %s %d %d %d %d'%(executable,jobdir+"/"+str(configName[len(configName)-1]),str(fileName[len(fileName)-1]),outputname+"_"+str(jobid)+".root",options.mjjcut,options.filter,firstEvent,options.eventsPerJob));      
       jobscript.write(') then \n')
       if (eosoutdir == ''):
             jobscript.write('\t cp ./%s_%s.root %s \n'%(outputname,jobid,jobdir))
@@ -139,7 +137,9 @@ def writeJobs(workingdir,executable,configCard,inputdir,inputPUdir,outputname,eo
       os.system('chmod a+x %s/subJob_%d.sh'%(jobdir,jobid))
 
       jobid += 1; 
-    
+
+     if jobid > options.njobmax and options.njobmax != 0: break; 
+
     njobs = jobid;
     
     print "==> End of Job creation ==>";

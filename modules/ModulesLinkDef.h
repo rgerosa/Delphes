@@ -43,6 +43,7 @@
 #include "modules/GenBeamSpotFilter.h"
 #include "modules/RunPUPPI.h"
 #include "modules/NeutrinoFilter.h"
+#include "modules/FakeLepton.h"
 
 #ifdef __CINT__
 
@@ -76,6 +77,7 @@
 #pragma link C++ class Cloner+;
 #pragma link C++ class Weighter+;
 #pragma link C++ class ExampleModule+;
+#pragma link C++ class FakeLepton+;
 
 //#pragma link C++ class CleansedJetFinder+;
 #pragma link C++ class PileUpJetID+;

@@ -230,6 +230,7 @@ class Photon: public SortableObject {
   Int_t Status; // particle status | hepevt.isthep[number]                                                                                                                                 
   Int_t IsRecoPU; // Assigned by charged hadron subtractor where applicable                                                                                                                
   Int_t IsPU;
+  Int_t IsFakeObject;
   
   Float_t EhadOverEem; // ratio of the hadronic versus electromagnetic energy deposited in the calorimeter
 
@@ -265,6 +266,7 @@ class Electron: public SortableObject {
   Int_t Status; // particle status | hepevt.isthep[number]                                                                                                                                 
   Int_t IsRecoPU; // Assigned by charged hadron subtractor where applicable                                                                                                                
   Int_t IsPU;
+  Int_t IsFakeObject;
 
 
   Int_t Charge; // electron charge
@@ -304,6 +306,7 @@ class Muon: public SortableObject {
   Int_t Status; // particle status | hepevt.isthep[number]                                                                                                                                 
   Int_t IsRecoPU; // Assigned by charged hadron subtractor where applicable                                                                                                                
   Int_t IsPU;
+  Int_t IsFakeObject;
 
   Int_t   Charge; // muon charge
   Float_t IsolationVarDBeta;
@@ -651,7 +654,7 @@ class Candidate: public SortableObject  {
   Int_t IsRecoPU; // Assigned by charged hadron subtractor where applicable Reflects decision ncoprorating z vertex resolution
   Int_t IsConstituent;
   Int_t IsEMCand; // Whether it is a Electron/Muon candidate
-  
+  Int_t IsFakeObject;
 
   // BTagging info
   UInt_t BTagAlgo;

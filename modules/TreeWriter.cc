@@ -325,6 +325,7 @@ void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, TObjArray *array){
     entry->Status   = candidate->Status;
     entry->IsRecoPU = candidate->IsRecoPU;
     entry->IsPU     = candidate->IsPU;
+    entry->IsFakeObject = candidate->IsFakeObject;
 
     entry->IsolationVarDBeta   = candidate->IsolationVarDBeta;
     entry->IsolationVarRhoCorr = candidate->IsolationVarRhoCorr;
@@ -368,6 +369,7 @@ void TreeWriter::ProcessElectrons(ExRootTreeBranch *branch, TObjArray *array){
     entry->Status   = candidate->Status;
     entry->IsRecoPU = candidate->IsRecoPU;
     entry->IsPU     = candidate->IsPU;
+    entry->IsFakeObject = candidate->IsFakeObject;
 
     entry->IsolationVarDBeta   = candidate->IsolationVarDBeta;
     entry->IsolationVarRhoCorr = candidate->IsolationVarRhoCorr;
@@ -417,6 +419,7 @@ void TreeWriter::ProcessMuons(ExRootTreeBranch *branch, TObjArray *array){
     entry->Status   = candidate->Status;
     entry->IsRecoPU = candidate->IsRecoPU;
     entry->IsPU     = candidate->IsPU;
+    entry->IsFakeObject = candidate->IsFakeObject;
 
     entry->IsolationVarDBeta   = candidate->IsolationVarDBeta;
     entry->IsolationVarRhoCorr = candidate->IsolationVarRhoCorr;
