@@ -1,14 +1,8 @@
 /** \class PileUpMerger
- *
  *  Merges particles from pile-up sample into event
- *
- *
  *  $Date: 2013-02-12 15:13:59 +0100 (Tue, 12 Feb 2013) $
  *  $Revision: 907 $
- *
- *
  *  \author M. Selvaggi - UCL, Louvain-la-Neuve
- *
  */
 
 #include "modules/PileUpMerger.h"
@@ -86,8 +80,6 @@ void PileUpMerger::Init()
   fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
   fNPUOutputArray = ExportArray(GetString("NPUOutputArray", "NPU"));
 
-  fRand = new TRandom3();
-
 }
 
 //------------------------------------------------------------------------------
@@ -119,8 +111,7 @@ void PileUpMerger::Process()
   }
 
   factory = GetFactory();
-  //  poisson = gRandom->Poisson(fMeanPileUp);
-  poisson = fRand->Poisson(fMeanPileUp);
+  poisson = gRandom->Poisson(fMeanPileUp);
 
   allEntries = fReader->GetEntries();
 
@@ -128,16 +119,15 @@ void PileUpMerger::Process()
   {
     do
     {
-      //entry = TMath::Nint(gFRandom->Rndm()*allEntries);
-      entry = TMath::Nint(fRand->Rndm()*allEntries);
+      entry = TMath::Nint(gRandom->Rndm()*allEntries);
     }
     while(entry >= allEntries);
 
     fReader->ReadEntry(entry);
 
-    dz = fRand->Gaus(0.0, fZVertexSpread);
-    dphi = fRand->Uniform(-TMath::Pi(), TMath::Pi());
-    dt = fRand->Gaus(0., fZVertexSpread*(mm/ns)/c_light);
+    dz = gRandom->Gaus(0.0, fZVertexSpread);
+    dphi = gRandom->Uniform(-TMath::Pi(), TMath::Pi());
+    dt = gRandom->Gaus(0., fZVertexSpread*(mm/ns)/c_light);
 
 
     while(fReader->ReadParticle(pid, x, y, z, t, px, py, pz, e))

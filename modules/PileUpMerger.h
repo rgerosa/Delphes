@@ -48,7 +48,6 @@ private:
   TObjArray *fOutputArray; //!
 
   TObjArray *fNPUOutputArray; //!                                                                                                                                                    
-  TRandom3* fRand;
 
   ClassDef(PileUpMerger, 2)
 };

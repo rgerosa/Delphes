@@ -25,6 +25,8 @@
 #include "ExRootAnalysis/ExRootTreeBranch.h"
 #include "ExRootAnalysis/ExRootProgressBar.h"
 
+#include "LHEActions/LHEF.h"
+
 using namespace std;
 
 static bool interrupted = false;
@@ -36,16 +38,25 @@ void SignalHandler(int sig){
 //**********************************************************
 //*** Method to filter LHE event on the fly and store info
 //**********************************************************
-bool lhe_event_preselection(vector< vector<float> >* LHE_event, float Mjj_cut, int SkimFullyHadronic,  DelphesFactory *factory, TObjArray* LHEparticlesArray);
+bool LHEEventPreselection(const LHEF::Reader & reader, 
+                          const float & Mjj_cut, 
+                          const int & SkimFullyHadronic, 
+                          DelphesFactory *factory, 
+                          TObjArray* LHEparticlesArray);
 
 //********************************************************************
 //*** Input Converter for Delphes (frpm Pythia8 to delphes particles)
 //********************************************************************
 
-void ConvertInput(Long64_t eventCounter, Pythia8::Pythia* pythia,
-		  ExRootTreeBranch *branch, DelphesFactory *factory,
-		  TObjArray *allParticleOutputArray, TObjArray *stableParticleOutputArray, TObjArray *partonOutputArray,
-		  TStopwatch *readStopWatch, TStopwatch *procStopWatch);
+void ConvertInput(Long64_t eventCounter, 
+                  Pythia8::Pythia* pythia,
+		  ExRootTreeBranch *branch, 
+                  DelphesFactory *factory,
+		  TObjArray *allParticleOutputArray, 
+                  TObjArray *stableParticleOutputArray, 
+                  TObjArray *partonOutputArray,
+		  TStopwatch *readStopWatch, 
+                  TStopwatch *procStopWatch);
 
 //*******************************************************************************************************************
 // main code : ./DelphesPythia8 <delphes_card> <lhe file> <output root file> <mjj cut> <filter fully hadronic FS> <starting event> <total event>
@@ -69,6 +80,16 @@ int main(int argc, char *argv[]){
     std::cout << "----------------------------------------------------------------------------------" << std::endl << std::endl;  
     return 1;
   }
+
+  std::cout<<"-------------------------------- Start DelphesPythia8 Code ------------------------------------ "<<std::endl;
+  std::cout<<"config file   : "<<argv[1]<<std::endl;
+  std::cout<<"input  file   : "<<argv[2]<<std::endl;
+  std::cout<<"output file   : "<<argv[3]<<std::endl;
+  if(argc >=5) std::cout<<"Mjj cut value : "<<argv[4]<<std::endl;
+  if(argc >=6) std::cout<<"filter events : "<<argv[5]<<std::endl;
+  if(argc >=7) std::cout<<"start event number : "<<argv[6]<<std::endl;
+  if(argc >=8) std::cout<<"number of events to analyze  : "<<argv[7]<<std::endl;
+  std::cout << "---------------------------------------------------------------------------------------------" << std::endl << std::endl;  
 
   signal(SIGINT,SignalHandler);
   gROOT->SetBatch();
@@ -118,11 +139,11 @@ int main(int argc, char *argv[]){
     //----- Delphes init ----- --> Card reader       
     ExRootConfReader *confReader = new ExRootConfReader;
     confReader->ReadFile(argv[1]);
-
+    
     Delphes *modularDelphes = new Delphes("Delphes");
     modularDelphes->SetConfReader(confReader); // read the config file
     modularDelphes->SetTreeWriter(treeWriter); // set the output tree
-
+    
     DelphesFactory *factory = modularDelphes->GetFactory();
 
     TObjArray *allParticleOutputArray    = modularDelphes->ExportArray("allParticles"); 
@@ -131,25 +152,18 @@ int main(int argc, char *argv[]){
     TObjArray *LHEparticlesArray         = modularDelphes->ExportArray("LHEParticles");
 
     modularDelphes->InitTask();
-
+   
     //------------------------------------------------------------
     //----- initialize fast lhe file reader for preselection -----
     //------------------------------------------------------------
 
-    ifstream inputLHE (inputFile.c_str(), ios::in); // read the input LHE file
-    int count          =-1;
+    std::ifstream inputLHE (inputFile.c_str(), ios::in); // read the input LHE file  
+    int counter = 0 ;
     int skippedCounter = 0;
-    char buffer[256];
-    std::vector<std::vector<float> > LHE_event;
 
-    //--- start from specified event --> read the LHE file
-    while(count < startEvent){
-      inputLHE.getline(buffer,256);
-      while(strcmp(buffer, "<event>") != 0){
-	inputLHE.getline(buffer,258);
-      }
-      count++;
-    }
+    LHEF::Reader reader (inputLHE) ;
+    while (reader.readEvent ()) counter++ ;
+
 
     //-----------------------------
     //----- Initialize pythia -----
@@ -174,7 +188,6 @@ int main(int argc, char *argv[]){
     pythia->readString("Beams:frameType = 4");        
     pythia->readString(sfile.c_str());
     pythia->init();
-
     if(pythia->LHAeventSkip(startEvent)){
       std::cout << "### skipped first " << startEvent << " events" << std::endl;
     }
@@ -187,34 +200,13 @@ int main(int argc, char *argv[]){
     modularDelphes->Clear();
     readStopWatch.Start();
 
-    while(!interrupted){
-      if(eventCounter >= nEvent && nEvent != -1) break;      
-      LHE_event.clear();  
+    // read LHE info
+    std::ifstream InputLHE (inputFile.c_str(), ios::in); // read the input LHE file                                                                                        
+    LHEF::Reader Reader (InputLHE) ;
 
-      //--- end of file check
-      if(strcmp(buffer, "</LesHouchesEvents>") == 0) {
-	std::cout << "### end of LHE file reached! ### " << std::endl;
-	break;
-      }
-
-      //--- reads and store the event
-      else if(strcmp(buffer, "<event>") == 0){   
-	int nPart;
-	float info_tmp;
-	inputLHE >> nPart;
-	for(int i=0; i<5; i++) inputLHE >> info_tmp;		
-	for(int i=0; i<nPart; i++){		
-	  std::vector<float> LHE_particle;
-	  LHE_particle.clear();                
-	  for(int j=0; j<13; j++){
-	    inputLHE >> info_tmp;
-	    LHE_particle.push_back(info_tmp);
-	  }
-	  LHE_event.push_back(LHE_particle);
-	}
-
-	//--- process only selected events
-	if(lhe_event_preselection(&LHE_event,Mjj_cut,skimFullyHadronic,factory,LHEparticlesArray)){
+    while (Reader.readEvent ()){
+     if(eventCounter >= nEvent && nEvent != -1) break;           
+       if(LHEEventPreselection(Reader,Mjj_cut,skimFullyHadronic,factory,LHEparticlesArray)){  // take only interesting events
 	  if(!pythia->next()){
 	    //--- If failure because reached end of file then exit event loop
 	    if (pythia->info.atEndOfFile()){
@@ -226,13 +218,12 @@ int main(int argc, char *argv[]){
 	  }
 
 	  readStopWatch.Stop();
-
 	  //--- delphes simulation fase
 	  procStopWatch.Start();
 	  ConvertInput(eventCounter,pythia,branchEvent,factory,allParticleOutputArray,stableParticleOutputArray,partonOutputArray,&readStopWatch,&procStopWatch);
 	  modularDelphes->ProcessTask();
 	  procStopWatch.Stop();
-		   
+
 	  //--- filling the output tree
 	  treeWriter->Fill();
     
@@ -240,17 +231,15 @@ int main(int argc, char *argv[]){
 	  treeWriter->Clear();
 	  modularDelphes->Clear();
 	  readStopWatch.Start();
-	}
-	else{		
+       }
+       else{		
 	  if(pythia->LHAeventSkip(1)) skippedCounter++;
 	  else std::cout << "### ERROR: couldn't skip event" << endl;
-	}
-		
-	eventCounter++;
-	progressBar.Update(eventCounter, eventCounter);
-      }
-      inputLHE.getline(buffer,256);
-    }	
+       }                
+       eventCounter++;
+       progressBar.Update(eventCounter, eventCounter);
+
+    }
 
     progressBar.Update(eventCounter, eventCounter, kTRUE);
     progressBar.Finish();
@@ -268,9 +257,11 @@ int main(int argc, char *argv[]){
 
     delete pythia;
     delete confReader;
-	    
+    	    
     return 0;
+
   }
+  
   catch(runtime_error &e){
     if(treeWriter) delete treeWriter;
     if(outputFile) delete outputFile;
@@ -282,36 +273,34 @@ int main(int argc, char *argv[]){
 
 }
 
+// *****************************************************************************************************
+bool LHEEventPreselection(const LHEF::Reader & reader, const float & Mjj_cut, const int & SkimFullyHadronic,  DelphesFactory *factory, TObjArray* LHEparticlesArray){
 
-//*******************************************************
-
-bool lhe_event_preselection(vector< vector<float> >* LHE_event, float Mjj_cut, int SkimFullyHadronic,  DelphesFactory *factory, TObjArray* LHEparticlesArray){
+  if ( reader.outsideBlock.length ()) std::cout << reader.outsideBlock; 
 
   std::vector<TLorentzVector> outPartons;
   int leptons   = 0;
   int Mjj_check = 0;
 
   TParticlePDG *pdgParticle = 0;
-  TDatabasePDG *pdg = 0; 
-  Candidate *candidate = 0;
+  TDatabasePDG *pdg = 0;
 
   pdg = TDatabasePDG::Instance();
 
-  //---search for final state partons in the event---
-  for(size_t iPart = 0; iPart < LHE_event->size(); iPart++){
+  Candidate *candidate = 0;
 
-    std::vector<float> particle = LHE_event->at(iPart);
-    TLorentzVector tmp4vect;
-    tmp4vect.SetPxPyPzE(particle.at(6), particle.at(7), particle.at(8), particle.at(9));
-
-    // store output parton information
-    if(particle.at(1) == 1 && ((abs(particle.at(0)) > 0 && abs(particle.at(0)) < 7) || abs(particle.at(0)) == 21)){
+  // loop over particles in the event                                                                                                                                                   
+  for (size_t iPart = 0 ; iPart < reader.hepeup.IDUP.size (); ++iPart){
+    if (reader.hepeup.ISTUP.at(iPart) ==  1){ // check status 1
+     TLorentzVector tmp4vect;
+     tmp4vect.SetPxPyPzE(reader.hepeup.PUP.at(iPart).at(0),reader.hepeup.PUP.at(iPart).at(1),reader.hepeup.PUP.at(iPart).at(2),reader.hepeup.PUP.at(iPart).at(3)); 
+     //---search for final state partons in the event---
+     if((abs(reader.hepeup.IDUP.at(iPart)) > 0 and abs(reader.hepeup.IDUP.at(iPart)) < 7) or abs(reader.hepeup.IDUP.at(iPart)) == 21)
       outPartons.push_back(tmp4vect);
-    }
-    // store number of leptons
-    if(particle.at(1) == 1 && (abs(particle.at(0)) == 11 || abs(particle.at(0)) == 13 || abs(particle.at(0)) == 15)){
+     }
+     if(abs(reader.hepeup.IDUP.at(iPart)) == 11 or abs(reader.hepeup.IDUP.at(iPart)) == 13 or abs(reader.hepeup.IDUP.at(iPart)) == 15){
       leptons++;
-    }
+     }
   }
 
   //---reject fully hadronic events --> fully hadronic events are filtered out by simone
@@ -334,17 +323,16 @@ bool lhe_event_preselection(vector< vector<float> >* LHE_event, float Mjj_cut, i
     return false;
   }
 
+  
   //---loop on lhe events particle searching for W's---
-  for(size_t iPart = 0; iPart < LHE_event->size(); iPart++){ 
-
-    std::vector<float> particle = LHE_event->at(iPart);
+  for (size_t iPart = 0 ; iPart < reader.hepeup.IDUP.size (); ++iPart){
     TLorentzVector tmp4vect;
-    tmp4vect.SetPxPyPzE(particle.at(6), particle.at(7), particle.at(8), particle.at(9));   
-
+    tmp4vect.SetPxPyPzE(reader.hepeup.PUP.at(iPart).at(0),reader.hepeup.PUP.at(iPart).at(1),reader.hepeup.PUP.at(iPart).at(2),reader.hepeup.PUP.at(iPart).at(3)); 
+    
     // for each particle in the LHE we can store the info in the treeWriter and the making branches in the dumper
     candidate = factory->NewCandidate();
-    candidate->PID    = particle.at(0);
-    candidate->Status = particle.at(1);
+    candidate->PID    = reader.hepeup.IDUP.at(iPart);
+    candidate->Status = reader.hepeup.ISTUP.at(iPart);
 
     // mother and  daughters are not set
     candidate->M1 = -1;
@@ -352,8 +340,9 @@ bool lhe_event_preselection(vector< vector<float> >* LHE_event, float Mjj_cut, i
     candidate->D1 = -1;
     candidate->D2 = -1;
 
-    pdgParticle = pdg->GetParticle(candidate->PID);
+    pdgParticle = pdg->GetParticle(reader.hepeup.IDUP.at(iPart));
     candidate->Charge = pdgParticle ? Int_t(pdgParticle->Charge()/3.0) : -999;
+
     // store mass and 4V 
     candidate->Mass = tmp4vect.M();
     candidate->Momentum.SetPxPyPzE(tmp4vect.Px(),tmp4vect.Py(),tmp4vect.Pz(),tmp4vect.E());
@@ -361,12 +350,12 @@ bool lhe_event_preselection(vector< vector<float> >* LHE_event, float Mjj_cut, i
 
     LHEparticlesArray->Add(candidate);
   }
-  
+
   return true;
   
 }
 
-//***************************************************
+// *****************************************************************************************************************
 
 void ConvertInput(Long64_t eventCounter, Pythia8::Pythia* pythia,
 		  ExRootTreeBranch *branch, DelphesFactory *factory,
