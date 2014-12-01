@@ -319,7 +319,7 @@ bool LHEEventPreselection(const LHEF::Reader & reader, const float & Mjj_cut, co
     }
   }
 
-  if( outPartons.size() > 2 && Mjj_check == 0 ){
+  if( outPartons.size() >= 2 && Mjj_check == 0 ){
     return false;
   }
 
