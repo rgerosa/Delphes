@@ -12,7 +12,7 @@
 #include "TStyle.h"
 #include "TLatex.h"
 #include "TLegend.h"
-
+#include "TPaveStats.h"
 #include "classes/DelphesClasses.h"
 
 // g++ -Wall -o DelphesComparison `root-config --glibs --libs --cflags` -lTreePlayer DelphesComparison.cpp
@@ -35,27 +35,27 @@ void getHistogram(std::map<std::string,histoPair> & map){
   map.insert(mapElement("puppiParticlePT",histoPair(new TH1F("puppiParticlePT_1","",50,0,50),new TH1F("puppiParticlePT_2","",50,0,50))));
   map.insert(mapElement("puppiParticleEta",histoPair(new TH1F("puppiParticleEta_1","",25,-5,5),new TH1F("puppiParticleEta_2","",25,-5,5))));
 
-  map.insert(mapElement("JetPtLead",  histoPair(new TH1F("JetPtLead_1","",50,10,1000),new TH1F("JetPtLead_2","",50,0,100))));
+  map.insert(mapElement("JetPtLead",  histoPair(new TH1F("JetPtLead_1","",50,10,500),new TH1F("JetPtLead_2","",50,0,500))));
   map.insert(mapElement("JetEtaLead", histoPair(new TH1F("JetEtaLead_1","",50,-5,5),  new TH1F("JetEtaLead_2","",50,-5,5))));
   map.insert(mapElement("JetMassLead",histoPair(new TH1F("JetMassLead_1","",30,0,150),new TH1F("JetMassLead_2","",30,0,150))));
 
-  map.insert(mapElement("JetPtSecond",  histoPair(new TH1F("JetPtSecond_1","",50,10,1000),new TH1F("JetPtSecond_2","",50,0,100))));
+  map.insert(mapElement("JetPtSecond",  histoPair(new TH1F("JetPtSecond_1","",50,10,500),new TH1F("JetPtSecond_2","",50,0,500))));
   map.insert(mapElement("JetEtaSecond", histoPair(new TH1F("JetEtaSecond_1","",50,-5,5),  new TH1F("JetEtaSecond_2","",50,-5,5))));
   map.insert(mapElement("JetMassSecond",histoPair(new TH1F("JetMassSecond_1","",30,0,150),new TH1F("JetMassSecond_2","",30,0,150))));
 
-  map.insert(mapElement("JetPtThird",  histoPair(new TH1F("JetPtThird_1","",50,10,1000),new TH1F("JetPtThird_2","",50,0,100))));
+  map.insert(mapElement("JetPtThird",  histoPair(new TH1F("JetPtThird_1","",50,10,500),new TH1F("JetPtThird_2","",50,0,500))));
   map.insert(mapElement("JetEtaThird", histoPair(new TH1F("JetEtaThird_1","",50,-5,5),  new TH1F("JetEtaThird_2","",50,-5,5))));
   map.insert(mapElement("JetMassThird",histoPair(new TH1F("JetMassThird_1","",30,0,150),new TH1F("JetMassThird_2","",30,0,150))));
 
-  map.insert(mapElement("PuppiJetPtLead",  histoPair(new TH1F("PuppiJetPtLead_1","",50,10,1000),new TH1F("PuppiJetPtLead_2","",50,0,100))));
+  map.insert(mapElement("PuppiJetPtLead",  histoPair(new TH1F("PuppiJetPtLead_1","",50,10,500),new TH1F("PuppiJetPtLead_2","",50,0,500))));
   map.insert(mapElement("PuppiJetEtaLead", histoPair(new TH1F("PuppiJetEtaLead_1","",50,-5,5),  new TH1F("PuppiJetEtaLead_2","",50,-5,5))));
   map.insert(mapElement("PuppiJetMassLead",histoPair(new TH1F("PuppiJetMassLead_1","",30,0,150),new TH1F("PuppiJetMassLead_2","",30,0,150))));
 
-  map.insert(mapElement("PuppiJetPtSecond",  histoPair(new TH1F("PuppiJetPtSecond_1","",50,10,1000),new TH1F("PuppiJetPtSecond_2","",50,0,100))));
+  map.insert(mapElement("PuppiJetPtSecond",  histoPair(new TH1F("PuppiJetPtSecond_1","",50,10,500),new TH1F("PuppiJetPtSecond_2","",50,0,500))));
   map.insert(mapElement("PuppiJetEtaSecond", histoPair(new TH1F("PuppiJetEtaSecond_1","",50,-5,5),  new TH1F("PuppiJetEtaSecond_2","",50,-5,5))));
   map.insert(mapElement("PuppiJetMassSecond",histoPair(new TH1F("PuppiJetMassSecond_1","",30,0,150),new TH1F("PuppiJetMassSecond_2","",30,0,150))));
 
-  map.insert(mapElement("PuppiJetPtThird",  histoPair(new TH1F("PuppiJetPtThird_1","",50,10,1000),new TH1F("PuppiJetPtThird_2","",50,0,100))));
+  map.insert(mapElement("PuppiJetPtThird",  histoPair(new TH1F("PuppiJetPtThird_1","",50,10,500),new TH1F("PuppiJetPtThird_2","",50,0,500))));
   map.insert(mapElement("PuppiJetEtaThird", histoPair(new TH1F("PuppiJetEtaThird_1","",50,-5,5),  new TH1F("PuppiJetEtaThird_2","",50,-5,5))));
   map.insert(mapElement("PuppiJetMassThird",histoPair(new TH1F("PuppiJetMassThird_1","",30,0,150),new TH1F("PuppiJetMassThird_2","",30,0,150))));
 
@@ -113,17 +113,22 @@ int main (int argc, char** argv){
     gROOT->ProcessLine((".x "+ROOTStyle+"/rootLogon.C").c_str());
     gROOT->ProcessLine((".x "+ROOTStyle+"/rootPalette.C").c_str());
     gROOT->ProcessLine((".x "+ROOTStyle+"/rootColors.C").c_str());
-        gROOT->ProcessLine((".x "+ROOTStyle+"/setTDRStyle.C").c_str());
+    gROOT->ProcessLine((".x "+ROOTStyle+"/setTDRStyle.C").c_str());
   }
 
-  gStyle->SetOptStat(0);
+  gStyle->SetOptStat(1111111);
   gStyle->SetPadLeftMargin(0.13);
   gStyle->SetPadTopMargin(0.09);
   gStyle->SetErrorX(0.5);
 
-  std::string outputFileDirectory = "MyDelphesCodes/outputPlots";
+  std::string outputFileDirectory = "MyDelphesCodes/outputPlotsDist";
+  std::string outputFileDirectoryRes = "MyDelphesCodes/outputPlotsRes";
+
   system(("mkdir -p "+outputFileDirectory).c_str());
   system(("rm -r "+outputFileDirectory+"/*").c_str());
+
+  system(("mkdir -p "+outputFileDirectoryRes).c_str());
+  system(("rm -r "+outputFileDirectoryRes+"/*").c_str());
 
   std::vector<std::string> inputFileList_1 ;
   std::vector<std::string> inputFileList_2 ;
@@ -238,7 +243,7 @@ int main (int argc, char** argv){
     itMap->second.second->Sumw2();
   }
   
-  for(int iEntry = 0; iEntry < maxEvents ; iEntry++){
+  for(int iEntry = 0; iEntry < maxEvents/10 ; iEntry++){
 
     if(iEntry%1000 == 0) std::cout<<" reading entry "<<iEntry<<std::endl;
 
@@ -625,6 +630,7 @@ int main (int argc, char** argv){
     legend->AddEntry(itMap->second.second,"Old Delphes","pl");
     legend->Draw("same");
 
+
     VariableName.ReplaceAll("{","");
     VariableName.ReplaceAll("}","");
     VariableName.ReplaceAll("#","");
@@ -635,7 +641,6 @@ int main (int argc, char** argv){
   }
 
 
-    
   for(std::map<std::string,histoPair>::const_iterator itMap = histogramResponse.begin(); itMap != histogramResponse.end(); itMap++){
 
     cCanvas->cd();
@@ -673,18 +678,46 @@ int main (int argc, char** argv){
     tex->Draw("same");
     tex2->Draw("same");
     tex3->Draw("same");
-
+ 
     legend->AddEntry(itMap->second.first,"New Delphes","l");
     legend->AddEntry(itMap->second.second,"Old Delphes","pl");
     legend->Draw("same");
+    gPad->Update();
 
+    TPaveStats *tps1 = (TPaveStats*) (itMap)->second.first->FindObject("stats");
+    tps1->SetTextColor(kBlack);
+    tps1->SetLineColor(kBlack);
+    double X1 = tps1->GetX1NDC();
+    double Y1 = tps1->GetY1NDC();
+    double X2 = tps1->GetX2NDC();
+    double Y2 = tps1->GetY2NDC();
+    /*
+    TPaveStats *tps2 = (TPaveStats*) (itMap)->second.second->FindObject("stats");
+    tps2->SetTextColor(kRed);
+    tps2->SetLineColor(kRed);
+    tps2->SetX1NDC(X1);
+    tps2->SetX2NDC(X2);
+    tps2->SetY1NDC(Y1-(Y2-Y1));
+    tps2->SetY2NDC(Y1);
+    tps1->Draw("same");
+    tps2->Draw("same");
+
+    // chi2 and KS test for compatibility
+    double  chi2 = itMap->second.first->Chi2Test(itMap->second.second,"UU CHI2/NDF");
+    double  KS_test = itMap->second.first->KolmogorovTest(itMap->second.second,"UO");
+    TString probatext = Form("#chi^{2}/ndf = %0.2f K_{s} = %0.2f",float(chi2),float(KS_test));
+    TLatex* tt = new TLatex(0.2,0.85,probatext);
+    tt->SetNDC();
+    tt->SetTextSize(0.025);
+    tt->AppendPad("same");
+    */
     VariableName.ReplaceAll("{","");
     VariableName.ReplaceAll("}","");
     VariableName.ReplaceAll("#","");
     
-    cCanvas->SaveAs(std::string(outputFileDirectory+"/"+VariableName+".png").c_str(),"png");
-    cCanvas->SaveAs(std::string(outputFileDirectory+"/"+VariableName+".pdf").c_str(),"pdf");
-    cCanvas->SaveAs(std::string(outputFileDirectory+"/"+VariableName+".root").c_str(),"root");
+    cCanvas->SaveAs(std::string(outputFileDirectoryRes+"/"+VariableName+".png").c_str(),"png");
+    cCanvas->SaveAs(std::string(outputFileDirectoryRes+"/"+VariableName+".pdf").c_str(),"pdf");
+    cCanvas->SaveAs(std::string(outputFileDirectoryRes+"/"+VariableName+".root").c_str(),"root");
 
   }
   
