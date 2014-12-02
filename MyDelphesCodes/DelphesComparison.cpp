@@ -28,11 +28,15 @@ float deltaPhi (float a, float b){
 void getHistogram(std::map<std::string,histoPair> & map){
 
   map.insert(mapElement("NPU",histoPair(new TH1F("NPU_1","",100,0,100),new TH1F("NPU_2","",100,0,100))));  
-  /*
-  map.insert(mapElement("Rho",histoPair(new TH1F("Rho_1","",30,0,100),new TH1F("Rho_2","",30,0,100))));
-  map.insert(mapElement("PuppiRho",histoPair(new TH1F("PuppiRho_1","",30,0,100),new TH1F("PuppiRho_2","",30,0,100))));
+  map.insert(mapElement("NPU",histoPair(new TH1F("N_{PU}_1","",40,30,70),new TH1F("N_{PU}_2","",40,30,70))));  
+  
+  map.insert(mapElement("Rho",histoPair(new TH1F("#rho_1","",30,0,100),new TH1F("#rho_2","",30,0,100))));
+  map.insert(mapElement("PuppiRho",histoPair(new TH1F("#rho_{Puppi}_1","",5,0,30),new TH1F("#rho_{Puppi}_2","",5,0,30))));
 
-  map.insert(mapElement("puppiParticlePT",histoPair(new TH1F("puppiParticlePT_1","",30,0,100),new TH1F("puppiParticlePT_2","",30,0,100))));
+  map.insert(mapElement("genParticlePT",histoPair(new TH1F("genParticlePT_1","",50,0,50),new TH1F("genParticlePT_2","",50,0,50))));
+  map.insert(mapElement("genParticleEta",histoPair(new TH1F("genParticleEta_1","",25,-5,5),new TH1F("genParticleEta_2","",25,-5,5))));
+
+  map.insert(mapElement("puppiParticlePT",histoPair(new TH1F("puppiParticlePT_1","",50,0,50),new TH1F("puppiParticlePT_2","",50,0,50))));
   map.insert(mapElement("puppiParticleEta",histoPair(new TH1F("puppiParticleEta_1","",25,-5,5),new TH1F("puppiParticleEta_2","",25,-5,5))));
 
   map.insert(mapElement("JetPtLead",  histoPair(new TH1F("JetPtLead_1","",50,10,1000),new TH1F("JetPtLead_2","",50,0,100))));
@@ -68,11 +72,10 @@ void getHistogram(std::map<std::string,histoPair> & map){
 
   map.insert(mapElement("ElectronPt",histoPair(new TH1F("ElectronPt_1","",50,10,1000),new TH1F("ElectronPt_2","",50,0,100))));
   map.insert(mapElement("ElectronEta",histoPair(new TH1F("ElectronEta_1","",50,-5,5),new TH1F("ElectronPt_2","",50,-5,5))));  
-  */
 }
 
 void getResponseHistogram( std::map<std::string,histoPair> & map) {
-  /*
+
   map.insert(mapElement("MetResp",histoPair(new TH1F("MetResp_1","",50,-100,100),new TH1F("MetPtResp_2","",50,-100,100))));
   map.insert(mapElement("puppiMetResp",histoPair(new TH1F("puppiMetResp_1","",50,-100,100),new TH1F("puppiMetPtResp_2","",50,-100,100))));
 
@@ -99,7 +102,6 @@ void getResponseHistogram( std::map<std::string,histoPair> & map) {
   map.insert(mapElement("PuppiJetPtRespThird",histoPair(new TH1F("PuppiJetPtRespThird_1","",50,-100,100),new TH1F("PuppiJetPtRespThird_2","",50,-100,100))));
   map.insert(mapElement("PuppiJetEtaRespThird",histoPair(new TH1F("PuppiJetEtaRespThird_1","",25,-5,5),new TH1F("PuppiJetEtaRespThird_2","",25,-5,5))));
   map.insert(mapElement("PuppiJetMassRespThird",histoPair(new TH1F("PuppiJetMassRespThird_1","",25,-50,50),new TH1F("PuppiJetMassRespThird_2","",25,-50,50))));
-  */
 }
 
 
@@ -127,21 +129,21 @@ int main (int argc, char** argv){
   std::vector<std::string> inputFileList_1 ;
   std::vector<std::string> inputFileList_2 ;
 
-  inputFileList_1.push_back("eos/cms/store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev/outputtree_0.root");
-  inputFileList_1.push_back("eos/cms/store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev/outputtree_2.root");
-  inputFileList_1.push_back("eos/cms/store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev/outputtree_5.root");
-  inputFileList_1.push_back("eos/cms/store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev/outputtree_6.root");
-  inputFileList_1.push_back("eos/cms/store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev/outputtree_7.root");
-  inputFileList_1.push_back("eos/cms/store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev/outputtree_10.root");
-  inputFileList_1.push_back("eos/cms/store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev/outputtree_14.root");
+  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev/outputtree_0.root");
+  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev/outputtree_2.root");
+  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev/outputtree_5.root");
+  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev/outputtree_6.root");
+  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev/outputtree_7.root");
+  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev/outputtree_10.root");
+  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev/outputtree_14.root");
 
-  inputFileList_2.push_back("eos/cms/store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_SethZenz/outputtree_0.root");
-  inputFileList_2.push_back("eos/cms/store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_SethZenz/outputtree_2.root");
-  inputFileList_2.push_back("eos/cms/store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_SethZenz/outputtree_5.root");
-  inputFileList_2.push_back("eos/cms/store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_SethZenz/outputtree_6.root");
-  inputFileList_2.push_back("eos/cms/store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_SethZenz/outputtree_7.root");
-  inputFileList_2.push_back("eos/cms/store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_SethZenz/outputtree_10.root");
-  inputFileList_2.push_back("eos/cms/store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_SethZenz/outputtree_14.root");
+  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_SethZenz/outputtree_0.root");
+  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_SethZenz/outputtree_2.root");
+  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_SethZenz/outputtree_5.root");
+  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_SethZenz/outputtree_6.root");
+  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_SethZenz/outputtree_7.root");
+  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_SethZenz/outputtree_10.root");
+  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_SethZenz/outputtree_14.root");
 
   TChain* chain_1 = new TChain("Delphes");
   TChain* chain_2 = new TChain("Delphes");
@@ -237,21 +239,19 @@ int main (int argc, char** argv){
     itMap->second.second->Sumw2();
   }
   
-  std::cout<<" Max Entries "<<maxEvents<<std::endl;  
-  for(int iEntry = 0; iEntry < maxEvents/15 ; iEntry++){
-
+  for(int iEntry = 0; iEntry < maxEvents ; iEntry++){
     if(iEntry%1000 == 0) std::cout<<" reading entry "<<iEntry<<std::endl;
 
     // Read the entry
     chain_1->GetEntry(iEntry);
     chain_2->GetEntry(iEntry);
-    /*   
+
     // fill PU
     for( int i = 0; i < NPU_1->GetEntries() and i < NPU_2->GetEntries(); i++){
       histogramSingleVariables["NPU"].first->Fill(dynamic_cast<ScalarHT*>(NPU_1->At(i))->HT);
       histogramSingleVariables["NPU"].second->Fill(dynamic_cast<ScalarHT*>(NPU_2->At(i))->HT);
     }
-    /*
+
     // Rho Kt4
     for( int i = 0; i < Rho_1->GetEntries() and i < Rho_2->GetEntries() ; i++){
       histogramSingleVariables["Rho"].first->Fill(dynamic_cast<Rho*>(Rho_1->At(i))->Rho);
@@ -312,7 +312,7 @@ int main (int argc, char** argv){
     }
 
     // JET 1 
-    for(int i = 0; i < Jets_1->GetEntries() and i < 2; i++){
+    for(int i = 0; i < Jets_1->GetEntries() and i <= 2; i++){
       if(i==0){
        histogramSingleVariables["JetPtLead"].first->Fill(dynamic_cast<Jet*>(Jets_1->At(i))->PT);
        histogramSingleVariables["JetEtaLead"].first->Fill(dynamic_cast<Jet*>(Jets_1->At(i))->Eta);
@@ -324,7 +324,7 @@ int main (int argc, char** argv){
        histogramSingleVariables["JetMassSecond"].first->Fill(dynamic_cast<Jet*>(Jets_1->At(i))->Mass);
       }
       else if (i==2){
-       histogramSingleVariables["JetPtThrid"].first->Fill(dynamic_cast<Jet*>(Jets_1->At(i))->PT);
+       histogramSingleVariables["JetPtThird"].first->Fill(dynamic_cast<Jet*>(Jets_1->At(i))->PT);
        histogramSingleVariables["JetEtaThird"].first->Fill(dynamic_cast<Jet*>(Jets_1->At(i))->Eta);
        histogramSingleVariables["JetMassThird"].first->Fill(dynamic_cast<Jet*>(Jets_1->At(i))->Mass);
       }
@@ -332,7 +332,7 @@ int main (int argc, char** argv){
     }
 
     // JET 2
-    for(int i = 0; i < Jets_2->GetEntries() and i < 2; i++){
+    for(int i = 0; i < Jets_2->GetEntries() and i <= 2; i++){
       if(i==0){
        histogramSingleVariables["JetPtLead"].second->Fill(dynamic_cast<Jet*>(Jets_2->At(i))->PT);
        histogramSingleVariables["JetEtaLead"].second->Fill(dynamic_cast<Jet*>(Jets_2->At(i))->Eta);
@@ -344,7 +344,7 @@ int main (int argc, char** argv){
        histogramSingleVariables["JetMassSecond"].second->Fill(dynamic_cast<Jet*>(Jets_2->At(i))->Mass);
       }
       else if (i==2){
-       histogramSingleVariables["JetPtThrid"].second->Fill(dynamic_cast<Jet*>(Jets_2->At(i))->PT);
+       histogramSingleVariables["JetPtThird"].second->Fill(dynamic_cast<Jet*>(Jets_2->At(i))->PT);
        histogramSingleVariables["JetEtaThird"].second->Fill(dynamic_cast<Jet*>(Jets_2->At(i))->Eta);
        histogramSingleVariables["JetMassThird"].second->Fill(dynamic_cast<Jet*>(Jets_2->At(i))->Mass);
       }
@@ -353,45 +353,45 @@ int main (int argc, char** argv){
 
 
     // PUPPI JET 1 
-    for(int i = 0; i < puppiJets_1->GetEntries() and i < 2; i++){
+    for(int i = 0; i < puppiJets_1->GetEntries() and i <= 2; i++){
       if(i==0){
-       histogramSingleVariables["JetPtLead"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->PT);
-       histogramSingleVariables["JetEtaLead"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Eta);
-       histogramSingleVariables["JetMassLead"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Mass);
+       histogramSingleVariables["PuppiJetPtLead"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->PT);
+       histogramSingleVariables["PuppiJetEtaLead"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Eta);
+       histogramSingleVariables["PuppiJetMassLead"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Mass);
       }
       else if (i==1){
-       histogramSingleVariables["JetPtSecond"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->PT);
-       histogramSingleVariables["JetEtaSecond"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Eta);
-       histogramSingleVariables["JetMassSecond"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Mass);
+       histogramSingleVariables["PuppiJetPtSecond"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->PT);
+       histogramSingleVariables["PuppiJetEtaSecond"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Eta);
+       histogramSingleVariables["PuppiJetMassSecond"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Mass);
       }
       else if (i==2){
-       histogramSingleVariables["JetPtThrid"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->PT);
-       histogramSingleVariables["JetEtaThird"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Eta);
-       histogramSingleVariables["JetMassThird"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Mass);
+       histogramSingleVariables["PuppiJetPtThird"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->PT);
+       histogramSingleVariables["PuppiJetEtaThird"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Eta);
+       histogramSingleVariables["PuppiJetMassThird"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Mass);
       }
       else break;
     }
 
     // PUPPI JET 2
-    for(int i = 0; i < puppiJets_2->GetEntries() and i < 2; i++){
+    for(int i = 0; i < puppiJets_2->GetEntries() and i <= 2; i++){
       if(i==0){
-       histogramSingleVariables["JetPtLead"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->PT);
-       histogramSingleVariables["JetEtaLead"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Eta);
-       histogramSingleVariables["JetMassLead"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Mass);
+       histogramSingleVariables["PuppiJetPtLead"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->PT);
+       histogramSingleVariables["PuppiJetEtaLead"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Eta);
+       histogramSingleVariables["PuppiJetMassLead"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Mass);
       }
       else if (i==1){
-       histogramSingleVariables["JetPtSecond"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->PT);
-       histogramSingleVariables["JetEtaSecond"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Eta);
-       histogramSingleVariables["JetMassSecond"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Mass);
+       histogramSingleVariables["PuppiJetPtSecond"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->PT);
+       histogramSingleVariables["PuppiJetEtaSecond"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Eta);
+       histogramSingleVariables["PuppiJetMassSecond"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Mass);
       }
       else if (i==2){
-       histogramSingleVariables["JetPtThrid"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->PT);
-       histogramSingleVariables["JetEtaThird"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Eta);
-       histogramSingleVariables["JetMassThird"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Mass);
+       histogramSingleVariables["PuppiJetPtThird"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->PT);
+       histogramSingleVariables["PuppiJetEtaThird"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Eta);
+       histogramSingleVariables["PuppiJetMassThird"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Mass);
       }
       else break;
     }
-     
+
     ///////////////////////////////////
     // RESPONSE
     /////////////////////////////////////
@@ -411,7 +411,7 @@ int main (int argc, char** argv){
       histogramResponse["puppiMetResp"].second->Fill(dynamic_cast<MissingET*>(PuppiMET_2->At(i))->MET-dynamic_cast<MissingET*>(GenMET_2->At(i))->MET);
     }
 
-    for(int i = 0; i < Jets_1->GetEntries() and i < 2 ; i++){
+    for(int i = 0; i < Jets_1->GetEntries() and i <= 2 ; i++){
       float minDr = 9999 ;
       int ijetMatched = -1;
       for(int j = 0; j < GenJets_1->GetEntries(); j++){
@@ -434,7 +434,7 @@ int main (int argc, char** argv){
 	  histogramResponse["JetMassRespSecond"].first->Fill(dynamic_cast<Jet*>(Jets_1->At(i))->Mass-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Mass);
 	}
         else if(i==2){
-	  histogramResponse["JetPtRespThrid"].first->Fill(dynamic_cast<Jet*>(Jets_1->At(i))->PT-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->PT);
+	  histogramResponse["JetPtRespThird"].first->Fill(dynamic_cast<Jet*>(Jets_1->At(i))->PT-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->PT);
 	  histogramResponse["JetEtaRespThird"].first->Fill(dynamic_cast<Jet*>(Jets_1->At(i))->Eta-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Eta);
 	  histogramResponse["JetMassRespThird"].first->Fill(dynamic_cast<Jet*>(Jets_1->At(i))->Mass-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Mass);
 	}
@@ -442,7 +442,7 @@ int main (int argc, char** argv){
       }
     }
 
-    for(int i = 0; i < Jets_2->GetEntries() and i < 2 ; i++){
+    for(int i = 0; i < Jets_2->GetEntries() and i <= 2 ; i++){
       float minDr = 9999 ;
       int ijetMatched = -1;
       for(int j = 0; j < GenJets_2->GetEntries(); j++){
@@ -465,7 +465,7 @@ int main (int argc, char** argv){
 	  histogramResponse["JetMassRespSecond"].second->Fill(dynamic_cast<Jet*>(Jets_2->At(i))->Mass-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Mass);
 	}
         else if(i==2){
-	  histogramResponse["JetPtRespThrid"].second->Fill(dynamic_cast<Jet*>(Jets_2->At(i))->PT-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->PT);
+	  histogramResponse["JetPtRespThird"].second->Fill(dynamic_cast<Jet*>(Jets_2->At(i))->PT-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->PT);
 	  histogramResponse["JetEtaRespThird"].second->Fill(dynamic_cast<Jet*>(Jets_2->At(i))->Eta-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Eta);
 	  histogramResponse["JetMassRespThird"].second->Fill(dynamic_cast<Jet*>(Jets_2->At(i))->Mass-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Mass);
 	}
@@ -475,7 +475,7 @@ int main (int argc, char** argv){
 
     /////////// PUPPI JET 
 
-    for(int i = 0; i < puppiJets_1->GetEntries() and i < 2 ; i++){
+    for(int i = 0; i < puppiJets_1->GetEntries() and i <= 2 ; i++){
       float minDr = 9999 ;
       int ijetMatched = -1;
       for(int j = 0; j < GenJets_1->GetEntries(); j++){
@@ -488,25 +488,25 @@ int main (int argc, char** argv){
 
       if(minDr != 9999 and ijetMatched !=-1){
         if(i==0){
-	  histogramResponse["JetPtRespLead"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->PT-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->PT);
-	  histogramResponse["JetEtaRespLead"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Eta-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Eta);
-	  histogramResponse["JetMassRespLead"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Mass-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Mass);
+	  histogramResponse["PuppiJetPtRespLead"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->PT-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->PT);
+	  histogramResponse["PuppiJetEtaRespLead"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Eta-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Eta);
+	  histogramResponse["PuppiJetMassRespLead"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Mass-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Mass);
 	}
         else if(i==1){
-	  histogramResponse["JetPtRespSecond"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->PT-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->PT);
-	  histogramResponse["JetEtaRespSecond"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Eta-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Eta);
-	  histogramResponse["JetMassRespSecond"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Mass-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Mass);
+	  histogramResponse["PuppiJetPtRespSecond"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->PT-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->PT);
+	  histogramResponse["PuppiJetEtaRespSecond"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Eta-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Eta);
+	  histogramResponse["PuppiJetMassRespSecond"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Mass-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Mass);
 	}
         else if(i==2){
-	  histogramResponse["JetPtRespThrid"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->PT-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->PT);
-	  histogramResponse["JetEtaRespThird"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Eta-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Eta);
-	  histogramResponse["JetMassRespThird"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Mass-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Mass);
+	  histogramResponse["PuppiJetPtRespThird"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->PT-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->PT);
+	  histogramResponse["PuppiJetEtaRespThird"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Eta-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Eta);
+	  histogramResponse["PuppiJetMassRespThird"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Mass-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Mass);
 	}
        else break;
       }
     }
 
-    for(int i = 0; i < puppiJets_2->GetEntries() and i < 2 ; i++){
+    for(int i = 0; i < puppiJets_2->GetEntries() and i <= 2 ; i++){
       float minDr = 9999 ;
       int ijetMatched = -1;
       for(int j = 0; j < GenJets_2->GetEntries(); j++){
@@ -519,31 +519,28 @@ int main (int argc, char** argv){
 
       if(minDr != 9999 and ijetMatched !=-1){
         if(i==0){
-	  histogramResponse["JetPtRespLead"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->PT-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->PT);
-	  histogramResponse["JetEtaRespLead"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Eta-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Eta);
-	  histogramResponse["JetMassRespLead"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Mass-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Mass);
+	  histogramResponse["PuppiJetPtRespLead"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->PT-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->PT);
+	  histogramResponse["PuppiJetEtaRespLead"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Eta-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Eta);
+	  histogramResponse["PuppiJetMassRespLead"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Mass-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Mass);
 	}
         else if(i==1){
-	  histogramResponse["JetPtRespSecond"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->PT-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->PT);
-	  histogramResponse["JetEtaRespSecond"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Eta-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Eta);
-	  histogramResponse["JetMassRespSecond"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Mass-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Mass);
+	  histogramResponse["PuppiJetPtRespSecond"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->PT-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->PT);
+	  histogramResponse["PuppiJetEtaRespSecond"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Eta-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Eta);
+	  histogramResponse["PuppiJetMassRespSecond"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Mass-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Mass);
 	}
         else if(i==2){
-	  histogramResponse["JetPtRespThrid"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->PT-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->PT);
-	  histogramResponse["JetEtaRespThird"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Eta-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Eta);
-	  histogramResponse["JetMassRespThird"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Mass-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Mass);
+	  histogramResponse["PuppiJetPtRespThird"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->PT-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->PT);
+	  histogramResponse["PuppiJetEtaRespThird"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Eta-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Eta);
+	  histogramResponse["PuppiJetMassRespThird"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Mass-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Mass);
 	}
        else break;
       }
     }      
-    */
-  
   }
   ///////////////////////////////////////////////
   // Plot
   ///////////////////////////////////////////////
   // make the plot vs PT
-  /*
   TCanvas *cCanvas = new TCanvas("cCanvas","",180,52,550,550);
   cCanvas->SetTicks();
   cCanvas->SetFillColor(0);
@@ -573,25 +570,51 @@ int main (int argc, char** argv){
   tex3->SetLineWidth(2);
   
   TLegend* legend = new TLegend(0.7,0.7,0.9,0.9);   
+  legend->SetBorderSize(0);
+  legend->SetFillColor(0);
+  legend->SetFillStyle(0);
+  legend->SetTextSize(0.031);
+  legend->SetTextFont(42);
 
   for(std::map<std::string,histoPair>::const_iterator itMap = histogramSingleVariables.begin(); itMap != histogramSingleVariables.end(); itMap++){
     cCanvas->cd();
     legend->Clear();
-    itMap->second.first->Scale(1/itMap->second.first->Integral());   
-    itMap->second.second->Scale(1/itMap->second.second->Integral());   
 
+    TString VariableName;
+    VariableName.Form("%s",itMap->second.first->GetName());
+    if(VariableName.Contains("_1"))  VariableName.ReplaceAll("_1","");
+
+    if(VariableName.Contains("puppiParticle")){
+      itMap->second.first->GetYaxis()->SetRangeUser(0.001,std::max(itMap->second.first->GetMaximum(),itMap->second.second->GetMaximum())*1000);
+    }
+    else{
+     itMap->second.first->Scale(1/itMap->second.first->Integral());   
+     itMap->second.second->Scale(1/itMap->second.second->Integral());   
+     itMap->second.first->GetYaxis()->SetRangeUser(0.,itMap->second.first->GetMaximum()*1.25);
+     cCanvas->SetLogy(0);
+     gPad->Update();
+    }
+    
     itMap->second.first->SetLineColor(kBlack);
     itMap->second.first->SetMarkerColor(kBlack);
     itMap->second.first->SetLineWidth(2);
-    itMap->second.first->GetXaxis()->SetTitle(itMap->second.first->GetName());
+
+    itMap->second.first->GetXaxis()->SetTitle(VariableName);
     itMap->second.first->GetYaxis()->SetTitle("a.u.");
     itMap->second.first->SetMarkerStyle(20);
-    itMap->second.first->Draw("p");
+    
+    itMap->second.first->Draw("hist");
+    
     itMap->second.second->SetLineColor(kRed);
     itMap->second.second->SetMarkerColor(kRed);
     itMap->second.second->SetLineWidth(2);
-    itMap->second.second->SetMarkerStyle(22);
+    itMap->second.second->SetMarkerStyle(20);
     itMap->second.second->Draw("psame");
+
+    if(VariableName.Contains("puppiParticle")){
+      cCanvas->SetLogy();
+      gPad->Update();
+    }
 
     tex->Draw("same");
     tex2->Draw("same");
@@ -600,8 +623,6 @@ int main (int argc, char** argv){
     legend->AddEntry(itMap->second.first,"New Delphes","pl");
     legend->AddEntry(itMap->second.second,"Old Delphes","pl");
     legend->Draw("same");
-
-    std::string VariableName = itMap->second.first->GetName();
 
     cCanvas->SaveAs(std::string(outputFileDirectory+"/"+VariableName+".png").c_str(),"png");
     cCanvas->SaveAs(std::string(outputFileDirectory+"/"+VariableName+".pdf").c_str(),"pdf");
@@ -612,36 +633,54 @@ int main (int argc, char** argv){
   for(std::map<std::string,histoPair>::const_iterator itMap = histogramResponse.begin(); itMap != histogramResponse.end(); itMap++){
 
     cCanvas->cd();
+    cCanvas->SetLogy(0);
     legend->Clear();
-    itMap->second.first->Scale(1/itMap->second.first->Integral());   
-    itMap->second.second->Scale(1/itMap->second.second->Integral());   
+
+    TString VariableName;
+    VariableName.Form("%s",itMap->second.first->GetName());
+    if(VariableName.Contains("_1"))  VariableName.ReplaceAll("_1","");
+
+    if(VariableName.Contains("puppiParticle")){
+      itMap->second.first->GetYaxis()->SetRangeUser(0.001,std::max(itMap->second.first->GetMaximum(),itMap->second.second->GetMaximum())*1000);
+    }
+    else{
+     itMap->second.first->Scale(1/itMap->second.first->Integral());   
+     itMap->second.second->Scale(1/itMap->second.second->Integral());   
+     itMap->second.first->GetYaxis()->SetRangeUser(0.,itMap->second.first->GetMaximum()*1.25);
+     cCanvas->SetLogy(0);
+     gPad->Update();
+    }
 
     itMap->second.first->SetLineColor(kBlack);
     itMap->second.first->SetMarkerColor(kBlack);
     itMap->second.first->SetLineWidth(2);
-    itMap->second.first->GetXaxis()->SetTitle(itMap->second.first->GetName());
+    itMap->second.first->GetXaxis()->SetTitle(VariableName);
     itMap->second.first->GetYaxis()->SetTitle("a.u.");
     itMap->second.first->SetMarkerStyle(20);
-    itMap->second.first->Draw("p");
+    itMap->second.first->Draw("hist");
     itMap->second.second->SetLineColor(kRed);
     itMap->second.second->SetMarkerColor(kRed);
     itMap->second.second->SetLineWidth(2);
-    itMap->second.second->SetMarkerStyle(22);
+    itMap->second.second->SetMarkerStyle(20);
     itMap->second.second->Draw("psame");
 
     tex->Draw("same");
     tex2->Draw("same");
     tex3->Draw("same");
 
-    legend->AddEntry(itMap->second.first,"New Delphes","pl");
+    legend->AddEntry(itMap->second.first,"New Delphes","l");
     legend->AddEntry(itMap->second.second,"Old Delphes","pl");
     legend->Draw("same");
+
+    VariableName.ReplaceAll("{","");
+    VariableName.ReplaceAll("}","");
+    VariableName.ReplaceAll("#","");
     
-    std::string VariableName = itMap->second.first->GetName();
     cCanvas->SaveAs(std::string(outputFileDirectory+"/"+VariableName+".png").c_str(),"png");
     cCanvas->SaveAs(std::string(outputFileDirectory+"/"+VariableName+".pdf").c_str(),"pdf");
     cCanvas->SaveAs(std::string(outputFileDirectory+"/"+VariableName+".root").c_str(),"root");
-  */  
+
+  }
   
   return 0 ;
 
