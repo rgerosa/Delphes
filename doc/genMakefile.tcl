@@ -264,7 +264,7 @@ all:
 
 }
 
-executableDeps {converters/*.cpp} {examples/*.cpp}
+executableDeps {converters/*.cpp} {examples/*.cpp} {MyDelphesCodes/*.cpp}
 
 executableDeps {readers/DelphesHepMC.cpp} {readers/DelphesLHEF.cpp} {readers/DelphesSTDHEP.cpp}
 
