@@ -56,6 +56,7 @@ void TreeWriter::Init() {
   fClassMap[Rho::Class()]         = &TreeWriter::ProcessRho;
   fClassMap[IsoTrack::Class()]    = &TreeWriter::ProcessIsoTracks;
   fClassMap[LHEParticle::Class()] = &TreeWriter::ProcessLHEParticles;
+  fClassMap[Event::Class()]       = &TreeWriter::ProcessEvent;
 
   TBranchMap::iterator itBranchMap;
   map< TClass *, TProcessMethod >::iterator itClassMap;
@@ -795,6 +796,21 @@ void TreeWriter::ProcessLHEParticles(ExRootTreeBranch *branch, TObjArray *array)
   }
 }
 
+// -----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+void TreeWriter::ProcessEvent(ExRootTreeBranch *branch, TObjArray *array){
+
+  Event *candidate = 0;
+  Event *entry = 0;
+  if((candidate = static_cast<Event*>(array->At(0)))){
+    entry->Number = candidate->Number;
+    entry->ReadTime = candidate->ReadTime;
+    entry->ProcTime = candidate->ProcTime;      
+  }
+
+
+}
 
 //------------------------------------------------------------------------------
 

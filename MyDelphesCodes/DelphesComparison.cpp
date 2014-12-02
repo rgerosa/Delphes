@@ -27,10 +27,14 @@ float deltaPhi (float a, float b){
 
 void getHistogram(std::map<std::string,histoPair> & map){
 
+  map.insert(mapElement("NPU",histoPair(new TH1F("NPU_1","",100,0,100),new TH1F("NPU_2","",100,0,100))));  
   map.insert(mapElement("NPU",histoPair(new TH1F("N_{PU}_1","",40,30,70),new TH1F("N_{PU}_2","",40,30,70))));  
   
   map.insert(mapElement("Rho",histoPair(new TH1F("#rho_1","",30,0,100),new TH1F("#rho_2","",30,0,100))));
   map.insert(mapElement("PuppiRho",histoPair(new TH1F("#rho_{Puppi}_1","",5,0,30),new TH1F("#rho_{Puppi}_2","",5,0,30))));
+
+  map.insert(mapElement("genParticlePT",histoPair(new TH1F("genParticlePT_1","",50,0,50),new TH1F("genParticlePT_2","",50,0,50))));
+  map.insert(mapElement("genParticleEta",histoPair(new TH1F("genParticleEta_1","",25,-5,5),new TH1F("genParticleEta_2","",25,-5,5))));
 
   map.insert(mapElement("puppiParticlePT",histoPair(new TH1F("puppiParticlePT_1","",50,0,50),new TH1F("puppiParticlePT_2","",50,0,50))));
   map.insert(mapElement("puppiParticleEta",histoPair(new TH1F("puppiParticleEta_1","",25,-5,5),new TH1F("puppiParticleEta_2","",25,-5,5))));
@@ -63,12 +67,11 @@ void getHistogram(std::map<std::string,histoPair> & map){
   map.insert(mapElement("RecoMissingET",histoPair(new TH1F("RecoMissingET_1","",30,0,600),new TH1F("RecoMissingET_2","",30,0,600))));
   map.insert(mapElement("PuppiMissingET",histoPair(new TH1F("PuppiMissingET_1","",30,0,600),new TH1F("PuppiMissingET_2","",30,0,600))));
 
-  map.insert(mapElement("MuonPt",histoPair(new TH1F("MuonPt_1","",50,10,500),new TH1F("MuonPt_2","",50,0,500))));
-  map.insert(mapElement("MuonEta",histoPair(new TH1F("MuonEta_1","",50,-5,5),new TH1F("MuonEta_2","",50,-5,5))));
+  map.insert(mapElement("MuonPt",histoPair(new TH1F("MuonPt_1","",50,10,1000),new TH1F("MuonPt_2","",50,0,100))));
+  map.insert(mapElement("MuonEta",histoPair(new TH1F("MuonEta_1","",50,-5,5),new TH1F("MuonPt_2","",50,-5,5))));
 
-  map.insert(mapElement("ElectronPt",histoPair(new TH1F("ElectronPt_1","",50,10,500),new TH1F("ElectronPt_2","",50,0,500))));
-  map.insert(mapElement("ElectronEta",histoPair(new TH1F("ElectronEta_1","",50,-5,5),new TH1F("ElectronEta_2","",50,-5,5))));  
-
+  map.insert(mapElement("ElectronPt",histoPair(new TH1F("ElectronPt_1","",50,10,1000),new TH1F("ElectronPt_2","",50,0,100))));
+  map.insert(mapElement("ElectronEta",histoPair(new TH1F("ElectronEta_1","",50,-5,5),new TH1F("ElectronPt_2","",50,-5,5))));  
 }
 
 void getResponseHistogram( std::map<std::string,histoPair> & map) {
@@ -99,7 +102,6 @@ void getResponseHistogram( std::map<std::string,histoPair> & map) {
   map.insert(mapElement("PuppiJetPtRespThird",histoPair(new TH1F("PuppiJetPtRespThird_1","",50,-100,100),new TH1F("PuppiJetPtRespThird_2","",50,-100,100))));
   map.insert(mapElement("PuppiJetEtaRespThird",histoPair(new TH1F("PuppiJetEtaRespThird_1","",25,-5,5),new TH1F("PuppiJetEtaRespThird_2","",25,-5,5))));
   map.insert(mapElement("PuppiJetMassRespThird",histoPair(new TH1F("PuppiJetMassRespThird_1","",25,-50,50),new TH1F("PuppiJetMassRespThird_2","",25,-50,50))));
-
 }
 
 
@@ -243,7 +245,7 @@ int main (int argc, char** argv){
     itMap->second.second->Sumw2();
   }
   
-  for(int iEntry = 0; iEntry < maxEvents/10 ; iEntry++){
+  for(int iEntry = 0; iEntry < maxEvents ; iEntry++){
 
     if(iEntry%1000 == 0) std::cout<<" reading entry "<<iEntry<<std::endl;
 
@@ -307,13 +309,13 @@ int main (int argc, char** argv){
 
     // puppi particle
     for(int i = 0; i < puppiParticle_1->GetEntries() ; i++){
-      histogramSingleVariables["puppiParticlePT"].first->Fill(dynamic_cast<GenParticle*>(puppiParticle_1->At(i))->PT);
-      histogramSingleVariables["puppiParticleEta"].first->Fill(dynamic_cast<GenParticle*>(puppiParticle_1->At(i))->Eta);
+      histogramSingleVariables["puppiParticlesPT"].first->Fill(dynamic_cast<GenParticle*>(puppiParticle_1->At(i))->PT);
+      histogramSingleVariables["puppiParticlesEta"].first->Fill(dynamic_cast<GenParticle*>(puppiParticle_1->At(i))->Eta);
     }
 
     for(int i = 0; i < puppiParticle_2->GetEntries() ; i++){
-      histogramSingleVariables["puppiParticlePT"].second->Fill(dynamic_cast<GenParticle*>(puppiParticle_2->At(i))->PT);
-      histogramSingleVariables["puppiParticleEta"].second->Fill(dynamic_cast<GenParticle*>(puppiParticle_2->At(i))->Eta);
+      histogramSingleVariables["puppiParticlesPT"].second->Fill(dynamic_cast<GenParticle*>(puppiParticle_2->At(i))->PT);
+      histogramSingleVariables["puppiParticlesEta"].second->Fill(dynamic_cast<GenParticle*>(puppiParticle_2->At(i))->Eta);
     }
 
     // JET 1 
@@ -546,7 +548,6 @@ int main (int argc, char** argv){
   // Plot
   ///////////////////////////////////////////////
   // make the plot vs PT
-
   TCanvas *cCanvas = new TCanvas("cCanvas","",180,52,550,550);
   cCanvas->SetTicks();
   cCanvas->SetFillColor(0);
@@ -601,10 +602,10 @@ int main (int argc, char** argv){
      gPad->Update();
     }
     
-
     itMap->second.first->SetLineColor(kBlack);
     itMap->second.first->SetMarkerColor(kBlack);
     itMap->second.first->SetLineWidth(2);
+
     itMap->second.first->GetXaxis()->SetTitle(VariableName);
     itMap->second.first->GetYaxis()->SetTitle("a.u.");
     itMap->second.first->SetMarkerStyle(20);
@@ -626,10 +627,9 @@ int main (int argc, char** argv){
     tex2->Draw("same");
     tex3->Draw("same");
 
-    legend->AddEntry(itMap->second.first,"New Delphes","l");
+    legend->AddEntry(itMap->second.first,"New Delphes","pl");
     legend->AddEntry(itMap->second.second,"Old Delphes","pl");
     legend->Draw("same");
-
 
     VariableName.ReplaceAll("{","");
     VariableName.ReplaceAll("}","");
@@ -638,8 +638,8 @@ int main (int argc, char** argv){
     cCanvas->SaveAs(std::string(outputFileDirectory+"/"+VariableName+".pdf").c_str(),"pdf");
     cCanvas->SaveAs(std::string(outputFileDirectory+"/"+VariableName+".png").c_str(),"png");
     cCanvas->SaveAs(std::string(outputFileDirectory+"/"+VariableName+".root").c_str(),"root");
-  }
-
+    
+  }   
 
   for(std::map<std::string,histoPair>::const_iterator itMap = histogramResponse.begin(); itMap != histogramResponse.end(); itMap++){
 

@@ -76,14 +76,13 @@ set ExecutionPath {
 
 }
 
+#  ConstituentFilter
 #  JetPileUpSubtractorGrid
 #  JetPileUpSubtractor4VArea
 #  PuppiJetPileUpSubtractorGrid
 #  PuppiJetPileUpSubtractor4VArea
 
 #### remove the module which do the filter of jet constituent
-# ConstituentFilter
-# PuppiConstituentFilter
 
 ## unique object finder actually removed from the sequence
 # UniqueObjectFinderGJ
@@ -1175,6 +1174,7 @@ module ConstituentFilter ConstituentFilter {
 
   add JetInputArray GenJetFinderNoNu/jets
   add JetInputArray PileUpJetID/jets
+  add JetInputArray PuppiPileUpJetID/jets
 
   add ConstituentInputArray Delphes/stableParticles stableParticles
   add ConstituentInputArray TrackPileUpSubtractor/eflowTracks eflowTracks
@@ -1184,21 +1184,6 @@ module ConstituentFilter ConstituentFilter {
 } 
 
 
-module ConstituentFilter ConstituentFilterPUPPI {
-
-  set ConEMin 0.
-
-  add JetInputArray GenJetFinderNoNu/jets
-  add JetInputArray PileUpJetIDPUPPI/jets
-
-  add ConstituentInputArray Delphes/stableParticles stableParticles
-  add ConstituentInputArray TrackPileUpSubtractor/eflowTracks eflowTracks
-  add ConstituentInputArray Calorimeter/eflowTowers eflowTowers
-  add ConstituentInputArray MuonMomentumSmearing/muons muons
-
-} 
-
- 
 
 ##################
 # ROOT tree writer
@@ -1260,7 +1245,7 @@ module TreeWriter TreeWriter {
   add Branch PileUpJetID/jets JetPUID Jet
 
   ## PUPPI
-  add Branch RunPUPPI/PuppiParticles puppiParticles GenParticle
+  #add Branch RunPUPPI/PuppiParticles puppiParticles GenParticle
   add Branch PuppiRhoKt4/rho         PuppiRhoKt4 Rho
   add Branch PuppiRhoGridFastJet/rho PuppiRhoGridFastJet Rho
   #add Branch PuppiJetFinder/jets     RawPuppiJet Jet
