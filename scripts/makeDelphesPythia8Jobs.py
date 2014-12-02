@@ -101,7 +101,7 @@ def writeJobs(workingdir,executable,configCard,inputdir,inputPUdir,outputname,eo
 
       firstEvent = 0;
       if i != 0: 
-          firstEvent = options.eventsPerJob*i+1;
+          firstEvent = options.eventsPerJob*i;
 
       ## copy the config file in the job dir and sobstitute the pileup file
       os.system("cp %s %s/temp.tcl"%(configCard,jobdir));                       
