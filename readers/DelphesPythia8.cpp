@@ -158,25 +158,19 @@ int main(int argc, char *argv[]){
     //------------------------------------------------------------
 
     std::ifstream inputLHE (inputFile.c_str(), ios::in); // read the input LHE file  
-    int counter = 0 ;
     int skippedCounter = 0;
-
-    LHEF::Reader reader (inputLHE) ;
-    while (reader.readEvent ()) counter++ ;
-
 
     //-----------------------------
     //----- Initialize pythia -----
     //-----------------------------
     TStopwatch readStopWatch, procStopWatch;
-    Long64_t eventCounter, errorCounter;
+    Long64_t eventCounter, errorCounter, startCounter;
 
     Pythia8::Pythia *pythia = new Pythia8::Pythia;        
 
     if(pythia == NULL or pythia == 0){
       throw runtime_error("can't create Pythia instance");
     }
-
 
     //--- Initialize Les Houches Event File run. List initialization information.
     std::string sfile       = "Beams:LHEF ="+inputFile;
@@ -197,6 +191,7 @@ int main(int argc, char *argv[]){
     // Loop over all events
     errorCounter = 0;
     eventCounter = 0;
+    startCounter = 0;
     modularDelphes->Clear();
     readStopWatch.Start();
 
@@ -205,6 +200,10 @@ int main(int argc, char *argv[]){
     LHEF::Reader Reader (InputLHE) ;
 
     while (Reader.readEvent ()){
+     if( startCounter < startEvent ) {
+       startCounter++;
+       continue;
+     }
      if(eventCounter >= nEvent && nEvent != -1) break;           
        if(LHEEventPreselection(Reader,Mjj_cut,skimFullyHadronic,factory,LHEparticlesArray)){  // take only interesting events
 	  if(!pythia->next()){
@@ -238,13 +237,13 @@ int main(int argc, char *argv[]){
        }                
        eventCounter++;
        progressBar.Update(eventCounter, eventCounter);
-
     }
 
     progressBar.Update(eventCounter, eventCounter, kTRUE);
     progressBar.Finish();
 
     std::cout << "--------------------Statistics---------------------" <<std::endl;
+    std::cout << "-#######  Started at:         " << startEvent << std::endl;
     std::cout << "-#######  read events:        " << eventCounter << std::endl; 
     std::cout << "-#######  failed events:      " << errorCounter << std::endl;
     std::cout << "-#######  skipped events:     " << skippedCounter << std::endl;
@@ -259,7 +258,6 @@ int main(int argc, char *argv[]){
     delete confReader;
     	    
     return 0;
-
   }
   
   catch(runtime_error &e){
@@ -270,7 +268,6 @@ int main(int argc, char *argv[]){
   }
 
   return 0 ;
-
 }
 
 // *****************************************************************************************************
