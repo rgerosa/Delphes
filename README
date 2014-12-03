@@ -63,7 +63,7 @@ INSTALL DELPHES
 ==========================
 
 cd $CMSSW_BASE/src 
-git clone https://github.com/rgerosa/Delphes.git
+git clone git@github.com:rgerosa/Delphes.git
 cd Delphes
 ./configure
 make -j
