@@ -13,9 +13,12 @@
 #include "TLatex.h"
 #include "TLegend.h"
 #include "TPaveStats.h"
+#include "TLorentzVector.h"
+
 #include "classes/DelphesClasses.h"
 
 // g++ -Wall -o DelphesComparison `root-config --glibs --libs --cflags` -lTreePlayer DelphesComparison.cpp
+
 typedef std::pair<TH1F*,TH1F*> histoPair ;
 typedef std::pair<std::string, histoPair > mapElement;
 
@@ -34,9 +37,6 @@ void getHistogram(std::map<std::string,histoPair> & map){
   map.insert(mapElement("Rho",      histoPair(new TH1F("#rho_1","",30,0,100),new TH1F("#rho_2","",30,0,100))));
   map.insert(mapElement("RhoCentral",histoPair(new TH1F("#rho^{central}_1","",30,0,100),new TH1F("#rho^{central}_2","",30,0,100))));
   map.insert(mapElement("RhoForward", histoPair(new TH1F("#rho^{forward}_1","",30,0,100),new TH1F("#rho^{forward}_2","",30,0,100))));
-  map.insert(mapElement("PuppiRho", histoPair(new TH1F("#rho_{Puppi}_1","",5,0,30),new TH1F("#rho_{Puppi}_2","",5,0,30))));  
-  map.insert(mapElement("PuppiRhoCentral", histoPair(new TH1F("#rho_{Puppi}^{central}_1","",5,0,30),new TH1F("#rho_{Puppi}^{central}_2","",5,0,30))));  
-  map.insert(mapElement("PuppiRhoForward", histoPair(new TH1F("#rho_{Puppi}^{forward}_1","",5,0,30),new TH1F("#rho_{Puppi}^{forward}_2","",5,0,30))));  
 
   // GenParticle
   map.insert(mapElement("genParticlePT",  histoPair(new TH1F("genParticlePT_1","",50,0,50),  new TH1F("genParticlePT_2","",50,0,50))));
@@ -194,6 +194,9 @@ int main (int argc, char** argv){
   gStyle->SetPadLeftMargin(0.13);
   gStyle->SetPadTopMargin(0.09);
   gStyle->SetErrorX(0.5);
+ 
+  float PtCut;
+  (argc >=3) ? PtCut = atof(argv[2]) : PtCut = 0 ;  
 
   // output folders
   std::string outputFileDirectory    = "MyDelphesCodes/outputPlotsDist";
@@ -209,35 +212,39 @@ int main (int argc, char** argv){
   std::vector<std::string> inputFileList_1 ;
   std::vector<std::string> inputFileList_2 ;
 
-  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev/outputtree_0.root");
-  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev/outputtree_2.root");
-  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev/outputtree_3.root");
-  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev/outputtree_4.root");
-  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev/outputtree_5.root");
-  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev/outputtree_6.root");
-  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev/outputtree_7.root");
-  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev/outputtree_8.root");
-  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev/outputtree_9.root");
-  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev/outputtree_10.root");
-  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev/outputtree_12.root");
-  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev/outputtree_13.root");
-  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev/outputtree_14.root");
-  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev/outputtree_15.root");
+  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test/outputtree_0.root");
+  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test/outputtree_1.root");
+  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test/outputtree_2.root");
+  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test/outputtree_3.root");
+  //  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test/outputtree_4.root");
+  /*  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test/outputtree_5.root");
+  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test/outputtree_6.root");
+  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test/outputtree_7.root");
+  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test/outputtree_8.root");
+  */
+  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test/outputtree_9.root");
+  //inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test/outputtree_10.root");
+  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test/outputtree_12.root");
+  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test/outputtree_13.root");
+  inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test/outputtree_14.root");
+  //inputFileList_1.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test/outputtree_15.root");
 
-  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_SethZenz/outputtree_0.root");
-  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_SethZenz/outputtree_2.root");
-  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_SethZenz/outputtree_3.root");
-  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_SethZenz/outputtree_4.root");
-  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_SethZenz/outputtree_5.root");
-  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_SethZenz/outputtree_6.root");
-  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_SethZenz/outputtree_7.root");
-  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_SethZenz/outputtree_8.root");
-  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_SethZenz/outputtree_9.root");
-  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_SethZenz/outputtree_10.root");
-  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_SethZenz/outputtree_12.root");
-  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_SethZenz/outputtree_13.root");
-  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_SethZenz/outputtree_14.root");
-  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_SethZenz/outputtree_15.root");
+  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test_Seth/outputtree_0.root");
+  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test_Seth/outputtree_1.root");
+  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test_Seth/outputtree_2.root");
+  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test_Seth/outputtree_3.root");
+  //  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test_Seth/outputtree_4.root");
+  /*  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test_Seth/outputtree_5.root");
+  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test_Seth/outputtree_6.root");
+  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test_Seth/outputtree_7.root");
+  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test_Seth/outputtree_8.root");
+  */
+  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test_Seth/outputtree_9.root");
+  //  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test_Seth/outputtree_10.root");
+  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test_Seth/outputtree_12.root");
+  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test_Seth/outputtree_13.root");
+  inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test_Seth/outputtree_14.root");
+  //inputFileList_2.push_back("root://eoscms.cern.ch//store/caf/user/rgerosa/TPSAMPLES_14TEV/DELPHES_TREES/SS_EWK_uvev_test_Seth/outputtree_15.root");
 
   TChain* chain_1 = new TChain("Delphes");
   TChain* chain_2 = new TChain("Delphes");
@@ -374,22 +381,6 @@ int main (int argc, char** argv){
 	histogramSingleVariables["RhoForward"].second->Fill(dynamic_cast<Rho*>(Rho_2->At(i))->Rho);
 
     }
-
-    // Puppi Rho Kt4
-    for( int i = 0; i < puppiRho_1->GetEntries() and i < puppiRho_2->GetEntries(); i++){
-      histogramSingleVariables["PuppiRho"].first->Fill(dynamic_cast<Rho*>(puppiRho_1->At(i))->Rho);
-      histogramSingleVariables["PuppiRho"].second->Fill(dynamic_cast<Rho*>(puppiRho_2->At(i))->Rho);
-
-      if(fabs(dynamic_cast<Rho*>(puppiRho_1->At(i))->Edges[0]) <= 2.5 and fabs(dynamic_cast<Rho*>(puppiRho_1->At(i))->Edges[1]) <= 2.5)
-	histogramSingleVariables["PuppiRhoCentral"].first->Fill(dynamic_cast<Rho*>(puppiRho_1->At(i))->Rho);
-      else
-	histogramSingleVariables["PuppiRhoForward"].first->Fill(dynamic_cast<Rho*>(puppiRho_1->At(i))->Rho);
-
-      if(fabs(dynamic_cast<Rho*>(puppiRho_2->At(i))->Edges[0]) <= 2.5 and fabs(dynamic_cast<Rho*>(puppiRho_2->At(i))->Edges[1]) <= 2.5)
-	histogramSingleVariables["PuppiRhoCentral"].second->Fill(dynamic_cast<Rho*>(puppiRho_2->At(i))->Rho);
-      else
-	histogramSingleVariables["PuppiRhoForward"].second->Fill(dynamic_cast<Rho*>(puppiRho_2->At(i))->Rho);
-    }
     
 
     //Muon 
@@ -458,6 +449,7 @@ int main (int argc, char** argv){
     
     for(int i = 0; i < Jets_1->GetEntries() ; i++){
       nJets_1++;
+      if(dynamic_cast<Jet*>(Jets_1->At(i))->PT < PtCut) continue ;
       if(fabs(dynamic_cast<Jet*>(Jets_1->At(i))->Eta) < 2.5) nJetsCentral_1++;
       else nJetsForward_1++;
 
@@ -484,6 +476,7 @@ int main (int argc, char** argv){
     histogramSingleVariables["JetOccupancyForward"].first->Fill(nJetsForward_1);
 
     for(int i = 0; i < Jets_2->GetEntries() ; i++){
+      if(dynamic_cast<Jet*>(Jets_2->At(i))->PT < PtCut) continue ;
       nJets_2++;
       if(fabs(dynamic_cast<Jet*>(Jets_2->At(i))->Eta) < 2.5) nJetsCentral_2++;
       else nJetsForward_2++;
@@ -516,6 +509,8 @@ int main (int argc, char** argv){
     nJetsForward_1 = 0, nJetsForward_2 = 0;
     
     for(int i = 0; i < puppiJets_1->GetEntries() ; i++){
+
+      if(dynamic_cast<Jet*>(puppiJets_1->At(i))->PT < PtCut) continue ;
       nJets_1++;
       if(fabs(dynamic_cast<Jet*>(puppiJets_1->At(i))->Eta) < 2.5) nJetsCentral_1++;
       else nJetsForward_1++;
@@ -543,6 +538,7 @@ int main (int argc, char** argv){
 
     // PUPPI JET 2
     for(int i = 0; i < puppiJets_2->GetEntries() ; i++){
+      if(dynamic_cast<Jet*>(puppiJets_2->At(i))->PT < PtCut) continue ;
       nJets_2++;
       if(fabs(dynamic_cast<Jet*>(puppiJets_2->At(i))->Eta) < 2.5) nJetsCentral_2++;
       else nJetsForward_2++;
@@ -598,6 +594,7 @@ int main (int argc, char** argv){
     nJetsForward_1 = 0, nJetsForward_2 = 0;
 
     for(int i = 0; i < Jets_1->GetEntries() ; i++){
+      if(dynamic_cast<Jet*>(Jets_1->At(i))->PT < PtCut) continue ;
       float minDr = 9999 ;
       int ijetMatched = -1;
       for(int j = 0; j < GenJets_1->GetEntries(); j++){
@@ -653,6 +650,7 @@ int main (int argc, char** argv){
 
 
     for(int i = 0; i < Jets_2->GetEntries() ; i++){
+      if(dynamic_cast<Jet*>(Jets_2->At(i))->PT < PtCut) continue ;
       float minDr = 9999 ;
       int ijetMatched = -1;
       for(int j = 0; j < GenJets_2->GetEntries(); j++){
@@ -709,10 +707,27 @@ int main (int argc, char** argv){
     nJetsForward_1 = 0, nJetsForward_2 = 0;
 
     for(int i = 0; i < puppiJets_1->GetEntries() ; i++){
+
+      TLorentzVector jetVector, jetArea;
+      jetVector.SetPtEtaPhiM(dynamic_cast<Jet*>(puppiJets_1->At(i))->PT,dynamic_cast<Jet*>(puppiJets_1->At(i))->Eta,dynamic_cast<Jet*>(puppiJets_1->At(i))->Phi,dynamic_cast<Jet*>(puppiJets_1->At(i))->Mass); 
+      jetArea.SetXYZT(dynamic_cast<Jet*>(puppiJets_1->At(i))->AreaX,dynamic_cast<Jet*>(puppiJets_1->At(i))->AreaY,dynamic_cast<Jet*>(puppiJets_1->At(i))->AreaZ,dynamic_cast<Jet*>(puppiJets_1->At(i))->AreaT);
+
+      float RhoValue = 0; 
+
+      for( int i = 0; i < puppiRho_1->GetEntries() ; i++){
+	if(fabs(jetVector.Eta()) > fabs(dynamic_cast<Rho*>(puppiRho_1->At(i))->Edges[0]) and fabs(jetVector.Eta()) <= fabs(dynamic_cast<Rho*>(puppiRho_1->At(i))->Edges[1])){
+	  RhoValue = dynamic_cast<Rho*>(puppiRho_1->At(i))->Rho;
+          break;
+	}
+      }
+
+      jetVector = jetVector + RhoValue*jetArea; 
+      if(jetVector.Pt() < PtCut) continue ;
+
       float minDr = 9999 ;
       int ijetMatched = -1;
       for(int j = 0; j < GenJets_1->GetEntries(); j++){
-        float dR = TMath::Sqrt(pow(fabs(dynamic_cast<Jet*>(puppiJets_1->At(i))->Eta+dynamic_cast<Jet*>(GenJets_1->At(j))->Eta),2)+pow(deltaPhi(dynamic_cast<Jet*>(puppiJets_1->At(i))->Phi,dynamic_cast<Jet*>(GenJets_1->At(j))->Phi),2));
+        float dR = TMath::Sqrt(pow(fabs(jetVector.Eta()-dynamic_cast<Jet*>(GenJets_1->At(j))->Eta),2)+pow(deltaPhi(jetVector.Phi(),dynamic_cast<Jet*>(GenJets_1->At(j))->Phi),2));
         if(dR < 0.3 and dR < minDr){
           minDr = dR ;      
           ijetMatched = j;
@@ -721,38 +736,38 @@ int main (int argc, char** argv){
 
       if(minDr != 9999 and ijetMatched !=-1){
         if(i==0){
-	  histogramResponse["PuppiJetPtRespLead"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->PT-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->PT);
-	  histogramResponse["PuppiJetEtaRespLead"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Eta-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Eta);
-	  histogramResponse["PuppiJetMassRespLead"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Mass-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Mass);
+	  histogramResponse["PuppiJetPtRespLead"].first->Fill(jetVector.Pt()-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->PT);
+	  histogramResponse["PuppiJetEtaRespLead"].first->Fill(jetVector.Eta()-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Eta);
+	  histogramResponse["PuppiJetMassRespLead"].first->Fill(jetVector.M()-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Mass);
 	}
         else if(i==1){
-	  histogramResponse["PuppiJetPtRespSecond"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->PT-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->PT);
-	  histogramResponse["PuppiJetEtaRespSecond"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Eta-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Eta);
-	  histogramResponse["PuppiJetMassRespSecond"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Mass-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Mass);
+	  histogramResponse["PuppiJetPtRespSecond"].first->Fill(jetVector.Pt()-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->PT);
+	  histogramResponse["PuppiJetEtaRespSecond"].first->Fill(jetVector.Eta()-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Eta);
+	  histogramResponse["PuppiJetMassRespSecond"].first->Fill(jetVector.M()-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Mass);
 	}
         else if(i==2){
-	  histogramResponse["PuppiJetPtRespThird"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->PT-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->PT);
-	  histogramResponse["PuppiJetEtaRespThird"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Eta-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Eta);
-	  histogramResponse["PuppiJetMassRespThird"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Mass-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Mass);
+	  histogramResponse["PuppiJetPtRespThird"].first->Fill(jetVector.Pt()-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->PT);
+	  histogramResponse["PuppiJetEtaRespThird"].first->Fill(jetVector.Eta()-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Eta);
+	  histogramResponse["PuppiJetMassRespThird"].first->Fill(jetVector.M()-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Mass);
 	}
 
         nJets_1++;
-        if(fabs(dynamic_cast<Jet*>(puppiJets_1->At(i))->Eta) < 2.5){
+        if(fabs(jetVector.Eta()) < 2.5){
          nJetsCentral_1++;
-         histogramResponse["PuppiJetPtRespCentral"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->PT-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->PT);
-         histogramResponse["PuppiJetEtaRespCentral"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Eta-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Eta);
-         histogramResponse["PuppiJetMassRespCentral"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Mass-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Mass);
+         histogramResponse["PuppiJetPtRespCentral"].first->Fill(jetVector.Pt()-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->PT);
+         histogramResponse["PuppiJetEtaRespCentral"].first->Fill(jetVector.Eta()-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Eta);
+         histogramResponse["PuppiJetMassRespCentral"].first->Fill(jetVector.M()-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Mass);
 	}
         else{
           nJetsForward_1++;
-          histogramResponse["PuppiJetPtRespForward"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->PT-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->PT);
-          histogramResponse["PuppiJetEtaRespForward"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Eta-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Eta);
-          histogramResponse["PuppiJetMassRespForward"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Mass-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Mass);
+          histogramResponse["PuppiJetPtRespForward"].first->Fill(jetVector.Pt()-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->PT);
+          histogramResponse["PuppiJetEtaRespForward"].first->Fill(jetVector.Eta()-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Eta);
+          histogramResponse["PuppiJetMassRespForward"].first->Fill(jetVector.M()-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Mass);
 	}
 
-        histogramResponse["PuppiJetPtResp"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->PT-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->PT);
-        histogramResponse["PuppiJetEtaResp"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Eta-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Eta);
-        histogramResponse["PuppiJetMassResp"].first->Fill(dynamic_cast<Jet*>(puppiJets_1->At(i))->Mass-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Mass);
+        histogramResponse["PuppiJetPtResp"].first->Fill(jetVector.Pt()-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->PT);
+        histogramResponse["PuppiJetEtaResp"].first->Fill(jetVector.Eta()-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Eta);
+        histogramResponse["PuppiJetMassResp"].first->Fill(jetVector.M()-dynamic_cast<Jet*>(GenJets_1->At(ijetMatched))->Mass);
 
       }
     }
@@ -761,11 +776,30 @@ int main (int argc, char** argv){
     histogramResponse["PuppiJetOccupancyRespCentral"].first->Fill(float(nJetsCentral_1/GenJets_1->GetEntries()));
     histogramResponse["PuppiJetOccupancyRespForward"].first->Fill(float(nJetsForward_1/GenJets_1->GetEntries()));
 
+
+    ////
+
     for(int i = 0; i < puppiJets_2->GetEntries() ; i++){
+
+      TLorentzVector jetVector, jetArea;
+      jetVector.SetPtEtaPhiM(dynamic_cast<Jet*>(puppiJets_2->At(i))->PT,dynamic_cast<Jet*>(puppiJets_2->At(i))->Eta,dynamic_cast<Jet*>(puppiJets_2->At(i))->Phi,dynamic_cast<Jet*>(puppiJets_2->At(i))->Mass); 
+      jetArea.SetXYZT(dynamic_cast<Jet*>(puppiJets_2->At(i))->AreaX,dynamic_cast<Jet*>(puppiJets_2->At(i))->AreaY,dynamic_cast<Jet*>(puppiJets_2->At(i))->AreaZ,dynamic_cast<Jet*>(puppiJets_2->At(i))->AreaT);
+
+      float RhoValue = 0; 
+
+      for( int i = 0; i < puppiRho_2->GetEntries() ; i++){
+	if(fabs(jetVector.Eta()) > fabs(dynamic_cast<Rho*>(puppiRho_2->At(i))->Edges[0]) and fabs(jetVector.Eta()) < fabs(dynamic_cast<Rho*>(puppiRho_2->At(i))->Edges[1]))
+	  RhoValue = dynamic_cast<Rho*>(puppiRho_2->At(i))->Rho;
+      }
+
+      jetVector = jetVector + RhoValue*jetArea; 
+
+      if(jetVector.Pt() < PtCut) continue ;
+
       float minDr = 9999 ;
       int ijetMatched = -1;
       for(int j = 0; j < GenJets_2->GetEntries(); j++){
-        float dR = TMath::Sqrt(pow(fabs(dynamic_cast<Jet*>(puppiJets_2->At(i))->Eta+dynamic_cast<Jet*>(GenJets_2->At(j))->Eta),2)+pow(deltaPhi(dynamic_cast<Jet*>(puppiJets_2->At(i))->Phi,dynamic_cast<Jet*>(GenJets_2->At(j))->Phi),2));
+        float dR = TMath::Sqrt(pow(fabs(jetVector.Eta()-dynamic_cast<Jet*>(GenJets_2->At(j))->Eta),2)+pow(deltaPhi(jetVector.Phi(),dynamic_cast<Jet*>(GenJets_2->At(j))->Phi),2));
         if(dR < 0.3 and dR < minDr){
           minDr = dR ;      
           ijetMatched = j;
@@ -774,45 +808,45 @@ int main (int argc, char** argv){
 
       if(minDr != 9999 and ijetMatched !=-1){
         if(i==0){
-	  histogramResponse["PuppiJetPtRespLead"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->PT-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->PT);
-	  histogramResponse["PuppiJetEtaRespLead"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Eta-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Eta);
-	  histogramResponse["PuppiJetMassRespLead"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Mass-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Mass);
+	  histogramResponse["PuppiJetPtRespLead"].second->Fill(jetVector.Pt()-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->PT);
+	  histogramResponse["PuppiJetEtaRespLead"].second->Fill(jetVector.Eta()-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Eta);
+	  histogramResponse["PuppiJetMassRespLead"].second->Fill(jetVector.M()-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Mass);
 	}
         else if(i==1){
-	  histogramResponse["PuppiJetPtRespSecond"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->PT-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->PT);
-	  histogramResponse["PuppiJetEtaRespSecond"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Eta-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Eta);
-	  histogramResponse["PuppiJetMassRespSecond"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Mass-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Mass);
+	  histogramResponse["PuppiJetPtRespSecond"].second->Fill(jetVector.Pt()-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->PT);
+	  histogramResponse["PuppiJetEtaRespSecond"].second->Fill(jetVector.Eta()-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Eta);
+	  histogramResponse["PuppiJetMassRespSecond"].second->Fill(jetVector.M()-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Mass);
 	}
         else if(i==2){
-	  histogramResponse["PuppiJetPtRespThird"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->PT-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->PT);
-	  histogramResponse["PuppiJetEtaRespThird"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Eta-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Eta);
-	  histogramResponse["PuppiJetMassRespThird"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Mass-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Mass);
+	  histogramResponse["PuppiJetPtRespThird"].second->Fill(jetVector.Pt()-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->PT);
+	  histogramResponse["PuppiJetEtaRespThird"].second->Fill(jetVector.Eta()-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Eta);
+	  histogramResponse["PuppiJetMassRespThird"].second->Fill(jetVector.M()-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Mass);
 	}
 
         nJets_2++;
-        if(fabs(dynamic_cast<Jet*>(puppiJets_2->At(i))->Eta) < 2.5){
-           nJetsCentral_2++;
-           histogramResponse["PuppiJetPtRespCentral"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->PT-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->PT);
-           histogramResponse["PuppiJetEtaRespCentral"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Eta-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Eta);
-           histogramResponse["PuppiJetMassRespCentral"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Mass-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Mass);
+        if(fabs(jetVector.Eta()) < 2.5){
+         nJetsCentral_2++;
+         histogramResponse["PuppiJetPtRespCentral"].second->Fill(jetVector.Pt()-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->PT);
+         histogramResponse["PuppiJetEtaRespCentral"].second->Fill(jetVector.Eta()-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Eta);
+         histogramResponse["PuppiJetMassRespCentral"].second->Fill(jetVector.M()-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Mass);
 	}
-        else {
-           nJetsForward_2++;
-           histogramResponse["PuppiJetPtRespForward"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->PT-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->PT);
-           histogramResponse["PuppiJetEtaRespForward"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Eta-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Eta);
-           histogramResponse["PuppiJetMassRespForward"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Mass-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Mass);
+        else{
+          nJetsForward_2++;
+          histogramResponse["PuppiJetPtRespForward"].second->Fill(jetVector.Pt()-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->PT);
+          histogramResponse["PuppiJetEtaRespForward"].second->Fill(jetVector.Eta()-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Eta);
+          histogramResponse["PuppiJetMassRespForward"].second->Fill(jetVector.M()-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Mass);
 	}
 
-        histogramResponse["PuppiJetPtResp"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->PT-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->PT);
-        histogramResponse["PuppiJetEtaResp"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Eta-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Eta);
-        histogramResponse["PuppiJetMassResp"].second->Fill(dynamic_cast<Jet*>(puppiJets_2->At(i))->Mass-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Mass);
+        histogramResponse["PuppiJetPtResp"].second->Fill(jetVector.Pt()-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->PT);
+        histogramResponse["PuppiJetEtaResp"].second->Fill(jetVector.Eta()-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Eta);
+        histogramResponse["PuppiJetMassResp"].second->Fill(jetVector.M()-dynamic_cast<Jet*>(GenJets_2->At(ijetMatched))->Mass);
 
       }
     }
 
-    histogramResponse["PuppiJetOccupancyResp"].second->Fill(float(nJets_2/GenJets_1->GetEntries()));
-    histogramResponse["PuppiJetOccupancyRespCentral"].second->Fill(float(nJetsCentral_2/GenJets_1->GetEntries()));
-    histogramResponse["PuppiJetOccupancyRespForward"].second->Fill(float(nJetsForward_2/GenJets_1->GetEntries()));
+    histogramResponse["PuppiJetOccupancyResp"].second->Fill(float(nJets_2/GenJets_2->GetEntries()));
+    histogramResponse["PuppiJetOccupancyRespCentral"].second->Fill(float(nJetsCentral_2/GenJets_2->GetEntries()));
+    histogramResponse["PuppiJetOccupancyRespForward"].second->Fill(float(nJetsForward_2/GenJets_2->GetEntries()));
   }
   
   ///////////////////////////////////////////////
@@ -915,6 +949,8 @@ int main (int argc, char** argv){
     tps2->SetX2NDC(X2);
     tps2->SetY1NDC(Y1-(Y2-Y1));
     tps2->SetY2NDC(Y1);
+    tps1->SetFillStyle(0);
+    tps2->SetFillStyle(0);
     tps1->Draw("same");
     tps2->Draw("same");
     
@@ -1039,6 +1075,8 @@ int main (int argc, char** argv){
     itMap->second.second->Draw("psame");
     gPad->Update();
 
+    tps1->SetFillStyle(0);
+    tps2->SetFillStyle(0);
     tps1->Draw("same");
     tps2->Draw("same");
 

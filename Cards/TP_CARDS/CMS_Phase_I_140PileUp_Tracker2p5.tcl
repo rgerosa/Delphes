@@ -1260,7 +1260,7 @@ module TreeWriter TreeWriter {
   add Branch PileUpJetID/jets JetPUID Jet
 
   ## PUPPI
-  add Branch RunPUPPI/PuppiParticles puppiParticles GenParticle
+  #add Branch RunPUPPI/PuppiParticles puppiParticles GenParticle
   add Branch PuppiRhoKt4/rho         PuppiRhoKt4 Rho
   add Branch PuppiRhoGridFastJet/rho PuppiRhoGridFastJet Rho
   #add Branch PuppiJetFinder/jets     RawPuppiJet Jet

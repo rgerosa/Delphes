@@ -1186,7 +1186,7 @@ module ConstituentFilter ConstituentFilterPUPPI {
 
 ##################                                                                                                                                                                         
 # ROOT tree writer                                                                                                                                                                         
-##################                                                                                                                                                                          
+##################                                                                                                                                                          
 
 module TreeWriter TreeWriter {
   ## branch notation : <particle collection> <branch name> <type of object in classes/DelphesClass.h<                                                                                     
@@ -1204,25 +1204,31 @@ module TreeWriter TreeWriter {
   add Branch PileUpMerger/NPU NPU ScalarHT
 
   ## gen particles after vertex smearing                                                                                                                                                   
-  #add Branch GenBeamSpotFilter/beamSpotParticles GenBeamSpotParticles GenParticle                                                                                                          
+  #add Branch GenBeamSpotFilter/beamSpotParticles GenBeamSpotParticles GenParticle                                                                                                
+ 
   ## particle after B field propagation                                                                                                                                                    
   #add Branch ParticlePropagator/stableParticles particlePropagator GenParticle                                                                                                            
   #add Branch ParticlePropagator/electrons       electronPropagator GenParticle                                                                                                            
   #add Branch ParticlePropagator/muons           muonPropagator GenParticle                                                                                                                
 
   ## after Pt filter: all delphes particles, not only status 1                                                                                                                             
-  #add Branch StatusPid/filteredParticles GenParticles GenParticle                                                                                                                          
+  #add Branch StatusPid/filteredParticles GenParticles GenParticle                                                                                                                  
+ 
   ## track collection after: charged hadrons smearing and track eff, electron smearing and track eff                                                                                       
-  #add Branch TrackMerger/tracks trackCollectionNoMU Track                                                                                                                                  
+  #add Branch TrackMerger/tracks trackCollectionNoMU Track                                                                                                                          
+ 
   ## output of the calorimeter simulation                                                                                                                                                  
   #add Branch Calorimeter/towers caloTowers Tower                                                                                                                                          
   #add Branch Calorimeter/photons RawPhotons Photon                                                                                                                                        
   #add Branch Calorimeter/eflowTracks eflowTracks Track                                                                                                                                    
-  #add Branch Calorimeter/eflowTracks eflowTowers Tower                                                                                                                                     
+  #add Branch Calorimeter/eflowTracks eflowTowers Tower                                                                                                                                
+ 
   ## tracks after CHS                                                                                                                                                                      
-  #add Branch TrackPileUpSubtractor/eflowTracks trackCollectionCHS Track                                                                                                                    
+  #add Branch TrackPileUpSubtractor/eflowTracks trackCollectionCHS Track                                                                                                               
+ 
   ## eflow output                                                                                                                                                                          
-  #add Branch EFlowMerger/eflow eflowCandidates Track                                                                                                                                       
+  #add Branch EFlowMerger/eflow eflowCandidates Track                                                                                                                            
+  
   ## Rho values                                                                                                                                                                            
   add Branch GlobalRhoKt4/rho GlobalRhoKt4 Rho
   add Branch GlobalRhoGridFastJet/rho GlobalRhoGridFastJet Rho
@@ -1240,7 +1246,7 @@ module TreeWriter TreeWriter {
   add Branch PileUpJetID/jets JetPUID Jet
 
   ## PUPPI                                                                                                                                                                                 
-  add Branch RunPUPPI/PuppiParticles puppiParticles GenParticle
+  #add Branch RunPUPPI/PuppiParticles puppiParticles GenParticle
   add Branch PuppiRhoKt4/rho         PuppiRhoKt4 Rho
   add Branch PuppiRhoGridFastJet/rho PuppiRhoGridFastJet Rho
   #add Branch PuppiJetFinder/jets     RawPuppiJet Jet                                                                                                                                      
@@ -1263,22 +1269,16 @@ module TreeWriter TreeWriter {
 
 #####################################################                                                                                                                                      
 # Find uniquely identified photons/electrons/tau/jets                                                                                                                                      
-#####################################################                                                                                                                                       
-
+#####################################################                                                                                                                                 
 #module UniqueObjectFinder UniqueObjectFinderGJ {                                                                                                                                          
 #   add InputArray PhotonIsolation/photons photons                                                                                                                                         
 #   add InputArray JetPileUpSubtractor/jets jets                                                                                                                                           
-#}                                                                                                                                                                                          
-
+#}                                                                                                                                                                                   
 #module UniqueObjectFinder UniqueObjectFinderEJ {                                                                                                                                          
 #   add InputArray ElectronIsolation/electrons electrons                                                                                                                                   
 #   add InputArray UniqueObjectFinderGJ/jets jets                                                                                                                                          
-#}                                                                                                                                                                                          
-
+#}                                                                                                                                                                                      
 #module UniqueObjectFinder UniqueObjectFinderMJ {                                                                                                                                          
 #   add InputArray MuonIsolation/muons muons                                                                                                                                               
 #   add InputArray UniqueObjectFinderEJ/jets jets                                                                                                                                          
-#}                                                                                                                                                                                          
-
-
-
+#}                                                                                                                                                                                       

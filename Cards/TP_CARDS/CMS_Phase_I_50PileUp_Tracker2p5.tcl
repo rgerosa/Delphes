@@ -1190,7 +1190,7 @@ module ConstituentFilter ConstituentFilter {
 ##################
 
 module TreeWriter TreeWriter {
-  ## branch notation : <particle collection> <branch name> <type of object in classes/DelphesClass.h<
+  ## branch notation : <particle collection> <branch name> <type of object in classes/DelphesClass.h
 
   ## input status 1 particle from Pythia8
   #add Branch Delphes/stableParticles GenParticles GenParticle

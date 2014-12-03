@@ -37,6 +37,7 @@ int main(int argc, char** argv)
     
     //-----Pythia setup-----
     Pythia pythia;     
+
     //---general setup
     pythia.readString("Random:seed = 0");
     pythia.readString("Random:setSeed = on"); 
@@ -46,6 +47,7 @@ int main(int argc, char** argv)
     pythia.readString("Beams:eB = 7000.");
     pythia.readString("Beams:eCM = 14000.");
     pythia.readString("HadronLevel:Hadronize = on");
+
     //---CMS tuned min bias
     pythia.readString("ParticleDecays:limitTau0 = on");
     pythia.readString("ParticleDecays:tauMax = 10");
@@ -53,22 +55,19 @@ int main(int argc, char** argv)
     pythia.readString("SoftQCD:singleDiffractive = on");
     pythia.readString("SoftQCD:doubleDiffractive = on");
     pythia.readString("Tune:ee = 3");
-    pythia.readString("Tune:pp = 2");
-    //pythia.readString("Tune:pp = 15");
+    pythia.readString("Tune:pp = 15");  // cms tune
+
     //---Pythia initialization
     pythia.init();
 
     HepMC::IO_GenEvent hepmc_file_out(outFile, std::ios::out);
     HepMC::Pythia8ToHepMC ToHepMC;
 	
-    for (int iEvent = 0; iEvent < nEvents; ++iEvent)
-    {
-	if(iEvent%(nEvents/10) == 0) 
-	{
+    for (int iEvent = 0; iEvent < nEvents; ++iEvent){
+	if(iEvent%(nEvents/10) == 0) {
 	    cout << "Events:  " << iEvent << endl;
 	}
-	if(!pythia.next())
-	{
+	if(!pythia.next()){
 	    cout << "CRASH! ---> skip" << endl;
 	    continue;
 	}

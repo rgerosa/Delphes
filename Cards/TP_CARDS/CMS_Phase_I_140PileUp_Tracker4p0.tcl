@@ -1240,7 +1240,7 @@ module TreeWriter TreeWriter {
   add Branch PileUpJetID/jets JetPUID Jet
 
   ## PUPPI                                                                                                                                                                                 
-  add Branch RunPUPPI/PuppiParticles puppiParticles GenParticle
+  #add Branch RunPUPPI/PuppiParticles puppiParticles GenParticle
   add Branch PuppiRhoKt4/rho         PuppiRhoKt4 Rho
   add Branch PuppiRhoGridFastJet/rho PuppiRhoGridFastJet Rho
   #add Branch PuppiJetFinder/jets     RawPuppiJet Jet                                                                                                                                      
@@ -1263,22 +1263,18 @@ module TreeWriter TreeWriter {
 
 #####################################################                                                                                                                                      
 # Find uniquely identified photons/electrons/tau/jets                                                                                                                                      
-#####################################################                                                                                                                                       
-
+#####################################################                                                                                                                            
 #module UniqueObjectFinder UniqueObjectFinderGJ {                                                                                                                                          
 #   add InputArray PhotonIsolation/photons photons                                                                                                                                         
 #   add InputArray JetPileUpSubtractor/jets jets                                                                                                                                           
-#}                                                                                                                                                                                          
-
+#}                                                                                                                                                                                  
 #module UniqueObjectFinder UniqueObjectFinderEJ {                                                                                                                                          
 #   add InputArray ElectronIsolation/electrons electrons                                                                                                                                   
 #   add InputArray UniqueObjectFinderGJ/jets jets                                                                                                                                          
-#}                                                                                                                                                                                          
-
+#}                                                                                                                                                                                  
 #module UniqueObjectFinder UniqueObjectFinderMJ {                                                                                                                                          
 #   add InputArray MuonIsolation/muons muons                                                                                                                                               
 #   add InputArray UniqueObjectFinderEJ/jets jets                                                                                                                                          
-#}                                                                                                                                                                                          
-
+#}                                                                                                                                                                                    
 
 
