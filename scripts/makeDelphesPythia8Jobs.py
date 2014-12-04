@@ -17,6 +17,7 @@ parser.add_option("-o","--outputname" , dest="outputname" , type="string", defau
 parser.add_option("-p","--inputPUdir" , dest="inputPUdir" , type="string", help="Path where PU files are located. Example: /afs/cern.ch/user/s/spigazzi/work/public/PU_14TeV/")
 parser.add_option(""  ,"--eosdir"     , dest="eosdir"     , type="string", default="",help="Name of the eos output directory for jobs")
 parser.add_option("-e","--executable" , dest="executable" , type="string", default="DelphesPythia8",help="Name of the executable. Default is: DelphesPythia8")
+parser.add_option("-d","--executableDumper" , dest="executableDumper" , type="string", default="",help="Name of the Dumper executable. Default is: ''")
 
 ## njobs decide the number of the jobs as a function fo the number of the file in the inputdir
 parser.add_option("-a","--njobmax"    , dest="njobmax"    , type="int"   , default = 0, help = "Number of jobs max")
@@ -51,7 +52,7 @@ def makeFilesList(inputdir,workingdir,additionalString = "",key=".dat"):
     print 'Found %d files for list%s.txt' %(len(list),additionalString);    
     return list
 
-def writeJobs(workingdir,executable,configCard,inputdir,inputPUdir,outputname,eosoutdir,njobs):
+def writeJobs(workingdir,executable,executableDumper,configCard,inputdir,inputPUdir,outputname,eosoutdir,njobs):
 
     print "==> Star Job Creation ==>";
     #----------------------------------------------------------------
@@ -61,7 +62,7 @@ def writeJobs(workingdir,executable,configCard,inputdir,inputPUdir,outputname,eo
     listoffiles = makeFilesList(inputdir,workingdir,"",options.lheKey); ## make the file list for the input directory on eos
     
     listofPUfiles = [];    
-    listofPUfiles = makeFilesList(inputPUdir,workingdir,"_PU",".pileup");
+    listofPUfiles = makeFilesList(inputPUdir,workingdir,"_PU",".mb");
     
     #---------------------------------------------
     # --- now split the jobs
@@ -72,11 +73,13 @@ def writeJobs(workingdir,executable,configCard,inputdir,inputPUdir,outputname,eo
     ## loop on the list
     for ifile in listoffiles:
      ## discover how many LHE events are there      
-     res = commands.getstatusoutput("(./countEvents "+ifile+")");
-     if res[0] == 0 : 
-        print "not able to count lhe events --> continue "; 
-        continue ;
-     nentries = int(res[1]);
+     #res = commands.getstatusoutput("(./countEvents "+ifile+")");
+     #if res[0] == 0 : 
+     #   print "not able to count lhe events --> continue "; 
+     #   continue ;
+     #nentries = int(res[1]);
+     nentries = 100000
+
      ## get the number of jobs for this file       
      if nentries/options.eventsPerJob - int(nentries/options.eventsPerJob) > 0.5 :  
          njobs    = int(nentries/options.eventsPerJob)+1;  
@@ -122,9 +125,15 @@ def writeJobs(workingdir,executable,configCard,inputdir,inputPUdir,outputname,eo
       jobscript.write('cmsStage %s ./ \n'%(pileUpName)) 
       jobscript.write('cmsStage %s ./ \n'%(fileSplit))
       jobscript.write('scp '+os.getcwd()+"/"+executable+" ./ \n"); 
+      if( executableDumper != '' ) : 
+          jobscript.write('scp '+os.getcwd()+"/"+executableDumper+" ./ \n"); 
       jobscript.write('if ( \n')
-      jobscript.write('\t touch %s/subJob_%d.run \n'%(jobdir,jobid))     
-      jobscript.write('\t ./%s %s %s %s %d %d %d %d'%(executable,jobdir+"/"+str(configName[len(configName)-1]),str(fileName[len(fileName)-1]),outputname+"_"+str(jobid)+".root",options.mjjcut,options.filter,firstEvent,options.eventsPerJob));      
+      jobscript.write('\t touch %s/subJob_%d.run \n'%(jobdir,jobid))
+      if( executableDumper != '' ) :
+          jobscript.write('\t ./%s %s %s %s %d %d %d %d \n'%(executable,jobdir+"/"+str(configName[len(configName)-1]),str(fileName[len(fileName)-1]),outputname+"_"+str(jobid)+"_Delphes.root",options.mjjcut,options.filter,firstEvent,options.eventsPerJob));
+          jobscript.write('\t ./%s %s %s'%(executableDumper,outputname+"_"+str(jobid)+"_Delphes.root", outputname+"_"+str(jobid)+".root")); 
+      else :
+          jobscript.write('\t ./%s %s %s %s %d %d %d %d'%(executable,jobdir+"/"+str(configName[len(configName)-1]),str(fileName[len(fileName)-1]),outputname+"_"+str(jobid)+".root",options.mjjcut,options.filter,firstEvent,options.eventsPerJob));    
       jobscript.write(') then \n')
       if (eosoutdir == ''):
             jobscript.write('\t cp ./%s_%s.root %s \n'%(outputname,jobid,jobdir))
@@ -216,7 +225,7 @@ if not options.checkJobs and not options.resubmit: ## if you want to create jobs
       os.system(command);
   
   # create jobs
-  njobs = writeJobs(workingdir,options.executable,options.configCard,options.inputdir,options.inputPUdir,options.outputname,eosoutdir,njobs);
+  njobs = writeJobs(workingdir,options.executable,options.executableDumper,options.configCard,options.inputdir,options.inputPUdir,options.outputname,eosoutdir,njobs);
    
   # -- submit jobs
   print "==> Start job submission ==>";
