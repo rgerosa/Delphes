@@ -72,13 +72,12 @@ def writeJobs(workingdir,executable,executableDumper,configCard,inputdir,inputPU
     nentries = 0;
     ## loop on the list
     for ifile in listoffiles:
-     ## discover how many LHE events are there      
-     #res = commands.getstatusoutput("(./countEvents "+ifile+")");
-     #if res[0] == 0 : 
-     #   print "not able to count lhe events --> continue "; 
-     #   continue ;
-     #nentries = int(res[1]);
-     nentries = 100000
+     ## discover how many LHE events are there     
+     res = commands.getstatusoutput("(./countEvents "+ifile+")");
+     if res[0] == 0 : 
+        print "not able to count lhe events --> continue "; 
+        continue ;
+     nentries = int(res[1]);
 
      ## get the number of jobs for this file       
      if nentries/options.eventsPerJob - int(nentries/options.eventsPerJob) > 0.5 :  
@@ -131,7 +130,8 @@ def writeJobs(workingdir,executable,executableDumper,configCard,inputdir,inputPU
       jobscript.write('\t touch %s/subJob_%d.run \n'%(jobdir,jobid))
       if( executableDumper != '' ) :
           jobscript.write('\t ./%s %s %s %s %d %d %d %d \n'%(executable,jobdir+"/"+str(configName[len(configName)-1]),str(fileName[len(fileName)-1]),outputname+"_"+str(jobid)+"_Delphes.root",options.mjjcut,options.filter,firstEvent,options.eventsPerJob));
-          jobscript.write('\t ./%s %s %s'%(executableDumper,outputname+"_"+str(jobid)+"_Delphes.root", outputname+"_"+str(jobid)+".root")); 
+          dumperSplit = executableDumper.split("/")
+          jobscript.write('\t ./%s %s %s'%(dumperSplit[len(dumperSplit)-1],outputname+"_"+str(jobid)+"_Delphes.root", outputname+"_"+str(jobid)+".root")); 
       else :
           jobscript.write('\t ./%s %s %s %s %d %d %d %d'%(executable,jobdir+"/"+str(configName[len(configName)-1]),str(fileName[len(fileName)-1]),outputname+"_"+str(jobid)+".root",options.mjjcut,options.filter,firstEvent,options.eventsPerJob));    
       jobscript.write(') then \n')
