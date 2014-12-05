@@ -561,7 +561,7 @@ module FastJetFinder GenJetFinder {
   set JetAlgorithm 6
   set ParameterR   0.4
 
-  set JetPTMin 5.0
+  set JetPTMin 15.0
 }
 
 
@@ -577,7 +577,7 @@ module JetPileUpSubtractor JetPileUpSubtractor { ## make the rho correction
   ## output jets
   set OutputArray jets
   set doSafe4VAreaSubtraction false
-  set JetPTMin 10.0
+  set JetPTMin 20.0
 }
 
 module JetPileUpSubtractor JetPileUpSubtractorGrid { ## make the rho correction 
@@ -588,7 +588,7 @@ module JetPileUpSubtractor JetPileUpSubtractorGrid { ## make the rho correction
   ## output jets
   set OutputArray jets
   set doSafe4VAreaSubtraction false
-  set JetPTMin 10.0
+  set JetPTMin 20.0
 }
 
 module JetPileUpSubtractor JetPileUpSubtractor4VArea { ## make the rho correction using safe 4V subtraction
@@ -598,7 +598,7 @@ module JetPileUpSubtractor JetPileUpSubtractor4VArea { ## make the rho correctio
   set RhoInputArray RhoGridFastJet/rho
   ## output jets
   set OutputArray jets
-  set JetPTMin 10.0
+  set JetPTMin 20.0
 
   ## options for 4V safe subtracion
   set doSafe4VAreaSubtraction true
@@ -658,7 +658,7 @@ module FastJetFinder GenJetFinderNoNu {
   # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
   set JetAlgorithm 6
   set ParameterR 0.4  
-  set JetPTMin 10.0
+  set JetPTMin 15.0
 }
 
 ### -sum of all particles after filtering neutrinos
@@ -765,7 +765,7 @@ module JetPileUpSubtractor PuppiJetPileUpSubtractor { ## make the rho correction
   set RhoInputArray PuppiRhoKt4/rho
   set OutputArray jets
   set doSafe4VAreaSubtraction false
-  set JetPTMin 10.0
+  set JetPTMin 20.0
 }
 
 
@@ -776,7 +776,7 @@ module JetPileUpSubtractor PuppiJetPileUpSubtractorGrid { ## make the rho correc
   set RhoInputArray PuppiRhoGridFastJet/rho
   set OutputArray jets
   set doSafe4VAreaSubtraction false
-  set JetPTMin 10.0
+  set JetPTMin 20.0
 }
 
 module JetPileUpSubtractor PuppiJetPileUpSubtractor4VArea { ## make the rho correction 
@@ -785,7 +785,7 @@ module JetPileUpSubtractor PuppiJetPileUpSubtractor4VArea { ## make the rho corr
   set RhoInputArray PuppiRhoGridFastJet/rho
   set OutputArray   jets
   set doSafe4VAreaSubtraction true
-  set JetPTMin      10.0
+  set JetPTMin      20.0
   ## use this info only if doSafe4VAreaSubtraction is set to true
   set InputArray    RunPUPPI/PuppiParticles
   # area algorithm: 0 Do not compute area, 1 Active area explicit ghosts, 2 One ghost passive area, 3 Passive area, 4 Voronoi, 5 Active area
@@ -820,9 +820,9 @@ module JetFlavourAssociation  PuppiJetFlavourAssociation {
   set LHEPartonInputArray Delphes/LHEParticles
   set JetInputArray       PuppiJetPileUpSubtractor/jets
 
-  set DeltaR 0.4
-  set PartonPTMin 0.5
-  set PartonEtaMax 4.0
+  set DeltaR       0.4
+  set PartonPTMin  0.5
+  set PartonEtaMax 2.5
  
 }
 
@@ -1000,28 +1000,28 @@ module BTagging BTagging {
 
   add EfficiencyFormulaLoose {4} { (pt <= 15.0) * (0.000) + \
 			           (abs(eta) <= 1.2) * (pt > 15.0) * (0.29*tanh(pt*0.0183 - 0.2196)) + \
-                                   (abs(eta) > 1.2 && abs(eta) <= 4.0) * (pt > 15.0) * (0.29*tanh(pt*0.00997 - 0.143)) + \
-                                   (abs(eta) > 4.0) * (0.000)
+                                   (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 15.0) * (0.29*tanh(pt*0.00997 - 0.143)) + \
+                                   (abs(eta) > 2.5) * (0.000)
   }
 
   add EfficiencyFormulaLoose {5} { (pt <= 15.0) * (0.000) + \
                                    (abs(eta) <= 1.2) * (pt > 15.0) * (0.629858*tanh(pt*0.0166188 + 0.300119)) + \
-                                   (abs(eta) > 1.2 && abs(eta) <= 4.0) * (pt > 15.0) * (0.584522*tanh(pt*0.0144387 + 0.397034)) + \
-                                   (abs(eta) > 4.0) * (0.000)
+                                   (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 15.0) * (0.584522*tanh(pt*0.0144387 + 0.397034)) + \
+                                   (abs(eta) > 2.5) * (0.000)
   }
 
   add EfficiencyFormulaMedium {0} {0.001}
   # efficiency formula for c-jets (misidentification rate)
   add EfficiencyFormulaMedium {4} { (pt <= 15.0) * (0.000) + \
                                     (abs(eta) <= 1.2) * (pt > 15.0) * (0.1873*tanh(pt*0.0183 - 0.2196)) + \
-                                    (abs(eta) > 1.2 && abs(eta) <= 4.0) * (pt > 15.0) * (0.1898*tanh(pt*0.00997 - 0.143)) + \
-                                    (abs(eta) > 4.0) * (0.000)
+                                    (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 15.0) * (0.1898*tanh(pt*0.00997 - 0.143)) + \
+                                    (abs(eta) > 2.5) * (0.000)
   }
   # efficiency formula for b-jets
   add EfficiencyFormulaMedium {5} { (pt <= 15.0) * (0.000) + \
                                     (abs(eta) <= 1.2) * (pt > 15.0) * (0.629858*tanh(pt*0.0166188 + 0.300119)) + \
-                                    (abs(eta) > 1.2 && abs(eta) <= 4.0) * (pt > 15.0) * (0.584522*tanh(pt*0.0144387 + 0.397034)) + \
-                                    (abs(eta) > 4.0) * (0.000)
+                                    (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 15.0) * (0.584522*tanh(pt*0.0144387 + 0.397034)) + \
+                                    (abs(eta) > 2.5) * (0.000)
   }
 
 }
@@ -1034,28 +1034,28 @@ module BTagging PuppiBTagging {
 
   add EfficiencyFormulaLoose {4} { (pt <= 15.0) * (0.000) + \
 			           (abs(eta) <= 1.2) * (pt > 15.0) * (0.29*tanh(pt*0.0183 - 0.2196)) + \
-                                   (abs(eta) > 1.2 && abs(eta) <= 4.0) * (pt > 15.0) * (0.29*tanh(pt*0.00997 - 0.143)) + \
-                                   (abs(eta) > 4.0) * (0.000)
+                                   (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 15.0) * (0.29*tanh(pt*0.00997 - 0.143)) + \
+                                   (abs(eta) > 2.5) * (0.000)
   }
 
   add EfficiencyFormulaLoose {5} { (pt <= 15.0) * (0.000) + \
                                    (abs(eta) <= 1.2) * (pt > 15.0) * (0.629858*tanh(pt*0.0166188 + 0.300119)) + \
-                                   (abs(eta) > 1.2 && abs(eta) <= 4.0) * (pt > 15.0) * (0.584522*tanh(pt*0.0144387 + 0.397034)) + \
-                                   (abs(eta) > 4.0) * (0.000)
+                                   (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 15.0) * (0.584522*tanh(pt*0.0144387 + 0.397034)) + \
+                                   (abs(eta) > 2.5) * (0.000)
   }
 
   add EfficiencyFormulaMedium {0} {0.001}
   # efficiency formula for c-jets (misidentification rate)
   add EfficiencyFormulaMedium {4} { (pt <= 15.0) * (0.000) + \
                                     (abs(eta) <= 1.2) * (pt > 15.0) * (0.1873*tanh(pt*0.0183 - 0.2196)) + \
-                                    (abs(eta) > 1.2 && abs(eta) <= 4.0) * (pt > 15.0) * (0.1898*tanh(pt*0.00997 - 0.143)) + \
-                                    (abs(eta) > 4.0) * (0.000)
+                                    (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 15.0) * (0.1898*tanh(pt*0.00997 - 0.143)) + \
+                                    (abs(eta) > 2.5) * (0.000)
   }
   # efficiency formula for b-jets
   add EfficiencyFormulaMedium {5} { (pt <= 15.0) * (0.000) + \
                                     (abs(eta) <= 1.2) * (pt > 15.0) * (0.629858*tanh(pt*0.0166188 + 0.300119)) + \
-                                    (abs(eta) > 1.2 && abs(eta) <= 4.0) * (pt > 15.0) * (0.584522*tanh(pt*0.0144387 + 0.397034)) + \
-                                    (abs(eta) > 4.0) * (0.000)
+                                    (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 15.0) * (0.584522*tanh(pt*0.0144387 + 0.397034)) + \
+                                    (abs(eta) > 2.5) * (0.000)
   }
 
 }
@@ -1075,7 +1075,7 @@ module PileUpJetID PileUpJetID {
   set OutputArray   jets
 
   set ParameterR 0.4  
-  set JetPTMin   10.0
+  set JetPTMin   20.0
   set UseConstituents 0
  
   add Cones  0.1 0.2 0.3 0.4 0.5 0.6 0.7
@@ -1121,7 +1121,7 @@ module PileUpJetID PuppiPileUpJetID {
   set OutputArray   jets
 
   set ParameterR      0.4  
-  set JetPTMin        10.0
+  set JetPTMin        20.0
   set UseConstituents 0
  
   add Cones  0.1 0.2 0.3 0.4 0.5 0.6 0.7

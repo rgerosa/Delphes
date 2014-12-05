@@ -73,15 +73,13 @@ set ExecutionPath {
 
 }
 
-
-
-
-# GenBeamSpotFilter
 # StatusPid
+# GenBeamSpotFilter
 # JetPileUpSubtractorGrid
 # JetPileUpSubtractor4VArea
 # PuppiJetPileUpSubtractorGrid
 # PuppiJetPileUpSubtractor4VArea
+
 #### remove the module which do the filter of jet constituent                                                                                                                    
 # ConstituentFilter                                                                                                                                                          
 # PuppiConstituentFilter                                                                                                                                                               
@@ -565,7 +563,7 @@ module FastJetFinder GenJetFinder {
   # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt                                                                                                      
   set JetAlgorithm 6
   set ParameterR   0.4
-  set JetPTMin 5.0
+  set JetPTMin 15.0
 }
 
 ############################################                                                                                                                                               
@@ -580,7 +578,7 @@ module JetPileUpSubtractor JetPileUpSubtractor { ## make the rho correction
   ## output jets                                                                                                                                                                           
   set OutputArray jets
   set doSafe4VAreaSubtraction false
-  set JetPTMin 10.0
+  set JetPTMin 20.0
 }
 
 module JetPileUpSubtractor JetPileUpSubtractorGrid { ## make the rho correction                                                                                                            
@@ -591,7 +589,7 @@ module JetPileUpSubtractor JetPileUpSubtractorGrid { ## make the rho correction
   ## output jets                                                                                                                                                                           
   set OutputArray jets
   set doSafe4VAreaSubtraction false
-  set JetPTMin 10.0
+  set JetPTMin 20.0
 }
 
 module JetPileUpSubtractor JetPileUpSubtractor4VArea { ## make the rho correction using safe 4V subtraction                                                                                 
@@ -601,7 +599,7 @@ module JetPileUpSubtractor JetPileUpSubtractor4VArea { ## make the rho correctio
   set RhoInputArray RhoGridFastJet/rho
   ## output jets                                                                                                                                                                           
   set OutputArray jets
-  set JetPTMin 10.0
+  set JetPTMin 20.0
 
   ## options for 4V safe subtracion                                                                                                                                                        
   set doSafe4VAreaSubtraction true
@@ -633,8 +631,8 @@ module JetFlavourAssociation  JetFlavourAssociation {
   set LHEPartonInputArray Delphes/LHEParticles
   set JetInputArray       JetPileUpSubtractor/jets
 
-  set DeltaR 0.4
-  set PartonPTMin 0.5
+  set DeltaR       0.4
+  set PartonPTMin  0.5
   set PartonEtaMax 4.0
 
 }
@@ -657,7 +655,7 @@ module FastJetFinder GenJetFinderNoNu {
   # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt                                                                                                      
   set JetAlgorithm 6
   set ParameterR 0.4
-  set JetPTMin 10.0
+  set JetPTMin   15.0
 }
 
 ### -sum of all particles after filtering neutrinos                                                                                                                                       
@@ -686,7 +684,7 @@ module RunPUPPI RunPUPPI {
   add RMSScaleFactorBin   1.0  1.0  1.0  1.0
   add NeutralMinEBin      0.2  0.2  0.2  0.2
   add NeutralPtSlope      0.02 0.02 0.02 0.02
-  add ApplyCHS            true true  true true 
+  add ApplyCHS            true true  true true
   add UseCharged          true true  false false
   add ApplyLowPUCorr      true true  true true
   add MetricId            5    5     0    1
@@ -761,7 +759,7 @@ module JetPileUpSubtractor PuppiJetPileUpSubtractor { ## make the rho correction
   set RhoInputArray PuppiRhoKt4/rho
   set OutputArray jets
   set doSafe4VAreaSubtraction false
-  set JetPTMin 10.0
+  set JetPTMin 20.0
 }
 
 
@@ -772,7 +770,7 @@ module JetPileUpSubtractor PuppiJetPileUpSubtractorGrid { ## make the rho correc
   set RhoInputArray PuppiRhoGridFastJet/rho
   set OutputArray jets
   set doSafe4VAreaSubtraction false
-  set JetPTMin 10.0
+  set JetPTMin 20.0
 }
 
 module JetPileUpSubtractor PuppiJetPileUpSubtractor4VArea { ## make the rho correction                                                                                                     
@@ -781,7 +779,7 @@ module JetPileUpSubtractor PuppiJetPileUpSubtractor4VArea { ## make the rho corr
   set RhoInputArray PuppiRhoGridFastJet/rho
   set OutputArray   jets
   set doSafe4VAreaSubtraction true
-  set JetPTMin      10.0
+  set JetPTMin      20.0
   ## use this info only if doSafe4VAreaSubtraction is set to true                                                                                                                          
   set InputArray    RunPUPPI/PuppiParticles
   # area algorithm: 0 Do not compute area, 1 Active area explicit ghosts, 2 One ghost passive area, 3 Passive area, 4 Voronoi, 5 Active area                                               
@@ -1065,8 +1063,8 @@ module PileUpJetID PileUpJetID {
 
   set OutputArray   jets
 
-  set ParameterR      0.4
-  set JetPTMin        10.0
+  set ParameterR 0.4
+  set JetPTMin   20.0
   set UseConstituents 0
 
   add Cones  0.1 0.2 0.3 0.4 0.5 0.6 0.7
@@ -1117,7 +1115,7 @@ module PileUpJetID PuppiPileUpJetID {
   set OutputArray   jets
 
   set ParameterR 0.4
-  set JetPTMin   10.0
+  set JetPTMin   20.0
   set UseConstituents 0
 
   add Cones  0.1 0.2 0.3 0.4 0.5 0.6 0.7
@@ -1187,7 +1185,7 @@ module ConstituentFilter ConstituentFilterPUPPI {
 
 ##################                                                                                                                                                                         
 # ROOT tree writer                                                                                                                                                                         
-##################                                                                                                                                                          
+##################                                                                                                                                                                          
 
 module TreeWriter TreeWriter {
   ## branch notation : <particle collection> <branch name> <type of object in classes/DelphesClass.h<                                                                                     
@@ -1205,31 +1203,25 @@ module TreeWriter TreeWriter {
   add Branch PileUpMerger/NPU NPU ScalarHT
 
   ## gen particles after vertex smearing                                                                                                                                                   
-  #add Branch GenBeamSpotFilter/beamSpotParticles GenBeamSpotParticles GenParticle                                                                                                
- 
+  #add Branch GenBeamSpotFilter/beamSpotParticles GenBeamSpotParticles GenParticle                                                                                                          
   ## particle after B field propagation                                                                                                                                                    
   #add Branch ParticlePropagator/stableParticles particlePropagator GenParticle                                                                                                            
   #add Branch ParticlePropagator/electrons       electronPropagator GenParticle                                                                                                            
   #add Branch ParticlePropagator/muons           muonPropagator GenParticle                                                                                                                
 
   ## after Pt filter: all delphes particles, not only status 1                                                                                                                             
-  #add Branch StatusPid/filteredParticles GenParticles GenParticle                                                                                                                  
- 
+  #add Branch StatusPid/filteredParticles GenParticles GenParticle                                                                                                                        
   ## track collection after: charged hadrons smearing and track eff, electron smearing and track eff                                                                                       
-  #add Branch TrackMerger/tracks trackCollectionNoMU Track                                                                                                                          
- 
+  #add Branch TrackMerger/tracks trackCollectionNoMU Track                                                                                                                                  
   ## output of the calorimeter simulation                                                                                                                                                  
   #add Branch Calorimeter/towers caloTowers Tower                                                                                                                                          
   #add Branch Calorimeter/photons RawPhotons Photon                                                                                                                                        
   #add Branch Calorimeter/eflowTracks eflowTracks Track                                                                                                                                    
-  #add Branch Calorimeter/eflowTracks eflowTowers Tower                                                                                                                                
- 
+  #add Branch Calorimeter/eflowTracks eflowTowers Tower                                                                                                                                     
   ## tracks after CHS                                                                                                                                                                      
-  #add Branch TrackPileUpSubtractor/eflowTracks trackCollectionCHS Track                                                                                                               
- 
+  #add Branch TrackPileUpSubtractor/eflowTracks trackCollectionCHS Track                                                                                                                    
   ## eflow output                                                                                                                                                                          
-  #add Branch EFlowMerger/eflow eflowCandidates Track                                                                                                                            
-  
+  #add Branch EFlowMerger/eflow eflowCandidates Track                                                                                                                                       
   ## Rho values                                                                                                                                                                            
   add Branch GlobalRhoKt4/rho GlobalRhoKt4 Rho
   add Branch GlobalRhoGridFastJet/rho GlobalRhoGridFastJet Rho
@@ -1270,16 +1262,18 @@ module TreeWriter TreeWriter {
 
 #####################################################                                                                                                                                      
 # Find uniquely identified photons/electrons/tau/jets                                                                                                                                      
-#####################################################                                                                                                                                 
+#####################################################                                                                                                                            
 #module UniqueObjectFinder UniqueObjectFinderGJ {                                                                                                                                          
 #   add InputArray PhotonIsolation/photons photons                                                                                                                                         
 #   add InputArray JetPileUpSubtractor/jets jets                                                                                                                                           
-#}                                                                                                                                                                                   
+#}                                                                                                                                                                                  
 #module UniqueObjectFinder UniqueObjectFinderEJ {                                                                                                                                          
 #   add InputArray ElectronIsolation/electrons electrons                                                                                                                                   
 #   add InputArray UniqueObjectFinderGJ/jets jets                                                                                                                                          
-#}                                                                                                                                                                                      
+#}                                                                                                                                                                                  
 #module UniqueObjectFinder UniqueObjectFinderMJ {                                                                                                                                          
 #   add InputArray MuonIsolation/muons muons                                                                                                                                               
 #   add InputArray UniqueObjectFinderEJ/jets jets                                                                                                                                          
-#}                                                                                                                                                                                       
+#}                                                                                                                                                                                    
+
+
