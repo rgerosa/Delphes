@@ -97,7 +97,7 @@ def writeJobs(workingdir,executable,executableDumper,configCard,inputdir,inputPU
      for i in range(njobs):
       ## create job directory         
       ## avoid to many jobs
-      if jobid > options.njobmax and options.njobmax != 0: break; 
+      if jobid >= options.njobmax and options.njobmax != 0: break; 
       jobdir = '%s/JOB_%d'%(workingdir,jobid)
       os.system("mkdir -p "+jobdir)        
 
@@ -147,7 +147,7 @@ def writeJobs(workingdir,executable,executableDumper,configCard,inputdir,inputPU
 
       jobid += 1; 
 
-     if jobid > options.njobmax and options.njobmax != 0: break; 
+     if jobid >= options.njobmax and options.njobmax != 0: break; 
 
     njobs = jobid;
     
