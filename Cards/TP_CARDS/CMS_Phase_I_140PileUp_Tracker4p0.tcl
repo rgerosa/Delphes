@@ -7,11 +7,8 @@ set ExecutionPath {
   PileUpMerger
 
   ModifyBeamSpot
-  GenBeamSpotFilter
 
   ParticlePropagator
-
-  StatusPid
 
   ChargedHadronTrackingEfficiency
   ElectronTrackingEfficiency
@@ -76,10 +73,12 @@ set ExecutionPath {
 
 }
 
-#  JetPileUpSubtractorGrid
-#  JetPileUpSubtractor4VArea
-#  PuppiJetPileUpSubtractorGrid
-#  PuppiJetPileUpSubtractor4VArea
+# StatusPid
+# GenBeamSpotFilter
+# JetPileUpSubtractorGrid
+# JetPileUpSubtractor4VArea
+# PuppiJetPileUpSubtractorGrid
+# PuppiJetPileUpSubtractor4VArea
 
 #### remove the module which do the filter of jet constituent                                                                                                                    
 # ConstituentFilter                                                                                                                                                          
@@ -677,18 +676,18 @@ module RunPUPPI RunPUPPI {
   set MinPuppiWeight 0.01
   set UseExp         false
   ## define puppi algorithm parameters (more than one for the same eta region is possible)                                                                                                 
-  add EtaMinBin           0.   2.5   3.0  2.5  3.0
-  add EtaMaxBin           2.5  3.0   10.0 3.0  10.0
-  add PtMinBin            0.1  0.5   1.0  0.5  1.0
-  add ConeSizeBin         0.3  0.3   0.3  0.3  0.3
-  add RMSPtMinBin         0.1  0.5   0.5  0.5  0.5
-  add RMSScaleFactorBin   1.0  1.0   1.0  1.0  1.0
-  add NeutralMinEBin      0.2  0.2   0.2  0.2  0.2
-  add NeutralPtSlope      0.02 0.02  0.02 0.02 0.02
-  add ApplyCHS            true true  true true true
-  add UseCharged          true false false false false
-  add ApplyLowPUCorr      true true  true  true  true
-  add MetricId            5    0     0     1     1
+  add EtaMinBin           0.   4.0  4.0  
+  add EtaMaxBin           4.0  10.0 10.0 
+  add PtMinBin            0.1  1.0  1.0  
+  add ConeSizeBin         0.3  0.3  0.3
+  add RMSPtMinBin         0.1  0.5  0.5
+  add RMSScaleFactorBin   1.0  1.0  1.0
+  add NeutralMinEBin      0.2  0.2  0.2
+  add NeutralPtSlope      0.02 0.02 0.02
+  add ApplyCHS            true true  true 
+  add UseCharged          true false false
+  add ApplyLowPUCorr      true true  true
+  add MetricId            5    0     1
   ## output name                                                                                                                                                                           
   set OutputArray PuppiParticles
   set OutputArrayTracks   puppiTracks

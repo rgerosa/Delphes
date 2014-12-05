@@ -7,11 +7,8 @@ set ExecutionPath {
   PileUpMerger 
 
   ModifyBeamSpot
-  GenBeamSpotFilter
 
   ParticlePropagator
-
-  StatusPid
 
   ChargedHadronTrackingEfficiency
   ElectronTrackingEfficiency
@@ -76,6 +73,8 @@ set ExecutionPath {
 
 }
 
+#  GenBeamSpotFilter
+#  StatusPid
 #  ConstituentFilter
 #  JetPileUpSubtractorGrid
 #  JetPileUpSubtractor4VArea
@@ -1211,7 +1210,7 @@ module TreeWriter TreeWriter {
   #add Branch ParticlePropagator/muons           muonPropagator GenParticle 
 
   ## after Pt filter: all delphes particles, not only status 1 
-  add Branch StatusPid/filteredParticles GenParticles GenParticle
+  #add Branch StatusPid/filteredParticles GenParticles GenParticle
  
   ## track collection after: charged hadrons smearing and track eff, electron smearing and track eff
   #add Branch TrackMerger/tracks trackCollectionNoMU Track
