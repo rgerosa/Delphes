@@ -88,9 +88,10 @@ def writeJobs(workingdir,executable,executableDumper,configCard,inputdir,inputPU
      residualEvents = nentries-options.eventsPerJob*njobs ;
      if residualEvents > 0 : njobs = njobs+1;
      
-     ## random number for pileup file 
+     ## random number for pileup file      
+     random.seed();
      pileupEntry = random.randint(0,len(listofPUfiles)-1);
-     
+
      ## create this jobs
      print "create job for file ",jobid/njobs," total file ",len(listoffiles);
 
