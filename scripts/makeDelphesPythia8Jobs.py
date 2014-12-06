@@ -74,6 +74,7 @@ def writeJobs(workingdir,executable,executableDumper,configCard,inputdir,inputPU
     for ifile in listoffiles:
      ## discover how many LHE events are there     
      res = commands.getstatusoutput("(./countEvents "+ifile+")");
+
      if res[0] == 0 : 
         print "not able to count lhe events --> continue "; 
         continue ;
@@ -93,7 +94,7 @@ def writeJobs(workingdir,executable,executableDumper,configCard,inputdir,inputPU
      pileupEntry = random.randint(0,len(listofPUfiles)-1);
 
      ## create this jobs
-     print "create job for file ",jobid/njobs," total file ",len(listoffiles);
+     print "create job for file ",jobid/njobs," total file ",len(listoffiles)," name ",ifile;
 
      for i in range(njobs):
       ## create job directory         
@@ -175,7 +176,6 @@ def checkJobs(wdir, output, queue, eosoutdir):
     print '  %s' %listdone
     for j in listdone:
         f = '%s/JOB_%d/subJob_%d.run'%(wdir,j,j)
-        #print 'rm %s/JOB_%d/sub_%d.run'%(wdir,j,j)
         if (os.path.isfile(f)):
             os.system('rm %s'%f)
             
