@@ -1,5 +1,4 @@
 
-
 #include <algorithm>
 #include <vector>
 #include <iostream>
@@ -87,6 +86,21 @@ float DeltaPhi(float phi1, float phi2)
   return dphi;
 }
 
+// function to fill a TChain with the list of input files to be processed
+bool FillChain(TChain& chain, const std::string& inputFileList){
+   std::ifstream inFile(inputFileList.c_str());
+   std::string buffer;
+   if(!inFile.is_open()){
+     std::cerr << "** ERROR: Can't open '" << inputFileList << "' for input" << std::endl;
+     return false;
+     }
+   while(1){
+     inFile >> buffer;
+     if(!inFile.good()) break;
+     chain.Add(buffer.c_str());
+     }
+   return true;
+  }
 
 //****************************************************************************************
 // main
@@ -100,21 +114,29 @@ int main (int argc, char *argv[])
   //change it for root input
   TChain* delphesNtuples = new TChain("Delphes");
   ExRootTreeReader *delphesTree = new ExRootTreeReader(delphesNtuples);
-  //new
+
+  // reading input files
+  if(argc < 3){
+      cout << "ERROR: not enough info provided" << endl;
+      return 0;
+  }
+
   //TTree *LT ;//=  (TTree*)(delphesNtuples);
   TFile* outputFile = TFile::Open(argv[2],"recreate");
   TTree* easyTree = new TTree("easyDelphes","easyDelphes");
   //----------------------------------------------------------------------------------------
-  // reading input files
-  if(argc < 3)
-    {
-      cout << "ERROR: not enough info provided" << endl;
-      return 0;
-    }
-    
-	
-  delphesNtuples -> Add(argv[1]);
-	
+
+   TString inputFileName = Form("%s",std::string(argv[1]).c_str());
+   if(inputFileName.Contains(".root"))
+     delphesNtuples -> Add(argv[1]);
+   else if (inputFileName.Contains(".txt")){
+       FillChain(*delphesNtuples,inputFileName.Data());
+   }
+   else{
+     cout << "ERROR: input argv[1] extension not known" << endl;
+     return 0;
+   }
+              	
   delphesNtuples -> BranchRef();
     
   Long64_t numberOfEntries = delphesTree->GetEntries();
