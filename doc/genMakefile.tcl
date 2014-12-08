@@ -264,7 +264,7 @@ all:
 
 }
 
-executableDeps {converters/*.cpp} {examples/*.cpp} {MyDelphesCodes/*.cpp}
+executableDeps {converters/*.cpp} {examples/*.cpp} {external/DelphesAnalysisCodes/*.cpp}
 
 executableDeps {readers/DelphesHepMC.cpp} {readers/DelphesLHEF.cpp} {readers/DelphesSTDHEP.cpp}
 
@@ -431,6 +431,7 @@ genMinBias_14TeV: external/MinBiasProduction/genMinBias_14TeV.cpp
 countEvents: external/LHEActions/countEvents.cpp
 	@echo ">> Compiling $<"
 	@$(CXX) $(CXXFLAGS) -o $@ $< 
+
 
 
 ###
