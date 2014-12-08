@@ -1,8 +1,4 @@
 
-/*c++ -O2 -lm `root-config --cflags --glibs` -L /afs/cern.ch/work/d/depoyraz/VBS/TP/CMSSW_6_2_0_SLHC19/src/Delphes_Two/Delphes -I /afs/cern.ch/work/d/depoyraz/VBS/TP/CMSSW_6_2_0_SLHC19/src/Delphes_Two/Delphes -l Delphes -o DelphesDumper DelphesDumper.cpp
-  ./DelphesDumper rootfile  output.root
-*/
-
 
 #include <algorithm>
 #include <vector>
@@ -1371,7 +1367,7 @@ int main (int argc, char *argv[])
 	
   //easyTree -> Print("easyDelphes");
   outputFile -> Write();
-  outputFile->Delete();
+  delete outputFile;
 }
 
 
