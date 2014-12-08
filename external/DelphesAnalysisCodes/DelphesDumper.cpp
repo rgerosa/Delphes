@@ -1,9 +1,3 @@
-
-/*c++ -O2 -lm `root-config --cflags --glibs` -L /afs/cern.ch/work/d/depoyraz/VBS/TP/CMSSW_6_2_0_SLHC19/src/Delphes_Two/Delphes -I /afs/cern.ch/work/d/depoyraz/VBS/TP/CMSSW_6_2_0_SLHC19/src/Delphes_Two/Delphes -l Delphes -o DelphesDumper DelphesDumper.cpp
-  ./DelphesDumper rootfile  output.root
-*/
-
-
 #include <algorithm>
 #include <vector>
 #include <iostream>
@@ -27,56 +21,45 @@
 
 using namespace std;
 
-//****************************************************************************************
-
-//****************************************************************************************
-// runs over all entries in the delphes tree
-
- 
-//****************************************************************************************
+//*******************************************
+// runs over all entries in the delphes tree 
+//*******************************************
 
 struct Lepton {
+
   unsigned int type; //0:electron , 1:muon
   unsigned int index;
   float lpt, leta, lphi, liso, lisoDBeta, lisoRhoCorr, lsumChargedHadron, lsumNeutral, lsumChargedPU, lsumAllParticles;
   double lch;
 };
 
-struct lheParticleDescendingPt
-{
-  bool operator() (LHEParticle* a, LHEParticle* b)
-  {
+struct lheParticleDescendingPt{
+  bool operator() (LHEParticle* a, LHEParticle* b){
     return a->PT > b->PT;
   }
 };	
-struct JetDescendingPt
-{
-  bool operator() (Jet* a, Jet* b)
-  {
+
+struct JetDescendingPt{
+  bool operator() (Jet* a, Jet* b){
     return a->PT > b->PT;
   }
 };
 
 
-struct leptonDescendingPt
-{
-  bool operator() (const Lepton& a, const Lepton& b)
-  {
+struct leptonDescendingPt{
+  bool operator() (const Lepton& a, const Lepton& b){
     return a.lpt > b.lpt;
   }
 };
 
-/* struct genParticleDescendingPt 
-{
-  bool operator() (GenParticle* a, GenParticle* b) 
-  {     
+struct genParticleDescendingPt {
+  bool operator() (GenParticle* a, GenParticle* b) {     
     return a->PT > b->PT;
   }
 }; 
-*/  
 
-float DeltaR(float eta1, float eta2, float phi1, float phi2)
-{
+
+float DeltaR(float eta1, float eta2, float phi1, float phi2){
   float deta = eta2 - eta1;
   float dphi = phi2 - phi1;
   if (fabs(dphi) > 3.14) dphi = 6.28 - fabs(dphi);
@@ -84,86 +67,98 @@ float DeltaR(float eta1, float eta2, float phi1, float phi2)
   return DELTAR;
 }
 
-float DeltaPhi(float phi1, float phi2)
-{
+float DeltaPhi(float phi1, float phi2){
   float dphi = phi2 - phi1;
   if (fabs(dphi) > 3.14) dphi = 6.28 - fabs(dphi);
   return dphi;
 }
 
+// function to fill a TChain with the list of input files to be processed
+bool FillChain(TChain& chain, const std::string& inputFileList){
+  std::ifstream inFile(inputFileList.c_str());
+  std::string buffer;
+  if(!inFile.is_open()){
+    std::cerr << "** ERROR: Can't open '" << inputFileList << "' for input" << std::endl;
+    return false;
+  }
+  while(1){
+    inFile >> buffer;
+    if(!inFile.good()) break;
+    chain.Add(buffer.c_str());
+  }
+  return true;
+}
 
-//****************************************************************************************
+//*************
 // main
-int main (int argc, char *argv[])
-{
-  //----------------------------------------------------------------------------------------
+//*************
+
+int main (int argc, char *argv[]){
+
   //importing delphes libraries
   gSystem->Load("libDelphes");
-  //----------------------------------------------------------------------------------------
-  //complex object definitions
-  //change it for root input
+
+  // In order to read input delphes tree
   TChain* delphesNtuples = new TChain("Delphes");
   ExRootTreeReader *delphesTree = new ExRootTreeReader(delphesNtuples);
-  //new
-  //TTree *LT ;//=  (TTree*)(delphesNtuples);
-  TFile* outputFile = TFile::Open(argv[2],"recreate");
-  TTree* easyTree = new TTree("easyDelphes","easyDelphes");
-  //----------------------------------------------------------------------------------------
+
   // reading input files
-  if(argc < 3)
-    {
+  if(argc < 3){
       cout << "ERROR: not enough info provided" << endl;
       return 0;
-    }
-    
+  }
+
+  // create output file and trees
+  TFile* outputFile = TFile::Open(argv[2],"recreate");
+  TTree* easyTree = new TTree("easyDelphes","easyDelphes");
+
+  TString inputFileName = Form("%s",std::string(argv[1]).c_str());
+  if(inputFileName.Contains(".root"))    	
+   delphesNtuples -> Add(argv[1]);
+  else if (inputFileName.Contains(".txt")){
+    FillChain(*delphesNtuples,inputFileName.Data());
+  }
+  else{
+      cout << "ERROR: input argv[1] extension not known" << endl;
+      return 0;
+  }    
+     
 	
-  delphesNtuples -> Add(argv[1]);
-	
-  delphesNtuples -> BranchRef();
-    
+  delphesNtuples -> BranchRef();    
   Long64_t numberOfEntries = delphesTree->GetEntries();
   cout<<"##### Number of Entires in the Delphes Tree is: "<<numberOfEntries<<endl;
-    
-    
-	
-    
+                   
   //----------------------------------------------------------------------------------------
   //variable management
-  //
-  // -> all objects in the output tree are stored in decreasing pt order.
-    
+  // -> all objects in the output tree are stored in decreasing pt order.    
   //--------- getting objects from the delphes tree
+
   TClonesArray* branchLHEParticle = delphesTree->UseBranch("LHEParticles");
-  TClonesArray* branchEl = delphesTree->UseBranch("Electron");
-  TClonesArray* branchMu = delphesTree->UseBranch("Muon");
-  TClonesArray* branchGenJet = delphesTree->UseBranch("GenJet");
-  TClonesArray* branchTrackJet = delphesTree->UseBranch("TrackJet");
-  TClonesArray* branchJet = delphesTree->UseBranch("JetPUID");
-  TClonesArray* branchPuppiJet = delphesTree->UseBranch("PuppiJetPUID");
+  TClonesArray* branchEl          = delphesTree->UseBranch("Electron");
+  TClonesArray* branchMu          = delphesTree->UseBranch("Muon");
+  TClonesArray* branchGenJet      = delphesTree->UseBranch("GenJet");
+  TClonesArray* branchTrackJet    = delphesTree->UseBranch("TrackJet");
+  TClonesArray* branchJet         = delphesTree->UseBranch("JetPUID");
+  TClonesArray* branchPuppiJet    = delphesTree->UseBranch("PuppiJetPUID");
   //TClonesArray* branchGenParticle = delphesTree->UseBranch("GenParticles");
     
-  TClonesArray* branchMET = delphesTree->UseBranch("MissingET");
+  TClonesArray* branchMET      = delphesTree->UseBranch("MissingET");
   TClonesArray* branchPuppiMET = delphesTree->UseBranch("PuppiMissingET");
-  TClonesArray* branchGenMET = delphesTree->UseBranch("GenMissingET");
+  TClonesArray* branchGenMET   = delphesTree->UseBranch("GenMissingET");
     
-  TClonesArray* branchNPU = delphesTree->UseBranch("NPU");
+  TClonesArray* branchNPU          = delphesTree->UseBranch("NPU");
   TClonesArray* branchGlobalRhokt4 = delphesTree->UseBranch("GlobalRhoKt4");
-  TClonesArray* branchGlobalRhoGFJ= delphesTree->UseBranch("GlobalRhoGridFastJet");
-  TClonesArray* branchRhokt4 = delphesTree->UseBranch("RhoKt4");
-  TClonesArray* branchRhoGFJ= delphesTree->UseBranch("RhoGridFastJet");
-  TClonesArray* branchPuppiRhokt4 = delphesTree->UseBranch("PuppiRhoKt4");
-  TClonesArray* branchPuppiRhoGFJ= delphesTree->UseBranch("PuppiRhoGridFastJet");
-  
-
-    
-
-    
-    
+  TClonesArray* branchGlobalRhoGFJ = delphesTree->UseBranch("GlobalRhoGridFastJet");
+  TClonesArray* branchRhokt4       = delphesTree->UseBranch("RhoKt4");
+  TClonesArray* branchRhoGFJ       = delphesTree->UseBranch("RhoGridFastJet");
+  TClonesArray* branchPuppiRhokt4  = delphesTree->UseBranch("PuppiRhoKt4");
+  TClonesArray* branchPuppiRhoGFJ  = delphesTree->UseBranch("PuppiRhoGridFastJet");
+              
   //--------- Creating branches for the new (light) tree
     
   //--------- LHE Information
-  int nlhe=4;
-  int nlhes=2;
+  int nlhe  = 4;
+  int nlhes = 2;
     
   float leptonLHEpt_tmp[nlhe], leptonLHEeta_tmp[nlhe], leptonLHEphi_tmp[nlhe], leptonLHEpid_tmp[nlhe], leptonLHEch_tmp[nlhe], leptonLHEm_tmp[nlhe] ;
   float neutrinoLHEpt_tmp[nlhe], neutrinoLHEeta_tmp[nlhe], neutrinoLHEphi_tmp[nlhe], neutrinoLHEpid_tmp[nlhe];
