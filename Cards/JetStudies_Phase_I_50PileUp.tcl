@@ -36,7 +36,6 @@ set ExecutionPath {
   RhoGridFastJet
 
   FastJetFinder
-  TrackJetFinder
   GenJetFinder
 
   JetPileUpSubtractor
@@ -77,18 +76,19 @@ set ExecutionPath {
   PuppiBTaggingMedium
   PuppiBTaggingTight
 
-  PileUpJetID
-  PuppiPileUpJetID
-
   TreeWriter
 
 }
+
+#  PileUpJetID
+#  PuppiPileUpJetID
 
 
 
 # PileUpJetIDMissingET  
 # ConstituentFilter
 # PuppiConstituentFilter
+# TrackJetFinder
  
 ## removed NoPU sequence
 # ParticlePropagatorNoPU
@@ -126,7 +126,7 @@ module PileUpMerger PileUpMerger {
  set OutputBSX 0.24
  set OutputBSY 0.39  
  # pre-generated minbias input file --> change this dummy name <random access with unifor number between 0 and NEntries>
- set PileUpFile /afs/cern.ch/user/s/spigazzi/work/public/PU_14TeV/MinBias_14TeV_100k_TunePP15.pileup
+ set PileUpFile MiniBias_0.pileUp
  #average expected pile up <poissonian generation>
  set MeanPileUp 50
  # spread in the beam direction in m (assumes gaussian) ; 
@@ -2476,7 +2476,7 @@ module TreeWriter TreeWriter {
   add Branch JetPileUpSubtractor/jets Jet Jet
   ## add Branch JetPileUpSubtractorGrid/jets Jet Jet
   add Branch JetPileUpSubtractor4VArea/jets Jet4VArea Jet
-  add Branch PileUpJetID/jets JetPUID Jet
+  #add Branch PileUpJetID/jets JetPUID Jet
 
   ## PUPPI
   add Branch RunPUPPI/weightedparticles puppiParticles GenParticle
@@ -2485,7 +2485,7 @@ module TreeWriter TreeWriter {
   add Branch PuppiJetPileUpSubtractor/jets PuppiJet Jet
   add Branch PuppiJetPileUpSubtractorGrid/jets PuppiJet Jet
   add Branch PuppiJetPileUpSubtractor4VArea/jets PuppiJet4VArea Jet
-  add Branch PuppiPileUpJetID/jets PuppiJetPUID Jet
+#  add Branch PuppiPileUpJetID/jets PuppiJetPUID Jet
 
   ## MET
   add Branch GenMissingET/momentum GenMissingET MissingET

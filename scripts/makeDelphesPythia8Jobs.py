@@ -123,8 +123,8 @@ def writeJobs(workingdir,executable,executableDumper,configCard,inputdir,inputPU
       jobscript.write('cd %s \n'%jobdir)
       jobscript.write('eval ` scramv1 runtime -sh ` \n')
       jobscript.write('cd - \n')
-      jobscript.write('cmsStage %s ./ \n'%(pileUpName)) 
-      jobscript.write('cmsStage %s ./ \n'%(fileSplit))
+      jobscript.write('cmsStage -f %s ./ \n'%(pileUpName)) 
+      jobscript.write('cmsStage -f %s ./ \n'%(fileSplit))
       jobscript.write('scp '+os.getcwd()+"/"+executable+" ./ \n"); 
       if( executableDumper != '' ) : 
           jobscript.write('scp '+os.getcwd()+"/"+executableDumper+" ./ \n"); 
@@ -140,7 +140,7 @@ def writeJobs(workingdir,executable,executableDumper,configCard,inputdir,inputPU
       if (eosoutdir == ''):
             jobscript.write('\t cp ./%s_%s.root %s \n'%(outputname,jobid,jobdir))
       else:
-            jobscript.write('\t cmsStage ./%s_%d.root %s/ \n'%(outputname,jobid,eosoutdir))
+            jobscript.write('\t cmsStage -f ./%s_%d.root %s/ \n'%(outputname,jobid,eosoutdir))
       jobscript.write('\t touch %s/subJob_%d.done \n'%(jobdir,jobid))
       jobscript.write('else \n')
       jobscript.write('\t touch %s/subJob_%d.fail \n'%(jobdir,jobid))
@@ -167,31 +167,40 @@ def submitJobs(workingdir, njobs, queue):
         
 
 
-def checkJobs(wdir, output, queue, eosoutdir):
+def checkJobs(wdir):
+
+    ## find total number of jobs 
     jobs = glob.glob( '%s/JOB_*/subJob*.sh'% (wdir) )
     print 'Total number of jobs: %d' %len(jobs)
-    
-    listdone = [j for j in range(len(jobs)) if os.path.isfile('%s/JOB_%d/subJob_%d.done' % (wdir,j,j))]
+        
+    ## list of job that are done    
+    listdone = [];
+    for j in range(len(jobs)):
+       if os.path.isfile('%s/JOB_%d/subJob_%d.done' % (wdir,j,j)):
+          listdone.append(j);
+
     print 'Total number of DONE jobs: %s ' % len(listdone)
-    print '  %s' %listdone
+        
+    ## eliminate run jobs for jobs that are done
+    
     for j in listdone:
         f = '%s/JOB_%d/subJob_%d.run'%(wdir,j,j)
         if (os.path.isfile(f)):
             os.system('rm %s'%f)
             
+    ## print running jobs    
     listrun = [j for j in range(len(jobs)) if os.path.isfile('%s/JOB_%d/subJob_%d.run' % (wdir,j,j))]
     print 'Total number of RUNNING jobs: %d ' %len(listrun)
-    print '   %s' %listrun
-            
+         
+    ## print list failed
     listfailed = [j for j in range(len(jobs)) if os.path.isfile('%s/JOB_%d/subJob_%d.fail' % (wdir,j,j))]
     print 'Failed jobs: %s ' % listfailed
     print '   %s' %listfailed
                         
     for j in listfailed:
-     print 'bsub -q %s -o %s/JOB_%d/sub_%d.log %s/JOB_%d/subJob_%d.sh'%(queue,wdir,j,j,wdir,j,j )
-                    
-
-
+     print 'bsub -q %s -o %s/JOB_%d/sub_%d.log %s/JOB_%d/subJob_%d.sh -o -e %s/JOB_%d/subJob_%d.err '%(queue,wdir,j,j,wdir,j,j,wdir,j,j)
+     os.system('bsub -q %s -o %s/JOB_%d/sub_%d.log %s/JOB_%d/subJob_%d.sh -o -e %s/JOB_%d/subJob_%d.err '%(queue,wdir,j,j,wdir,j,j,wdir,j,j));                    
+    
 #-----------------------------------------
 #--- MAIN CODE
 #-----------------------------------------
@@ -236,7 +245,7 @@ if not options.checkJobs and not options.resubmit: ## if you want to create jobs
   # resubmit option
    else:
     print "submit options is not enables ";
-  elif options.resubmit and options.jobmin >-1 and options.jobmax >-1:
+  elif options.resubmit and options.jobmin >-1 and options.jobmax >-1 and not options.checkJobs:
     for ijob in range(options.jobmax-options.jobmin):
      print 'Resubmitting job %d ' %(ijob+options.jobmin)
      resubcmd = 'bsub -q %s -o %s/JOB_%d/subJob_%d.log %s/JOB_%d/subJob_%d.sh'%(options.queue,workingdir,options.jobmin+ijob,options.jobmin+ijob,workingdir,options.jobmin+ijob,options.jobmin+ijob)
@@ -244,5 +253,5 @@ if not options.checkJobs and not options.resubmit: ## if you want to create jobs
     os.system(resubcmd)
 
 elif options.checkJobs:
-    checkJobs(workingdir,options.outputname,options.queue,eosoutdir);
+    checkJobs(workingdir);
     
