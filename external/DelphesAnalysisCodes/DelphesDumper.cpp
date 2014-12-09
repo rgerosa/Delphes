@@ -538,7 +538,7 @@ int main (int argc, char *argv[])
   double  ch_tmp[nlep];
 
   easyTree -> Branch("mll",&mll_tmp,"mll/F");
-  easyTree -> Branch("PTll",&PTll_tmp,"PTll/F");
+  easyTree -> Branch("ptll",&PTll_tmp,"ptll/F");
   easyTree -> Branch("dPhill",&dPhill_tmp,"dPhill/F");
   easyTree -> Branch("dRll",&dRll_tmp,"dRll/F");
   easyTree -> Branch("dEtall",&dEtall_tmp,"dEtall/F");
@@ -1231,28 +1231,47 @@ int main (int argc, char *argv[])
       }
 		
       int tjet_entries = branchTrackJet->GetEntriesFast();
-		
+
+      // Cleaned RECOjets for making jet veto variables
+      vector <Jet*> cleanedJets;
+      for(vector<Jet*>::const_iterator iJet = puidJet.begin(); iJet != puidJet.end(); ++iJet) {
+	bool isLepton = false;
+	for(vector<Lepton>::const_iterator iLept = leptonvec.begin(); iLept != leptonvec.end(); ++iLept) {
+	  float dR = DeltaR((*iJet)->Eta, iLept->leta, (*iJet)->Phi,  iLept->lphi);
+	  if( dR < 0.3 ) isLepton = true;
+	}
+	if( ! isLepton ) cleanedJets.push_back(*iJet);
+      }
+      float etaLow=0, etaHigh=0;
+      if( cleanedJets.size() >= 2 ) {
+	etaLow = cleanedJets[0]->Eta;
+	if( cleanedJets[1]->Eta < etaLow ) {
+	  etaHigh = etaLow;
+	  etaLow = cleanedJets[1]->Eta;
+	}
+	else etaHigh = cleanedJets[1]->Eta;
+      }
+//      cout << "Eta: " << etaLow << ", " << etaHigh << endl;
+//      cout << "size jets: " << puidJet.size() << endl;
+//      cout << "size cleaned jets: " << cleanedJets.size() << endl;
+	
+      // push back track jets	
       for (int i = 0 ; i < tjet_entries  ; i++) {
 	Jet *trackjet = (Jet*) branchTrackJet->At(i);
 	trackJet.push_back(trackjet);
 	trackJetIndex.push_back(i);
 	
+	// Jet veto variables
 	bool passLeptonCleaning = true;
 	bool passJetCleaning = false;
 	for( unsigned int i =0; i<leptonvec.size(); i++ ) {
 	  float dR = DeltaR(trackjet->Eta, leptonvec.at(i).leta, trackjet->Phi,  leptonvec.at(i).lphi);
 	  if( dR < 0.3 ) passLeptonCleaning=false;
 	}
+//	if( passLeptonCleaning ) cout<< "trackJet passed Lepton cleaning." <<endl;
     
-	if( jetpt_tmp[1] != -999. ) {
-	  float etaLow, etaHigh;
-	  etaLow = jeteta_tmp[0];
-	  if( jeteta_tmp[1] < etaLow ) {
-	    etaHigh = etaLow;
-	    etaLow = jeteta_tmp[1];
-	  }
-	  else etaHigh = jeteta_tmp[1];
-    
+	if( cleanedJets.size() >= 2 ) {  
+//	  cout << "track jet eta: " << trackjet->Eta << endl;
 	  if( trackjet->Eta < (etaHigh - 0.5) && trackjet->Eta > (etaLow + 0.5) ) {
 	    passJetCleaning = true;
 	  }
@@ -1262,9 +1281,9 @@ int main (int argc, char *argv[])
 	    nSoftJets_tmp++;
 	  }
 	}
-    
-    
-      }			
+      }
+//      cout << "nSoftJets: " << nSoftJets_tmp << endl; 
+//      cout << "trackJets size: " << trackJet.size() << endl; 			
 						
       int njetstrack = (trackJetIndex.size()<8) ? trackJetIndex.size():8;
             
