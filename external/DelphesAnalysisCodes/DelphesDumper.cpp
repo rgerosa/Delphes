@@ -33,45 +33,38 @@ using namespace std;
 struct Lepton {
   unsigned int type; //0:electron , 1:muon
   unsigned int index;
-  float lpt, leta, lphi, liso, lisoDBeta, lisoRhoCorr, lsumChargedHadron, lsumNeutral, lsumChargedPU, lsumAllParticles;
-  double lch;
+  float        lpt, leta, lphi, liso, lisoDBeta, lisoRhoCorr, lsumChargedHadron, lsumNeutral, lsumChargedPU, lsumAllParticles;
+  int          lch;
 };
 
-struct lheParticleDescendingPt
-{
-  bool operator() (LHEParticle* a, LHEParticle* b)
-  {
+struct lheParticleDescendingPt {
+  bool operator() (LHEParticle* a, LHEParticle* b){
     return a->PT > b->PT;
   }
 };	
-struct JetDescendingPt
-{
-  bool operator() (Jet* a, Jet* b)
-  {
+
+struct JetDescendingPt {
+  bool operator() (Jet* a, Jet* b){
     return a->PT > b->PT;
   }
 };
 
 
-struct leptonDescendingPt
-{
-  bool operator() (const Lepton& a, const Lepton& b)
-  {
+struct leptonDescendingPt {
+  bool operator() (const Lepton& a, const Lepton& b){
     return a.lpt > b.lpt;
   }
 };
 
-/* struct genParticleDescendingPt 
-   {
-   bool operator() (GenParticle* a, GenParticle* b) 
-   {     
-   return a->PT > b->PT;
-   }
-   }; 
-*/  
+struct genParticleDescendingPt {
+  bool operator() (GenParticle* a, GenParticle* b) {
+    return a->PT > b->PT;
+  }
+}; 
+ 
 
-float DeltaR(float eta1, float eta2, float phi1, float phi2)
-{
+float DeltaR(float eta1, float eta2, float phi1, float phi2){
+
   float deta = eta2 - eta1;
   float dphi = phi2 - phi1;
   if (fabs(dphi) > 3.14) dphi = 6.28 - fabs(dphi);
@@ -79,8 +72,8 @@ float DeltaR(float eta1, float eta2, float phi1, float phi2)
   return DELTAR;
 }
 
-float DeltaPhi(float phi1, float phi2)
-{
+float DeltaPhi(float phi1, float phi2){
+
   float dphi = phi2 - phi1;
   if (fabs(dphi) > 3.14) dphi = 6.28 - fabs(dphi);
   return dphi;
@@ -104,8 +97,8 @@ bool FillChain(TChain& chain, const std::string& inputFileList){
 
 //****************************************************************************************
 // main
-int main (int argc, char *argv[])
-{
+int main (int argc, char *argv[]){
+
   //----------------------------------------------------------------------------------------
   //importing delphes libraries
   gSystem->Load("libDelphes");
@@ -141,10 +134,11 @@ int main (int argc, char *argv[])
     
   Long64_t numberOfEntries = delphesTree->GetEntries();
   cout<<"##### Number of Entires in the Delphes Tree is: "<<numberOfEntries<<endl;
-    
-    
-	
-    
+  
+  int useGenParticles = 0;
+  if(argc < 4) useGenParticles = 0;
+  else     useGenParticles = atoi(argv[3]);
+       
   //----------------------------------------------------------------------------------------
   //variable management
   //
@@ -152,13 +146,14 @@ int main (int argc, char *argv[])
     
   //--------- getting objects from the delphes tree
   TClonesArray* branchLHEParticle = delphesTree->UseBranch("LHEParticles");
-  TClonesArray* branchEl = delphesTree->UseBranch("Electron");
-  TClonesArray* branchMu = delphesTree->UseBranch("Muon");
-  TClonesArray* branchGenJet = delphesTree->UseBranch("GenJet");
-  TClonesArray* branchTrackJet = delphesTree->UseBranch("TrackJet");
-  TClonesArray* branchJet = delphesTree->UseBranch("JetPUID");
-  TClonesArray* branchPuppiJet = delphesTree->UseBranch("PuppiJetPUID");
-  //TClonesArray* branchGenParticle = delphesTree->UseBranch("GenParticles");
+  TClonesArray* branchEl          = delphesTree->UseBranch("Electron");
+  TClonesArray* branchMu          = delphesTree->UseBranch("Muon");
+  TClonesArray* branchGenJet      = delphesTree->UseBranch("GenJet");
+  TClonesArray* branchTrackJet    = delphesTree->UseBranch("TrackJet");
+  TClonesArray* branchJet         = delphesTree->UseBranch("JetPUID");
+  TClonesArray* branchPuppiJet    = delphesTree->UseBranch("PuppiJetPUID");
+  TClonesArray* branchGenParticle = 0;
+  if(useGenParticles)  branchGenParticle = delphesTree->UseBranch("GenParticles");
     
   TClonesArray* branchMET = delphesTree->UseBranch("MissingET");
   TClonesArray* branchPuppiMET = delphesTree->UseBranch("PuppiMissingET");
@@ -171,12 +166,7 @@ int main (int argc, char *argv[])
   TClonesArray* branchRhoGFJ= delphesTree->UseBranch("RhoGridFastJet");
   TClonesArray* branchPuppiRhokt4 = delphesTree->UseBranch("PuppiRhoKt4");
   TClonesArray* branchPuppiRhoGFJ= delphesTree->UseBranch("PuppiRhoGridFastJet");
-  
-
-    
-
-    
-    
+             
   //--------- Creating branches for the new (light) tree
     
   //--------- LHE Information
@@ -249,17 +239,17 @@ int main (int argc, char *argv[])
   }
   
   //------Gen Particles  
+  int ngen=4;
+  float leptonGenpt_tmp[ngen];
+  float leptonGenpid_tmp[ngen];
+  float leptonGenphi_tmp[ngen];
+  float leptonGeneta_tmp[ngen];
+  float neutrinoGenpt_tmp[ngen];
+  float neutrinoGenpid_tmp[ngen];
+  float neutrinoGenphi_tmp[ngen];
+  float neutrinoGeneta_tmp[ngen];
   
-  /*  int ngen=4;
-      float leptonGenpt_tmp[ngen];
-      float leptonGenpid_tmp[ngen];
-      float leptonGenphi_tmp[ngen];
-      float leptonGeneta_tmp[ngen];
-      float neutrinoGenpt_tmp[ngen];
-      float neutrinoGenpid_tmp[ngen];
-      float neutrinoGenphi_tmp[ngen];
-      float neutrinoGeneta_tmp[ngen];
-  
+  if(useGenParticles){
   	
       for(int igen = 0; igen<ngen; igen++){
       TString leptonGenptStr = "leptonGenpt"; leptonGenptStr += (igen+1);
@@ -281,8 +271,7 @@ int main (int argc, char *argv[])
       easyTree -> Branch(neutrinoGenphiStr,&neutrinoGenphi_tmp[igen],neutrinoGenphiStr+"/F");
       easyTree -> Branch(neutrinoGenpidStr,&neutrinoGenpid_tmp[igen],neutrinoGenpidStr+"/F");
       }
-  
-  */  
+  }
 	
   //--------- GEN JETS Information
   int ngjet=4;
@@ -352,6 +341,7 @@ int main (int argc, char *argv[])
   float jetptD_tmp[njet], jetptDNe_tmp[njet], jetptDCh_tmp[njet];
   float jetnNeutral_tmp[njet], jetnCharged_tmp[njet], jetneuEMfrac_tmp[njet], jetneuHadfrac_tmp[njet];
   float jetbetaClassic_tmp[njet],jetbetaClassicStar_tmp[njet], jetbeta_tmp[njet], jetbetaStar_tmp[njet], jetconstituents_tmp[njet], jetaxis2_tmp[njet];
+  int   pileupIDFlagCutBased_tmp[njet];
   float mjj_tmp, detajj_tmp; 
   int njet_tmp, njetid_tmp, nbjet_tmp, hardbjpb_tmp, softbjpb_tmp;
 
@@ -397,7 +387,8 @@ int main (int argc, char *argv[])
     TString jetbetaStarStr = "jetbetaStar"; jetbetaStarStr += (ijet+1);
     TString jetconstituentsStr = "jetconstituents"; jetconstituentsStr += (ijet+1);
     TString jetaxis2Str = "jetaxis2_"; jetaxis2Str += (ijet+1);
-        
+    TString pileupIDFlagCutBasedStr = "jetpileupIDFlagCutBased"; pileupIDFlagCutBasedStr += (ijet+1);
+    
     easyTree -> Branch(jetptStr,&jetpt_tmp[ijet],jetptStr+"/F");
     easyTree -> Branch(jetetaStr,&jeteta_tmp[ijet],jetetaStr+"/F");
     easyTree -> Branch(jetphiStr,&jetphi_tmp[ijet],jetphiStr+"/F");
@@ -431,6 +422,7 @@ int main (int argc, char *argv[])
     easyTree -> Branch(jetbetaStarStr,&jetbetaStar_tmp[ijet],jetbetaStarStr+"/F");
     easyTree -> Branch(jetconstituentsStr,&jetconstituents_tmp[ijet],jetconstituentsStr+"/F");
     easyTree -> Branch(jetaxis2Str,&jetaxis2_tmp[ijet],jetaxis2Str+"/F");
+    easyTree -> Branch(pileupIDFlagCutBasedStr,&pileupIDFlagCutBased_tmp[ijet],pileupIDFlagCutBasedStr+"/I");
   }
         
   //---------  PUPPI JETS (JetPUID) Information
@@ -443,6 +435,7 @@ int main (int argc, char *argv[])
   float jetptD_puppi_tmp[npujet], jetptDNe_puppi_tmp[npujet], jetptDCh_puppi_tmp[npujet];
   float jetnNeutral_puppi_tmp[npujet], jetnCharged_puppi_tmp[npujet], jetneuEMfrac_puppi_tmp[npujet], jetneuHadfrac_puppi_tmp[npujet];
   float jetbetaClassic_puppi_tmp[npujet],jetbetaClassicStar_puppi_tmp[npujet], jetbeta_puppi_tmp[npujet], jetbetaStar_puppi_tmp[npujet], jetconstituents_puppi_tmp[npujet], jetaxis2_puppi_tmp[npujet];
+  int   pileupIDFlagCutBased_puppi_tmp[njet];
   float mjj_puppi_tmp, detajj_puppi_tmp;
   int njet_puppi_tmp, njetid_puppi_tmp, nbjet_puppi_tmp, hardbjpb_puppi_tmp, softbjpb_puppi_tmp;
 
@@ -488,6 +481,7 @@ int main (int argc, char *argv[])
     TString jetbetaStar_puppiStr = "jetbetaStar_puppiStr"; jetbetaStar_puppiStr +=  (ijet+1);
     TString jetconstituents_puppiStr = "jetconstituents_puppiStr"; jetconstituents_puppiStr +=  (ijet+1);
     TString jetaxis2_puppiStr = "jetaxis2_puppiStr"; jetaxis2_puppiStr +=  (ijet+1);
+    TString pileupIDFlagCutBased_puppiStr = "jetpileupIDFlagCutBased_puppi"; pileupIDFlagCutBased_puppiStr += (ijet+1);
     
     
     easyTree -> Branch(jetpt_puppiStr,&jetpt_puppi_tmp[ijet],jetpt_puppiStr+"/F");
@@ -523,6 +517,7 @@ int main (int argc, char *argv[])
     easyTree -> Branch(jetbetaStar_puppiStr,&jetbetaStar_puppi_tmp[ijet],jetbetaStar_puppiStr+"/F");
     easyTree -> Branch(jetconstituents_puppiStr,&jetconstituents_puppi_tmp[ijet],jetconstituents_puppiStr+"/F");
     easyTree -> Branch(jetaxis2_puppiStr,&jetaxis2_puppi_tmp[ijet],jetaxis2_puppiStr+"/F");
+    easyTree -> Branch(pileupIDFlagCutBased_puppiStr,&pileupIDFlagCutBased_puppi_tmp[ijet],pileupIDFlagCutBased_puppiStr+"/I");
   }
 
 
@@ -535,7 +530,7 @@ int main (int argc, char *argv[])
 
   float pt_tmp[nlep], eta_tmp[nlep], phi_tmp[nlep], iso_tmp[nlep], isoDBeta_tmp[nlep], isoRhoCorr_tmp[nlep] ;
   float sumChargedHadron_tmp[nlep], sumNeutral_tmp[nlep], sumChargedPU_tmp[nlep], sumAllParticles_tmp[nlep];
-  double  ch_tmp[nlep];
+  int   ch_tmp[nlep];
 
   easyTree -> Branch("mll",&mll_tmp,"mll/F");
   easyTree -> Branch("ptll",&PTll_tmp,"ptll/F");
@@ -782,7 +777,7 @@ int main (int argc, char *argv[])
             
       //--------- GenParticle filling
 
-      /*
+      if(useGenParticles){
 
 	vector< int> leptonID;
 	vector< int> neutrinoID;
@@ -848,7 +843,7 @@ int main (int argc, char *argv[])
 	neutrinoGenphi_tmp[j] = genNeutrino.at(j)->Phi;
 	neutrinoGenpid_tmp[j] = genNeutrino.at(j)->PID;
 	}
-      */			
+      }			
                
       //------ GEN JET Filling  -----------------//
         
@@ -918,6 +913,7 @@ int main (int argc, char *argv[])
 	jetnNeutral_tmp[k]=-999;  jetnCharged_tmp[k]=-999;  jetneuEMfrac_tmp[k]=-999;  jetneuHadfrac_tmp[k]=-999;
 	jetbetaClassic_tmp[k]=-999; jetbetaClassicStar_tmp[k]=-999;    jetbeta_tmp[k]=-999;  jetbetaStar_tmp[k]=-999;
 	jetconstituents_tmp[k]=-999;  jetaxis2_tmp[k]=-999;
+        pileupIDFlagCutBased_tmp[k] = -999;
       }
         
       int jet_entries = branchJet->GetEntriesFast();
@@ -980,6 +976,7 @@ int main (int argc, char *argv[])
 	jetbeta_tmp[j] = puidJet.at(j)->beta;
 	jetbetaStar_tmp[j] = puidJet.at(j)->betaStar;
 	jetconstituents_tmp[j] = puidJet.at(j)->constituents;
+        pileupIDFlagCutBased_tmp[j] = puidJet.at(j)->pileupIDFlagCutBased;
       }
 			 
       if (njetspuid >= 2){
@@ -1021,6 +1018,7 @@ int main (int argc, char *argv[])
 	jetnNeutral_puppi_tmp[k]=-999;  jetnCharged_puppi_tmp[k]=-999;  jetneuEMfrac_puppi_tmp[k]=-999;  jetneuHadfrac_puppi_tmp[k]=-999;
 	jetbetaClassic_puppi_tmp[k]=-999; jetbetaClassicStar_puppi_tmp[k]=-999;    jetbeta_puppi_tmp[k]=-999;  jetbetaStar_puppi_tmp[k]=-999;
 	jetconstituents_puppi_tmp[k]=-999;  jetaxis2_puppi_tmp[k]=-999;
+        pileupIDFlagCutBased_puppi_tmp[k] = -999;
       }
 
       int puppijet_entries = branchPuppiJet->GetEntriesFast();
@@ -1084,6 +1082,7 @@ int main (int argc, char *argv[])
 	jetbeta_puppi_tmp[j] = puppiJet.at(j)->beta;
 	jetbetaStar_puppi_tmp[j] = puppiJet.at(j)->betaStar;
 	jetconstituents_puppi_tmp[j] = puppiJet.at(j)->constituents;
+        pileupIDFlagCutBased_puppi_tmp[j] = puppiJet.at(j)->pileupIDFlagCutBased;
       }
     
       if (njetspuppi >= 2){
