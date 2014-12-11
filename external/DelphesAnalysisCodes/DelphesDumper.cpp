@@ -15,6 +15,9 @@
 #include "TObjArray.h"
 #include "TLorentzVector.h"
 #include "TMath.h"
+#include "Math/Vector3D.h"
+#include "Math/Vector4D.h"
+
 #include "TStopwatch.h"
 #include "classes/DelphesClasses.h"
 #include "external/ExRootAnalysis/ExRootTreeReader.h"
@@ -34,7 +37,7 @@ struct Lepton {
   unsigned int type; //0:electron , 1:muon
   unsigned int index;
   float        lpt, leta, lphi, liso, lisoDBeta, lisoRhoCorr, lsumChargedHadron, lsumNeutral, lsumChargedPU, lsumAllParticles;
-  int          lch;
+  int          lch, lpid;
 };
 
 struct lheParticleDescendingPt {
@@ -81,19 +84,19 @@ float DeltaPhi(float phi1, float phi2){
 
 // function to fill a TChain with the list of input files to be processed
 bool FillChain(TChain& chain, const std::string& inputFileList){
-   std::ifstream inFile(inputFileList.c_str());
-   std::string buffer;
-   if(!inFile.is_open()){
-     std::cerr << "** ERROR: Can't open '" << inputFileList << "' for input" << std::endl;
-     return false;
-     }
-   while(1){
-     inFile >> buffer;
-     if(!inFile.good()) break;
-     chain.Add(buffer.c_str());
-     }
-   return true;
+  std::ifstream inFile(inputFileList.c_str());
+  std::string buffer;
+  if(!inFile.is_open()){
+    std::cerr << "** ERROR: Can't open '" << inputFileList << "' for input" << std::endl;
+    return false;
   }
+  while(1){
+    inFile >> buffer;
+    if(!inFile.good()) break;
+    chain.Add(buffer.c_str());
+  }
+  return true;
+}
 
 //****************************************************************************************
 // main
@@ -110,8 +113,8 @@ int main (int argc, char *argv[]){
 
   // reading input files
   if(argc < 3){
-      cout << "ERROR: not enough info provided" << endl;
-      return 0;
+    cout << "ERROR: not enough info provided" << endl;
+    return 0;
   }
 
   //TTree *LT ;//=  (TTree*)(delphesNtuples);
@@ -119,16 +122,16 @@ int main (int argc, char *argv[]){
   TTree* easyTree = new TTree("easyDelphes","easyDelphes");
   //----------------------------------------------------------------------------------------
 
-   TString inputFileName = Form("%s",std::string(argv[1]).c_str());
-   if(inputFileName.Contains(".root"))
-     delphesNtuples -> Add(argv[1]);
-   else if (inputFileName.Contains(".txt")){
-       FillChain(*delphesNtuples,inputFileName.Data());
-   }
-   else{
-     cout << "ERROR: input argv[1] extension not known" << endl;
-     return 0;
-   }
+  TString inputFileName = Form("%s",std::string(argv[1]).c_str());
+  if(inputFileName.Contains(".root"))
+    delphesNtuples -> Add(argv[1]);
+  else if (inputFileName.Contains(".txt")){
+    FillChain(*delphesNtuples,inputFileName.Data());
+  }
+  else{
+    cout << "ERROR: input argv[1] extension not known" << endl;
+    return 0;
+  }
               	
   delphesNtuples -> BranchRef();
     
@@ -251,7 +254,7 @@ int main (int argc, char *argv[]){
   
   if(useGenParticles){
   	
-      for(int igen = 0; igen<ngen; igen++){
+    for(int igen = 0; igen<ngen; igen++){
       TString leptonGenptStr = "leptonGenpt"; leptonGenptStr += (igen+1);
       TString leptonGenetaStr = "leptonGeneta"; leptonGenetaStr += (igen+1);
       TString leptonGenphiStr = "leptonGenphi"; leptonGenphiStr += (igen+1);
@@ -270,7 +273,7 @@ int main (int argc, char *argv[]){
       easyTree -> Branch(neutrinoGenetaStr,&neutrinoGeneta_tmp[igen],neutrinoGenetaStr+"/F");
       easyTree -> Branch(neutrinoGenphiStr,&neutrinoGenphi_tmp[igen],neutrinoGenphiStr+"/F");
       easyTree -> Branch(neutrinoGenpidStr,&neutrinoGenpid_tmp[igen],neutrinoGenpidStr+"/F");
-      }
+    }
   }
 	
   //--------- GEN JETS Information
@@ -300,36 +303,43 @@ int main (int argc, char *argv[]){
   }
 	
   //--------- TRACK JETS Information
-  int ntjet=8;
-	
-  float jetTrackpt_tmp[ntjet], jetTracketa_tmp[ntjet], jetTrackphi_tmp[ntjet],  jetTrackm_tmp[ntjet] ;
-  float jetTrackAreaX_tmp[ntjet], jetTrackAreaY_tmp[ntjet], jetTrackAreaZ_tmp[ntjet], jetTrackAreaT_tmp[ntjet];
+  vector <TLorentzVector> TrackJet_V4_tmp;
   float HtSoft_tmp, nSoftJets_tmp;
-	
+  easyTree -> Branch("TrackJet_V4","vector<TLorentzVector>",&TrackJet_V4_tmp);
   easyTree -> Branch("HtSoft",&HtSoft_tmp,"HtSoft/F");
   easyTree -> Branch("nSoftJets",&nSoftJets_tmp,"nSoftJets/F");
-    
-  for(int ijet = 0; ijet<ntjet; ijet++){
-    TString jetTrackptStr = "jetTrackpt"; jetTrackptStr += (ijet+1);
-    TString jetTracketaStr = "jetTracketa"; jetTracketaStr += (ijet+1);
-    TString jetTrackphiStr = "jetTrackphi"; jetTrackphiStr += (ijet+1);
-    TString jetTrackmStr = "jetTrackm"; jetTrackmStr += (ijet+1);
-    TString jetTrackAreaxStr = "jetTrackAreaX"; jetTrackAreaxStr += (ijet+1);
-    TString jetTrackAreayStr = "jetTrackAreaY"; jetTrackAreayStr += (ijet+1);
-    TString jetTrackAreazStr = "jetTrackAreaZ"; jetTrackAreazStr += (ijet+1);
-    TString jetTrackAreatStr = "jetTrackAreaT"; jetTrackAreatStr += (ijet+1);
-        
-    easyTree -> Branch(jetTrackptStr,&jetTrackpt_tmp[ijet],jetTrackptStr+"/F");
-    easyTree -> Branch(jetTracketaStr,&jetTracketa_tmp[ijet],jetTracketaStr+"/F");
-    easyTree -> Branch(jetTrackphiStr,&jetTrackphi_tmp[ijet],jetTrackphiStr+"/F");
-    easyTree -> Branch(jetTrackmStr,&jetTrackm_tmp[ijet],jetTrackmStr+"/F");
-    easyTree -> Branch(jetTrackAreaxStr,&jetTrackAreaX_tmp[ijet],jetTrackAreaxStr+"/F");
-    easyTree -> Branch(jetTrackAreayStr,&jetTrackAreaY_tmp[ijet],jetTrackAreayStr+"/F");
-    easyTree -> Branch(jetTrackAreazStr,&jetTrackAreaZ_tmp[ijet],jetTrackAreazStr+"/F");
-    easyTree -> Branch(jetTrackAreatStr,&jetTrackAreaT_tmp[ijet],jetTrackAreatStr+"/F");
-        
-  }
+
+  
+  /*  int ntjet=8;
 	
+      float jetTrackpt_tmp[ntjet], jetTracketa_tmp[ntjet], jetTrackphi_tmp[ntjet],  jetTrackm_tmp[ntjet] ;
+      float jetTrackAreaX_tmp[ntjet], jetTrackAreaY_tmp[ntjet], jetTrackAreaZ_tmp[ntjet], jetTrackAreaT_tmp[ntjet];
+      float HtSoft_tmp, nSoftJets_tmp;
+	
+      easyTree -> Branch("HtSoft",&HtSoft_tmp,"HtSoft/F");
+      easyTree -> Branch("nSoftJets",&nSoftJets_tmp,"nSoftJets/F");
+    
+      for(int ijet = 0; ijet<ntjet; ijet++){
+      TString jetTrackptStr = "jetTrackpt"; jetTrackptStr += (ijet+1);
+      TString jetTracketaStr = "jetTracketa"; jetTracketaStr += (ijet+1);
+      TString jetTrackphiStr = "jetTrackphi"; jetTrackphiStr += (ijet+1);
+      TString jetTrackmStr = "jetTrackm"; jetTrackmStr += (ijet+1);
+      TString jetTrackAreaxStr = "jetTrackAreaX"; jetTrackAreaxStr += (ijet+1);
+      TString jetTrackAreayStr = "jetTrackAreaY"; jetTrackAreayStr += (ijet+1);
+      TString jetTrackAreazStr = "jetTrackAreaZ"; jetTrackAreazStr += (ijet+1);
+      TString jetTrackAreatStr = "jetTrackAreaT"; jetTrackAreatStr += (ijet+1);
+        
+      easyTree -> Branch(jetTrackptStr,&jetTrackpt_tmp[ijet],jetTrackptStr+"/F");
+      easyTree -> Branch(jetTracketaStr,&jetTracketa_tmp[ijet],jetTracketaStr+"/F");
+      easyTree -> Branch(jetTrackphiStr,&jetTrackphi_tmp[ijet],jetTrackphiStr+"/F");
+      easyTree -> Branch(jetTrackmStr,&jetTrackm_tmp[ijet],jetTrackmStr+"/F");
+      easyTree -> Branch(jetTrackAreaxStr,&jetTrackAreaX_tmp[ijet],jetTrackAreaxStr+"/F");
+      easyTree -> Branch(jetTrackAreayStr,&jetTrackAreaY_tmp[ijet],jetTrackAreayStr+"/F");
+      easyTree -> Branch(jetTrackAreazStr,&jetTrackAreaZ_tmp[ijet],jetTrackAreazStr+"/F");
+      easyTree -> Branch(jetTrackAreatStr,&jetTrackAreaT_tmp[ijet],jetTrackAreatStr+"/F");
+        
+      }
+  */	
     
   //---------  JETS (JetPUID) Information
   int njet=8;
@@ -530,7 +540,7 @@ int main (int argc, char *argv[]){
 
   float pt_tmp[nlep], eta_tmp[nlep], phi_tmp[nlep], iso_tmp[nlep], isoDBeta_tmp[nlep], isoRhoCorr_tmp[nlep] ;
   float sumChargedHadron_tmp[nlep], sumNeutral_tmp[nlep], sumChargedPU_tmp[nlep], sumAllParticles_tmp[nlep];
-  int   ch_tmp[nlep];
+  int   ch_tmp[nlep],  pid_tmp[nlep];
 
   easyTree -> Branch("mll",&mll_tmp,"mll/F");
   easyTree -> Branch("ptll",&PTll_tmp,"ptll/F");
@@ -549,6 +559,7 @@ int main (int argc, char *argv[]){
     TString etaStr = "eta"; etaStr += (ilep+1);
     TString phiStr = "phi"; phiStr += (ilep+1);
     TString chStr = "ch"; chStr += (ilep+1);
+    TString pidStr = "pid"; pidStr += (ilep+1);
     TString isoStr = "iso"; isoStr += (ilep+1);
     TString isoDBetaStr = "isoDBeta"; isoDBetaStr += (ilep+1);
     TString isoRhoCorrStr = "isoRhoCorr"; isoRhoCorrStr += (ilep+1);
@@ -561,6 +572,7 @@ int main (int argc, char *argv[]){
     easyTree -> Branch(etaStr,&eta_tmp[ilep],etaStr+"/F");
     easyTree -> Branch(phiStr,&phi_tmp[ilep],phiStr+"/F");
     easyTree -> Branch(chStr,&ch_tmp[ilep],chStr+"/I");
+    easyTree -> Branch(pidStr,&pid_tmp[ilep],pidStr+"/I");
     easyTree -> Branch(isoStr,&iso_tmp[ilep],isoStr+"/F");
     easyTree -> Branch(isoDBetaStr,&isoDBeta_tmp[ilep],isoDBetaStr+"/F");
     easyTree -> Branch(isoRhoCorrStr,&isoRhoCorr_tmp[ilep],isoRhoCorrStr+"/F");
@@ -599,7 +611,7 @@ int main (int argc, char *argv[]){
   float  globalRhokt4_tmp ;
   easyTree->Branch("globalRhokt4",&globalRhokt4_tmp,"globalRhokt4/F");
   
-  //  Global RhoGridFastJet
+  //  Global RhoGridFastJett
   
   float  globalRhoGridFastJet_tmp ;
   easyTree->Branch("globalGridFastJet",&globalRhoGridFastJet_tmp,"globalGridFastJet/F");
@@ -788,33 +800,33 @@ int main (int argc, char *argv[]){
 	
 	for(int k =0; k<4;k++){
 	
-	leptonGenpt_tmp[k]=-99;
-	leptonGeneta_tmp[k]=-99;
-	leptonGenphi_tmp[k]=-99;
-	leptonGenpid_tmp[k]=-99;
-	neutrinoGenpt_tmp[k]=-99;
-	neutrinoGeneta_tmp[k]=-99;
-	neutrinoGenphi_tmp[k]=-99;
-	neutrinoGenpid_tmp[k]=-99;
+	  leptonGenpt_tmp[k]=-99;
+	  leptonGeneta_tmp[k]=-99;
+	  leptonGenphi_tmp[k]=-99;
+	  leptonGenpid_tmp[k]=-99;
+	  neutrinoGenpt_tmp[k]=-99;
+	  neutrinoGeneta_tmp[k]=-99;
+	  neutrinoGenphi_tmp[k]=-99;
+	  neutrinoGenpid_tmp[k]=-99;
 	}
 
 	
 	for (int i = 0 ; i < gen_entries  ; i++) {
-	GenParticle *part = (GenParticle*) branchGenParticle->At(i);
-	int type   =  part-> PID;
+	  GenParticle *part = (GenParticle*) branchGenParticle->At(i);
+	  int type   =  part-> PID;
 		
 
-	if(part->Status!=1)continue;
+	  if(part->Status!=1)continue;
 			
-	if (type == 11 || type == 13 || type == 15 ||type == -11 || type == -13 || type == -15 ) {
-	leptonID.push_back(i);
-	genLepton.push_back(part);
-	}
+	  if (type == 11 || type == 13 || type == 15 ||type == -11 || type == -13 || type == -15 ) {
+	    leptonID.push_back(i);
+	    genLepton.push_back(part);
+	  }
 			
-	if (type == 12 || type == 14 || type == 16 ||type == -12 || type == -14 || type == -16 ) {
-	neutrinoID.push_back(i);
-	genNeutrino.push_back(part);
-	}
+	  if (type == 12 || type == 14 || type == 16 ||type == -12 || type == -14 || type == -16 ) {
+	    neutrinoID.push_back(i);
+	    genNeutrino.push_back(part);
+	  }
 
 	}
 
@@ -830,18 +842,18 @@ int main (int argc, char *argv[]){
      
 			
 	for(int j=0; j<jgl; j++){
-	leptonGenpt_tmp[j] = genLepton.at(j)->PT;
-	leptonGeneta_tmp[j] = genLepton.at(j)->Eta;
-	leptonGenphi_tmp[j] = genLepton.at(j)->Phi;
-	leptonGenpid_tmp[j] = genLepton.at(j)->PID;
+	  leptonGenpt_tmp[j] = genLepton.at(j)->PT;
+	  leptonGeneta_tmp[j] = genLepton.at(j)->Eta;
+	  leptonGenphi_tmp[j] = genLepton.at(j)->Phi;
+	  leptonGenpid_tmp[j] = genLepton.at(j)->PID;
 
 	}
 			
 	for(int j=0; j<jgn; j++){
-	neutrinoGenpt_tmp[j] = genNeutrino.at(j)->PT;
-	neutrinoGeneta_tmp[j] = genNeutrino.at(j)->Eta;
-	neutrinoGenphi_tmp[j] = genNeutrino.at(j)->Phi;
-	neutrinoGenpid_tmp[j] = genNeutrino.at(j)->PID;
+	  neutrinoGenpt_tmp[j] = genNeutrino.at(j)->PT;
+	  neutrinoGeneta_tmp[j] = genNeutrino.at(j)->Eta;
+	  neutrinoGenphi_tmp[j] = genNeutrino.at(j)->Phi;
+	  neutrinoGenpid_tmp[j] = genNeutrino.at(j)->PID;
 	}
       }			
                
@@ -1100,13 +1112,13 @@ int main (int argc, char *argv[]){
 
       nextra_tmp=-999; sameflav_tmp=-999; nlepton_tmp=-999;
       channel_tmp=-999;	//0 mumu, 1 elel, 2 elmu, 3 muel
-      mll_tmp = -999.;  PTll_tmp = -999. ; dPhill_tmp = -999. ; dRll_tmp = -999. ; dEtall_tmp = -999. ; etall_tmp = -999. ; yll_tmp = -999. ; 
+      mll_tmp = -999.;  PTll_tmp = -999. ; dPhill_tmp = -999. ; dRll_tmp = -999. ; dEtall_tmp = -999. ; etall_tmp = -999. ; yll_tmp = -999.;
 
 
       for(int k =0; k<4; k++){
 	pt_tmp[k]=-999.; eta_tmp[k]=-999.;	phi_tmp[k]=-999.; iso_tmp[k]=-999;  
 	isoDBeta_tmp[k]=-999;  isoRhoCorr_tmp[k]=-999;   sumChargedHadron_tmp[k]=-999; sumNeutral_tmp[k]=-999; 
-	sumChargedPU_tmp[k]=-999;  sumAllParticles_tmp[k]=-999;
+	sumChargedPU_tmp[k]=-999;  sumAllParticles_tmp[k]=-999;  ch_tmp[k]=-999; pid_tmp[k]=-999 ; 
       }
 	
 	
@@ -1124,6 +1136,12 @@ int main (int argc, char *argv[]){
 	l.leta = elec->Eta;
 	l.lphi =elec->Phi;
 	l.lch = elec->Charge;
+	if(elec->Charge == -1){
+	  l.lpid = 11;
+	}
+	else if(elec->Charge == 1){
+	  l.lpid = -11;
+	}
 	l.liso =  elec->IsolationVarDBeta;
 	l.lisoDBeta = elec->IsolationVarDBeta;
 	l.lisoRhoCorr = elec->IsolationVarRhoCorr;
@@ -1143,6 +1161,12 @@ int main (int argc, char *argv[]){
 	l.leta = muo->Eta;
 	l.lphi =muo->Phi;
 	l.lch = muo->Charge;
+	if(muo->Charge == -1){
+	  l.lpid = 13;
+	}
+	else if(muo->Charge == 1){
+	  l.lpid = -13;
+	}
 	l.liso =  muo->IsolationVarDBeta;
 	l.lisoDBeta = muo->IsolationVarDBeta;
 	l.lisoRhoCorr = muo->IsolationVarRhoCorr;
@@ -1163,6 +1187,7 @@ int main (int argc, char *argv[]){
 	eta_tmp[i] = leptonvec.at(i).leta;
 	phi_tmp[i] = leptonvec.at(i).lphi;
 	ch_tmp[i] = leptonvec.at(i).lch;
+	pid_tmp[i] = leptonvec.at(i).lpid;
 	iso_tmp[i] = leptonvec.at(i).liso;
 	isoDBeta_tmp[i] = leptonvec.at(i).lisoDBeta;
 	isoRhoCorr_tmp[i] = leptonvec.at(i).lisoRhoCorr;
@@ -1218,17 +1243,17 @@ int main (int argc, char *argv[]){
       HtSoft_tmp = 0; nSoftJets_tmp = 0;
        
 		
-      for(int k =0; k<8; k++){
-	jetTrackpt_tmp[k]=-999;
-	jetTracketa_tmp[k]=-999;
-	jetTrackphi_tmp[k]=-999;
-	jetTrackm_tmp[k]=-999;
-	jetTrackAreaX_tmp[k]=-999;
-	jetTrackAreaY_tmp[k]=-999;
-	jetTrackAreaZ_tmp[k]=-999;
-	jetTrackAreaT_tmp[k]=-999;
-      }
-		
+      /*      for(int k =0; k<8; k++){
+	      jetTrackpt_tmp[k]=-999;
+	      jetTracketa_tmp[k]=-999;
+	      jetTrackphi_tmp[k]=-999;
+	      jetTrackm_tmp[k]=-999;
+	      jetTrackAreaX_tmp[k]=-999;
+	      jetTrackAreaY_tmp[k]=-999;
+	      jetTrackAreaZ_tmp[k]=-999;
+	      jetTrackAreaT_tmp[k]=-999;
+	      }
+      */		
       int tjet_entries = branchTrackJet->GetEntriesFast();
 
       // Cleaned RECOjets for making jet veto variables
@@ -1250,13 +1275,15 @@ int main (int argc, char *argv[]){
 	}
 	else etaHigh = cleanedJets[1]->Eta;
       }
-//      cout << "Eta: " << etaLow << ", " << etaHigh << endl;
-//      cout << "size jets: " << puidJet.size() << endl;
-//      cout << "size cleaned jets: " << cleanedJets.size() << endl;
+      //      cout << "Eta: " << etaLow << ", " << etaHigh << endl;
+      //      cout << "size jets: " << puidJet.size() << endl;
+      //      cout << "size cleaned jets: " << cleanedJets.size() << endl;
 	
       // push back track jets	
+      TrackJet_V4_tmp.clear();
       for (int i = 0 ; i < tjet_entries  ; i++) {
 	Jet *trackjet = (Jet*) branchTrackJet->At(i);
+	TrackJet_V4_tmp.push_back(trackjet->P4());
 	trackJet.push_back(trackjet);
 	trackJetIndex.push_back(i);
 	
@@ -1267,10 +1294,10 @@ int main (int argc, char *argv[]){
 	  float dR = DeltaR(trackjet->Eta, leptonvec.at(i).leta, trackjet->Phi,  leptonvec.at(i).lphi);
 	  if( dR < 0.3 ) passLeptonCleaning=false;
 	}
-//	if( passLeptonCleaning ) cout<< "trackJet passed Lepton cleaning." <<endl;
+	//	if( passLeptonCleaning ) cout<< "trackJet passed Lepton cleaning." <<endl;
     
 	if( cleanedJets.size() >= 2 ) {  
-//	  cout << "track jet eta: " << trackjet->Eta << endl;
+	  //	  cout << "track jet eta: " << trackjet->Eta << endl;
 	  if( trackjet->Eta < (etaHigh - 0.5) && trackjet->Eta > (etaLow + 0.5) ) {
 	    passJetCleaning = true;
 	  }
@@ -1281,24 +1308,26 @@ int main (int argc, char *argv[]){
 	  }
 	}
       }
-//      cout << "nSoftJets: " << nSoftJets_tmp << endl; 
-//      cout << "trackJets size: " << trackJet.size() << endl; 			
+      //      cout << "nSoftJets: " << nSoftJets_tmp << endl; 
+      //      cout << "trackJets size: " << trackJet.size() << endl; 			
 						
-      int njetstrack = (trackJetIndex.size()<8) ? trackJetIndex.size():8;
+      /*      int njetstrack = (trackJetIndex.size()<8) ? trackJetIndex.size():8;
             
 			
-      for(int j=0; j<njetstrack; j++){
-	jetTrackpt_tmp[j] = trackJet.at(j)->PT;
-	jetTracketa_tmp[j] = trackJet.at(j)->Eta;
-	jetTrackphi_tmp[j] = trackJet.at(j)->Phi;
-	jetTrackm_tmp[j] = trackJet.at(j)->Mass;
-	jetTrackAreaX_tmp[j] = trackJet.at(j)->AreaX;
-	jetTrackAreaY_tmp[j] = trackJet.at(j)->AreaY;
-	jetTrackAreaZ_tmp[j] = trackJet.at(j)->AreaZ;
-	jetTrackAreaT_tmp[j] = trackJet.at(j)->AreaT;
+	      for(int j=0; j<njetstrack; j++){
+	      jetTrackpt_tmp[j] = trackJet.at(j)->PT;
+	      jetTracketa_tmp[j] = trackJet.at(j)->Eta;
+	      jetTrackphi_tmp[j] = trackJet.at(j)->Phi;
+	      jetTrackm_tmp[j] = trackJet.at(j)->Mass;
+	      jetTrackAreaX_tmp[j] = trackJet.at(j)->AreaX;
+	      jetTrackAreaY_tmp[j] = trackJet.at(j)->AreaY;
+	      jetTrackAreaZ_tmp[j] = trackJet.at(j)->AreaZ;
+	      jetTrackAreaT_tmp[j] = trackJet.at(j)->AreaT;
                 
-      }
-      
+	      }
+      */
+ 
+ 	     
        
         
       //--------- MET BRANCHES
