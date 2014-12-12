@@ -78,6 +78,7 @@
 #pragma link C++ class Weighter+;
 #pragma link C++ class ExampleModule+;
 #pragma link C++ class FakeLepton+;
+#pragma link C++ class std::vector<TLorentzVector>+;
 
 //#pragma link C++ class CleansedJetFinder+;
 #pragma link C++ class PileUpJetID+;
