@@ -32,7 +32,8 @@ int main(int argc, char** argv)
              << "-----------------" << endl << endl;
         return 0;
     }
-    int nEvents = atoi(argv[1]);
+
+    int nEvents    = atoi(argv[1]);
     string outFile = argv[2];
     
     //-----Pythia setup-----
@@ -41,22 +42,41 @@ int main(int argc, char** argv)
     //---general setup
     pythia.readString("Random:seed = 0");
     pythia.readString("Random:setSeed = on"); 
+
     pythia.readString("Beams:idA = 2212");
     pythia.readString("Beams:idB = 2212");
-    pythia.readString("Beams:eA = 7000.");
-    pythia.readString("Beams:eB = 7000.");
+    pythia.readString("Beams:eA  = 7000.");
+    pythia.readString("Beams:eB  = 7000.");
     pythia.readString("Beams:eCM = 14000.");
+
     pythia.readString("HadronLevel:Hadronize = on");
 
     //---CMS tuned min bias
     pythia.readString("ParticleDecays:limitTau0 = on");
-    pythia.readString("ParticleDecays:tauMax = 10");
-    pythia.readString("SoftQCD:nonDiffractive = on");
-    pythia.readString("SoftQCD:singleDiffractive = on");
-    pythia.readString("SoftQCD:doubleDiffractive = on");
-    pythia.readString("Tune:ee = 3");
-    pythia.readString("Tune:pp = 15");  // cms tune
+    pythia.readString("ParticleDecays:tau0Max = 10");
 
+    pythia.readString("SoftQCD:nonDiffractive     = on");
+    pythia.readString("SoftQCD:singleDiffractive  = on");
+    pythia.readString("SoftQCD:doubleDiffractive  = on");
+    pythia.readString("SoftQCD:centralDiffractive = on");
+
+    pythia.readString("ParticleDecays:allowPhotonRadiation = on");
+
+    pythia.readString("Check:epTolErr = 0.01");
+    pythia.readString("SLHA:keepSM    = on");
+    pythia.readString("SLHA:minMassSM = 1000.");
+
+    pythia.readString("MultipartonInteractions:pT0Ref = 2.1006");
+    pythia.readString("MultipartonInteractions:ecmPow = 0.21057");
+    pythia.readString("MultipartonInteractions:expPow = 1.6089");
+    pythia.readString("MultipartonInteractions:a1     = 0.00");
+
+    pythia.readString("Tune:ee = 3");
+    pythia.readString("Tune:pp = 5");  // cms tune
+    
+    pythia.readString("PDF:pSet = 8"); // use cteq L1 as suggested
+
+    
     //---Pythia initialization
     pythia.init();
 
