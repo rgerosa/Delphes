@@ -7,13 +7,13 @@ import os
 
 TESTING        = 0
 QUEUE          = '1nd'
-EVENTS_PER_JOB = 100000
-TOT_EVENTS     = 10000000
-CMSSW_FOLDER   = '/afs/cern.ch/user/g/govoni/work/TP/20Nove/CMSSW_6_2_0_SLHC20/src'
+EVENTS_PER_JOB = 10000
+TOT_EVENTS     = 1000000
+CMSSW_FOLDER   = '/afs/cern.ch/user/r/rgerosa/work/TP_ANALYSIS/DELPHES_ANALYSIS/CMSSW_6_2_0_SLHC20_patch1/src/'
 DELPHES_FOLDER = CMSSW_FOLDER + '/Delphes'
 GEN_MINBIAS    = DELPHES_FOLDER + '/genMinBias_14TeV'
 TRANS_MINBIAS  = DELPHES_FOLDER + '/hepmc2pileup'
-CMSStagefolder = '/store/user/govoni/Delphes/PU_14TeV'
+CMSStagefolder = '/store/group/dpg_ecal/alca_ecalcalib/ecalMIBI/rgerosa/TP_ANALYSIS/PU_FILES_14TEV/'
 EOSfolder      = '/eos/cms' + CMSStagefolder
 
 rootfolder = os.getcwd ()
@@ -48,7 +48,7 @@ def replaceAll (file,searchExp,replaceExp) :
 def prepareJob (tag) :
     filename = 'run_' + tag + '.job'
     f = open (filename, 'w')
-    f.write ('cd /afs/cern.ch/user/g/govoni/work/TP/20Nove/CMSSW_6_2_0_SLHC20/src\n')
+    f.write ('cd /afs/cern.ch/user/r/rgerosa/work/TP_ANALYSIS/DELPHES_ANALYSIS/CMSSW_6_2_0_SLHC20_patch1/src/\n')
     f.write ('eval `scram run -sh`\n')
     f.write ('cd -\n')
     outfilename = tag + '.tempo'
