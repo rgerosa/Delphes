@@ -90,11 +90,6 @@ int main(int argc, char** argv)
     }
     else if (tunePythia == 15){
 
-     pythia.readString("MultipartonInteractions:pT0Ref = 2.1006");
-     pythia.readString("MultipartonInteractions:ecmPow = 0.21057");
-     pythia.readString("MultipartonInteractions:expPow = 1.6089");
-     pythia.readString("MultipartonInteractions:a1     = 0.00");
-
      pythia.readString("Tune:ee  = 3");
      pythia.readString("Tune:pp  = 15");  // cms tune   
      pythia.readString("PDF:pSet = 8"); // use cteq L1 as suggested
