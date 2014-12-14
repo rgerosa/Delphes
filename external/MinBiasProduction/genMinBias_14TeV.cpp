@@ -23,19 +23,20 @@ using namespace std;
 
 int main(int argc, char** argv) 
 {
-    if(argc < 3)
+    if(argc < 4)
     {
         cout << "missing argument!" << endl
              << "-----------------" << endl
 	     << "usage: " << endl
-             << "genMinBias_14TeV events_number output_file" << endl
+             << "genMinBias_14TeV events_number output_file tune" << endl
              << "-----------------" << endl << endl;
         return 0;
     }
 
     int nEvents    = atoi(argv[1]);
     string outFile = argv[2];
-    
+    int tunePythia = atoi(argv[3]);
+
     //-----Pythia setup-----
     Pythia pythia;     
 
@@ -54,29 +55,52 @@ int main(int argc, char** argv)
     //---CMS tuned min bias
     pythia.readString("ParticleDecays:limitTau0 = on");
     pythia.readString("ParticleDecays:tau0Max = 10");
+    pythia.readString("ParticleDecays:allowPhotonRadiation = on");
 
     pythia.readString("SoftQCD:nonDiffractive     = on");
     pythia.readString("SoftQCD:singleDiffractive  = on");
     pythia.readString("SoftQCD:doubleDiffractive  = on");
     pythia.readString("SoftQCD:centralDiffractive = on");
 
-    pythia.readString("ParticleDecays:allowPhotonRadiation = on");
-
     pythia.readString("Check:epTolErr = 0.01");
     pythia.readString("SLHA:keepSM    = on");
     pythia.readString("SLHA:minMassSM = 1000.");
 
-    pythia.readString("MultipartonInteractions:pT0Ref = 2.1006");
-    pythia.readString("MultipartonInteractions:ecmPow = 0.21057");
-    pythia.readString("MultipartonInteractions:expPow = 1.6089");
-    pythia.readString("MultipartonInteractions:a1     = 0.00");
+    if( tunePythia == 5){
 
-    pythia.readString("Tune:ee = 3");
-    pythia.readString("Tune:pp = 5");  // cms tune
-    
-    pythia.readString("PDF:pSet = 8"); // use cteq L1 as suggested
+     pythia.readString("MultipartonInteractions:pT0Ref = 2.1006");
+     pythia.readString("MultipartonInteractions:ecmPow = 0.21057");
+     pythia.readString("MultipartonInteractions:expPow = 1.6089");
+     pythia.readString("MultipartonInteractions:a1     = 0.00");
 
-    
+     pythia.readString("Tune:ee  = 3");
+     pythia.readString("Tune:pp  = 5");  // cms tune   
+     pythia.readString("PDF:pSet = 8"); // use cteq L1 as suggested
+
+    }
+    else if (tunePythia == 14){
+
+      pythia.readString("MultipartonInteractions:pT0Ref=2.4024");
+      pythia.readString("MultipartonInteractions:ecmPow=0.25208");
+      pythia.readString("MultipartonInteractions:expPow=1.6");
+
+      pythia.readString("Tune:ee = 7");
+      pythia.readString("Tune:pp = 14");
+
+    }
+    else if (tunePythia == 15){
+
+     pythia.readString("MultipartonInteractions:pT0Ref = 2.1006");
+     pythia.readString("MultipartonInteractions:ecmPow = 0.21057");
+     pythia.readString("MultipartonInteractions:expPow = 1.6089");
+     pythia.readString("MultipartonInteractions:a1     = 0.00");
+
+     pythia.readString("Tune:ee  = 3");
+     pythia.readString("Tune:pp  = 15");  // cms tune   
+     pythia.readString("PDF:pSet = 8"); // use cteq L1 as suggested
+
+    }
+
     //---Pythia initialization
     pythia.init();
 
