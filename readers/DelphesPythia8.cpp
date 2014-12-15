@@ -178,12 +178,6 @@ int main(int argc, char *argv[]){
     //--- random seed from start event number
     pythia->readString("Random:setSeed = on");
 
-    pythia->readString("ParticleDecays:limitTau0 = on");
-    pythia->readString("ParticleDecays:tau0Max = 10");
-    pythia->readString("ParticleDecays:allowPhotonRadiation = on");
-    pythia->readString("Tune:ee = 3");
-    pythia->readString("Tune:pp = 5");  // cms tune                                                                                                                                      
-    pythia->readString("PDF:pSet = 8"); // use cteq L1 as suggested                                                                                                                       
     pythia->readString("HadronLevel:Hadronize = on"); // turn on the hadronize module
 
     pythia->readString(sRandomSeed.c_str());          // random seed set
