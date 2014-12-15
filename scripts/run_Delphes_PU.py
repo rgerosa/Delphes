@@ -13,6 +13,7 @@ CMSSW_FOLDER   = '/afs/cern.ch/user/r/rgerosa/work/TP_ANALYSIS/DELPHES_ANALYSIS/
 DELPHES_FOLDER = CMSSW_FOLDER + '/Delphes'
 GEN_MINBIAS    = DELPHES_FOLDER + '/genMinBias_14TeV'
 TRANS_MINBIAS  = DELPHES_FOLDER + '/hepmc2pileup'
+TUNE_MINIBIAS  = 5
 CMSStagefolder = '/store/group/dpg_ecal/alca_ecalcalib/ecalMIBI/rgerosa/TP_ANALYSIS/PU_FILES_14TEV/'
 EOSfolder      = '/eos/cms' + CMSStagefolder
 
@@ -53,7 +54,7 @@ def prepareJob (tag) :
     f.write ('cd -\n')
     outfilename = tag + '.tempo'
     finalfilename = tag + '.mb'
-    f.write (GEN_MINBIAS + ' ' + str (EVENTS_PER_JOB) + ' '  + outfilename + '\n')
+    f.write (GEN_MINBIAS + ' ' + str (EVENTS_PER_JOB) + ' '  + outfilename + ' ' + str(TUNE_MINIBIAS) + '\n')
     f.write (TRANS_MINBIAS + ' ' + finalfilename +  ' '  + outfilename + '\n')
     f.write ('cmsStage ' + finalfilename + ' ' + CMSStagefolder + '\n')
     f.close ()
