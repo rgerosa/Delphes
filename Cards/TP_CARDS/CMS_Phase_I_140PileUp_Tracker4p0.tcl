@@ -2220,7 +2220,7 @@ module TreeWriter TreeWriter {
  
   ## track collection after: charged hadrons smearing and track eff, electron smearing and track eff
   #add Branch TrackMerger/tracks trackCollectionNoMU Track
-  add Branch ChargedHadronTrackingEfficiency/chargedHadrons chargedHadronTrack GenParticle
+  #add Branch ChargedHadronTrackingEfficiency/chargedHadrons chargedHadronTrack GenParticle
 
   ## output of the calorimeter simulation
   #add Branch Calorimeter/towers caloTowers Tower

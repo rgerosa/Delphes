@@ -643,7 +643,7 @@ module Merger TrackMergerWithMuon {
   add InputArray MuonMomentumSmearing/muons 
   set OutputArray tracks
 }
-
+1
 
 module RunPUPPI RunPUPPI {
   ## input information
