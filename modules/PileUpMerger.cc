@@ -114,7 +114,6 @@ void PileUpMerger::Process()
   poisson = gRandom->Poisson(fMeanPileUp);
 
   allEntries = fReader->GetEntries();
-
   for(event = 0; event < poisson; ++event)
   {
     do
@@ -128,10 +127,10 @@ void PileUpMerger::Process()
     dz = gRandom->Gaus(0.0, fZVertexSpread);
     dphi = gRandom->Uniform(-TMath::Pi(), TMath::Pi());
     dt = gRandom->Gaus(0., fZVertexSpread*(mm/ns)/c_light);
-
-
+   
+     
     while(fReader->ReadParticle(pid, x, y, z, t, px, py, pz, e))
-    {
+    {  
       candidate = factory->NewCandidate();
 
       // Get rid of BS position in PU
@@ -142,7 +141,6 @@ void PileUpMerger::Process()
       candidate->PID = pid;
 
       candidate->Status = 1;
-
       pdgParticle = pdg->GetParticle(pid);
       candidate->Charge = pdgParticle ? Int_t(pdgParticle->Charge()/3.0) : -999;
       candidate->Mass = pdgParticle ? pdgParticle->Mass() : -999.9;

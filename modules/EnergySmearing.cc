@@ -103,7 +103,6 @@ void EnergySmearing::Process()
     phi = candidateMomentum.Phi();
     candidate->Momentum.SetPtEtaPhiE(energy/TMath::CosH(eta), eta, phi, energy);
     candidate->AddCandidate(mother);
- 
     fOutputArray->Add(candidate);
   }
 }

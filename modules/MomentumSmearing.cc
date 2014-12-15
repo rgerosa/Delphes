@@ -103,7 +103,6 @@ void MomentumSmearing::Process()
     phi = candidateMomentum.Phi();
     candidate->Momentum.SetPtEtaPhiE(pt, eta, phi, pt*TMath::CosH(eta));
     candidate->AddCandidate(mother);
-        
     fOutputArray->Add(candidate);
   }
 }

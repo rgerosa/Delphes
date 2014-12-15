@@ -150,7 +150,7 @@ void RunPUPPI::Process(){
       curRecoObj.pt  = momentum.Pt();
       curRecoObj.eta = momentum.Eta();
       curRecoObj.phi = momentum.Phi();
-      curRecoObj.m   = momentum.M();      
+      curRecoObj.m   = momentum.M();  
       particle = static_cast<Candidate*>(candidate->GetCandidates()->Last());
       if (candidate->IsRecoPU and candidate->Charge !=0) { // if it comes fromPU vertexes after the resolution smearing and the dZ matching within resolution
 	curRecoObj.id    = 2;

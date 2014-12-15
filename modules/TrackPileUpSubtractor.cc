@@ -106,11 +106,11 @@ void TrackPileUpSubtractor::Process()
   {
     iterator = itInputMap->first;
     array = itInputMap->second;
-
     // loop over all candidates
     iterator->Reset();
     while((candidate = static_cast<Candidate*>(iterator->Next())))
     {
+        
       particle = static_cast<Candidate*>(candidate->GetCandidates()->Last());
       z = particle->Position.Z();
       // apply pile-up subtraction

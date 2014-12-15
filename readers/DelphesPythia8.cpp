@@ -42,6 +42,7 @@ bool LHEEventPreselection(const LHEF::Reader & reader,
                           const float & Mjj_cut, 
                           const int & SkimFullyHadronic, 
                           DelphesFactory *factory, 
+                          ExRootTreeBranch* branch,
                           TObjArray* LHEparticlesArray);
 
 //********************************************************************
@@ -134,7 +135,9 @@ int main(int argc, char *argv[]){
     
     //--- deals with the HepMc output of Pythia8 ---> no need to store it
     ExRootTreeWriter *treeHepMC = new ExRootTreeWriter();
-    ExRootTreeBranch *branchEvent = treeHepMC->NewBranch("Event",HepMCEvent::Class());
+    ExRootTreeBranch *branchEventHEPMC = treeHepMC->NewBranch("Event",HepMCEvent::Class());
+    ExRootTreeBranch *branchEventLHE   = treeWriter->NewBranch("LHEFEvent", LHEFEvent::Class());
+
 
     //----- Delphes init ----- --> Card reader       
     ExRootConfReader *confReader = new ExRootConfReader;
@@ -208,8 +211,8 @@ int main(int argc, char *argv[]){
        startCounter++;
        continue;
      }
-     if(eventCounter >= nEvent && nEvent != -1) break;           
-       if(LHEEventPreselection(Reader,Mjj_cut,skimFullyHadronic,factory,LHEparticlesArray)){  // take only interesting events
+     if(eventCounter >= nEvent && nEvent != -1) break;                  
+      if(LHEEventPreselection(Reader,Mjj_cut,skimFullyHadronic,factory,branchEventLHE,LHEparticlesArray)){  // take only interesting events
 	  if(!pythia->next()){
 	    //--- If failure because reached end of file then exit event loop
 	    if (pythia->info.atEndOfFile()){
@@ -223,7 +226,7 @@ int main(int argc, char *argv[]){
 	  readStopWatch.Stop();
 	  //--- delphes simulation fase
 	  procStopWatch.Start();
-	  ConvertInput(eventCounter,pythia,branchEvent,factory,allParticleOutputArray,stableParticleOutputArray,partonOutputArray,&readStopWatch,&procStopWatch);
+	  ConvertInput(eventCounter,pythia,branchEventHEPMC,factory,allParticleOutputArray,stableParticleOutputArray,partonOutputArray,&readStopWatch,&procStopWatch);
 	  modularDelphes->ProcessTask();
 	  procStopWatch.Stop();
 
@@ -275,7 +278,8 @@ int main(int argc, char *argv[]){
 }
 
 // *****************************************************************************************************
-bool LHEEventPreselection(const LHEF::Reader & reader, const float & Mjj_cut, const int & SkimFullyHadronic,  DelphesFactory *factory, TObjArray* LHEparticlesArray){
+bool LHEEventPreselection(const LHEF::Reader & reader, const float & Mjj_cut, const int & SkimFullyHadronic,  DelphesFactory *factory, 
+                          ExRootTreeBranch* branch, TObjArray* LHEparticlesArray){
 
   if ( reader.outsideBlock.length ()) std::cout << reader.outsideBlock; 
 
@@ -289,6 +293,7 @@ bool LHEEventPreselection(const LHEF::Reader & reader, const float & Mjj_cut, co
   pdg = TDatabasePDG::Instance();
 
   Candidate *candidate = 0;
+  
 
   // loop over particles in the event                                                                                                                                                   
   for (size_t iPart = 0 ; iPart < reader.hepeup.IDUP.size (); ++iPart){
@@ -326,6 +331,17 @@ bool LHEEventPreselection(const LHEF::Reader & reader, const float & Mjj_cut, co
 
   
   //---loop on lhe events particle searching for W's---
+  LHEFEvent *lheEvt;
+  lheEvt = static_cast<LHEFEvent *>(branch->NewEntry());
+  lheEvt->ProcessID = reader.hepeup.IDPRUP ;
+  lheEvt->Weight    = reader.hepeup.XWGTUP ;
+  lheEvt->ScalePDF  = reader.hepeup.SCALUP ;
+  lheEvt->AlphaQED  = reader.hepeup.AQEDUP ;
+  lheEvt->AlphaQCD  = reader.hepeup.AQCDUP ;
+  lheEvt->PDF1 = reader.hepeup.XPDWUP.first ;
+  lheEvt->PDF2 = reader.hepeup.XPDWUP.second ;
+  
+
   for (size_t iPart = 0 ; iPart < reader.hepeup.IDUP.size (); ++iPart){
     TLorentzVector tmp4vect;
     tmp4vect.SetPxPyPzE(reader.hepeup.PUP.at(iPart).at(0),reader.hepeup.PUP.at(iPart).at(1),reader.hepeup.PUP.at(iPart).at(2),reader.hepeup.PUP.at(iPart).at(3)); 
@@ -336,11 +352,13 @@ bool LHEEventPreselection(const LHEF::Reader & reader, const float & Mjj_cut, co
     candidate->Status = reader.hepeup.ISTUP.at(iPart);
 
     // mother and  daughters are not set
-    candidate->M1 = -1;
-    candidate->M2 = -1;
+    candidate->M1 = reader.hepeup.MOTHUP.at(iPart).first;
+    candidate->M2 = reader.hepeup.MOTHUP.at(iPart).second;
     candidate->D1 = -1;
     candidate->D2 = -1;
 
+    candidate->Spin = reader.hepeup.SPINUP.at(iPart) ;
+ 
     pdgParticle = pdg->GetParticle(reader.hepeup.IDUP.at(iPart));
     candidate->Charge = pdgParticle ? Int_t(pdgParticle->Charge()/3.0) : -999;
 

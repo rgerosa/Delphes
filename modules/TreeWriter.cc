@@ -778,7 +778,7 @@ void TreeWriter::ProcessLHEParticles(ExRootTreeBranch *branch, TObjArray *array)
     entry->D2     = candidate->D2;
     entry->Charge = candidate->Charge;
     entry->Mass   = candidate->Mass;
-
+    entry->Spin   = candidate->Spin;
     entry->E  = momentum.E();
     entry->Px = momentum.Px();
     entry->Py = momentum.Py();
@@ -811,6 +811,7 @@ void TreeWriter::ProcessEvent(ExRootTreeBranch *branch, TObjArray *array){
 
 
 }
+
 
 //------------------------------------------------------------------------------
 
