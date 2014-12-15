@@ -55,11 +55,13 @@ class LHEFEvent: public Event {
   
   public:
 
-  Int_t ProcessID; // subprocess code for the event | hepup.IDPRUP
+  Int_t   ProcessID; // subprocess code for the event | hepup.IDPRUP
   Float_t Weight; // weight for the event | hepup.XWGTUP
   Float_t ScalePDF; // scale in GeV used in the calculation of the PDFs in the event | hepup.SCALUP
   Float_t AlphaQED; // value of the QED coupling used in the event | hepup.AQEDUP
   Float_t AlphaQCD; // value of the QCD coupling used in the event | hepup.AQCDUP
+  Float_t PDF1 ;
+  Float_t PDF2 ;
 
   ClassDef(LHEFEvent, 2)
 };
@@ -137,6 +139,7 @@ class GenParticle: public SortableObject{
   ClassDef(GenParticle, 1)
 };
 
+
 //---------------------------------------------------------------------------
 class LHEParticle: public SortableObject{
   public:
@@ -150,6 +153,8 @@ class LHEParticle: public SortableObject{
 
   Int_t D1; // particle 1st daughter | hepevt.jdahep[number][0] - 1
   Int_t D2; // particle last daughter | hepevt.jdahep[number][1] - 1
+
+  Int_t Spin ;
 
   Int_t Charge; // particle charge
   Float_t Mass; // particle mass
@@ -638,6 +643,7 @@ class Candidate: public SortableObject  {
   Int_t Status;
   Int_t M1, M2, D1, D2;
   Int_t Charge;
+  Int_t Spin;
   Float_t Mass;
   
   // Isolatiom info

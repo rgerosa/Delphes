@@ -98,7 +98,7 @@ Candidate::Candidate() :
   Position(0.0, 0.0, 0.0, 0.0),
   Area    (0.0, 0.0, 0.0, 0.0),
   PID(0), Status(0), M1(-1), M2(-1), D1(-1), D2(-1),
-  Charge(0), Mass(0.0),
+  Charge(0), Spin(0), Mass(0.0),
   IsolationVarDBeta(0), IsolationVarRhoCorr(0), TrackIsolationVar(0),
   chargedHadronEnergy(0),neutralEnergy(0),chargedPUEnergy(0),allParticleEnergy(0),
   IsPU(0), IsRecoPU(0),IsConstituent(0),IsEMCand(0),IsFakeObject(0), 
@@ -197,6 +197,7 @@ void Candidate::Copy(TObject &obj) const{
   object.D1 = D1;
   object.D2 = D2;
   object.Charge = Charge;
+  object.Spin   = Spin;
   object.Mass = Mass;
   object.IsPU = IsPU;
   object.IsRecoPU = IsRecoPU;
@@ -394,6 +395,7 @@ void Candidate::Clear(Option_t* option){
   TrackIsolationVar =0.;
   M1 = -1; M2 = -1; D1 = -1; D2 = -1;
   Charge = 0;
+  Spin   = 0;
   Mass   = 0.0;
   IsPU   = 0;
   IsRecoPU = 0;
