@@ -28,6 +28,7 @@
 #include "LHEActions/LHEF.h"
 
 using namespace std;
+using namespace Pythia8;
 
 static bool interrupted = false;
 
@@ -176,7 +177,6 @@ int main(int argc, char *argv[]){
     }
 
     //--- Initialize Les Houches Event File run. List initialization information.
-    std::string sfile       = "Beams:LHEF ="+inputFile;
     std::string sRandomSeed = "Random:seed = "+sSeed;
     //--- random seed from start event number
     pythia->readString("Random:setSeed = on");
@@ -185,10 +185,10 @@ int main(int argc, char *argv[]){
 
     pythia->readString(sRandomSeed.c_str());          // random seed set
     pythia->readString("Beams:frameType = 4");        
-    pythia->readString(sfile.c_str());
 
+    Pythia8::LHAupLHEF lhareader(inputFile.c_str());
 
-    pythia->init();
+    pythia->init(&lhareader);
     if(pythia->LHAeventSkip(startEvent)){
       std::cout << "### skipped first " << startEvent << " events" << std::endl;
     }
