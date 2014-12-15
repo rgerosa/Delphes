@@ -110,7 +110,7 @@ module PileUpMerger PileUpMerger {
  set OutputBSX 0.24
  set OutputBSY 0.39  
  # pre-generated minbias input file --> change this dummy name <random access with unifor number between 0 and NEntries>
- set PileUpFile /afs/cern.ch/user/s/spigazzi/work/public/PU_14TeV/MinBias_14TeV_100k_TunePP15.pileup
+ set PileUpFile MB_1.mb
  #average expected pile up <poissonian generation>
  set MeanPileUp 140
  # spread in the beam direction in m (assumes gaussian) ; 
@@ -126,15 +126,6 @@ module ModifyBeamSpot ModifyBeamSpot {
   set InputArray    PileUpMerger/stableParticles 
   set OutputArray   stableParticles
   set PVOutputArray PV  
-}
-
-#####################
-# GenBeamSpotFilter #
-#####################
-
-module GenBeamSpotFilter GenBeamSpotFilter {
-    set InputArray ModifyBeamSpot/stableParticles
-    set OutputArray beamSpotParticles
 }
 
 
@@ -158,16 +149,6 @@ module ParticlePropagator ParticlePropagator {
   set Bz 3.8
 }
 
-###############################################################################################################
-# StatusPidFilter: this module removes all generated particles except electrons, muons, taus, and status == 3 #
-###############################################################################################################
-
-module StatusPidFilter StatusPid {
-    ## take the particles from Pythia8 not adding pile-up
-    set InputArray  Delphes/allParticles
-    set OutputArray filteredParticles
-    set PTMin 0.35
-}
 
 ####################################
 # Charged hadron tracking efficiency
@@ -179,27 +160,16 @@ module Efficiency ChargedHadronTrackingEfficiency {
   set OutputArray chargedHadrons
   # tracking efficiency formula for charged hadrons
   # set ResolutionFormula {resolution formula as a function of eta and pt}
-  set ResolutionFormula { (abs(eta) <= 1.5) * (pt > 0.1 && pt <= 1.0) * (0.015) + \
-			      (abs(eta) <= 1.5) * (pt > 1.0 && pt <= 1.0e1) * (0.013) + \
-			      (abs(eta) <= 1.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.02) + \
-			      (abs(eta) <= 1.5) * (pt > 2.0e2) * (0.05) + \
-			      (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.1 && pt <= 1.0) * (0.015) + \
-			      (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0 && pt <= 1.0e1) * (0.015) + \
-			      (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.04) + \
-			      (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 2.0e2) * (0.05) + \
-			      (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 0.1 && pt <= 1.0) * (0.017) + \
-			      (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 1.0 && pt <= 10.0) * (0.03) + \
-			      (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 10.0 && pt <= 100.0) * (0.05) + \
-			      (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 100.0) * (0.30) + \
-			      (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 0.1 && pt <= 1.0) * (0.02) + \
-			      (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 1.0 && pt <= 10.0) * (0.04) + \
-			      (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 10.0 && pt <= 100.0) * (0.07) + \
-			      (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 100.0) * (0.30) + \
-			      (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 0.1 && pt <= 1.0) * (0.025) + \
-			      (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 1.0 && pt <= 10.0) * (0.05) + \
-			      (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 10.0 && pt <= 100.0) * (0.20) + \
-			      (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 100.0) * (0.80)
+  set EfficiencyFormula { (pt <= 0.2) * (0.00) + \
+                          (abs(eta) <= 1.2) * (pt > 0.2 && pt <= 1.0) * (pt * 0.96) + \
+                          (abs(eta) <= 1.2) * (pt > 1.0) * (0.97) + \
+                          (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 0.2 && pt <= 1.0) * (pt*0.85) + \
+                          (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 1.0) * (0.87) + \
+                          (abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 0.2 && pt <= 1.0) * (pt*0.8) + \
+                          (abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 1.0) * (0.82) + \
+                          (abs(eta) > 4.0) * (0.00)
   }
+
 }
 
 
@@ -211,17 +181,16 @@ module Efficiency ElectronTrackingEfficiency {
   set InputArray  ParticlePropagator/electrons
   set OutputArray electrons
   set EfficiencyFormula { (pt <= 0.2) * (0.00) + \
-				(abs(eta) <= 1.2) * (pt > 0.2 && pt <= 1.0) * (pt * 0.96) + \
-				(abs(eta) <= 1.2) * (pt > 1.0) * (0.97) + \
-				(abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 0.2 && pt <= 1.0) * (pt*0.85) + \
-				(abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 1.0 && pt <= 10.0) * (0.82+pt*0.01) + \
-				(abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 10.0) * (0.90) + \
-				(abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 0.2 && pt <= 1.0) * (pt*0.8) + \
-				(abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 1.0 && pt <= 10.0) * (0.8+pt*0.01) + \
-				(abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 10.0) * (0.85) + \
-				(abs(eta) > 4.0) * (0.00)
-    }
-
+                          (abs(eta) <= 1.2) * (pt > 0.2 && pt <= 1.0) * (pt * 0.96) + \
+                          (abs(eta) <= 1.2) * (pt > 1.0) * (0.97) + \
+                          (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 0.2 && pt <= 1.0) * (pt*0.85) + \
+                          (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 1.0 && pt <= 10.0) * (0.82+pt*0.01) + \
+                          (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 10.0) * (0.90) + \
+                          (abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 0.2 && pt <= 1.0) * (pt*0.8) + \
+                          (abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 1.0 && pt <= 10.0) * (0.8+pt*0.01) + \
+                          (abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 10.0) * (0.85) + \
+                          (abs(eta) > 4.0) * (0.00)
+  }
 
 }
 
@@ -233,13 +202,13 @@ module Efficiency MuonTrackingEfficiency {
   set InputArray ParticlePropagator/muons
   set OutputArray muons
   set EfficiencyFormula { (pt <= 0.2) * (0.00) + \
-			      (abs(eta) <= 1.2) * (pt > 0.2 && pt <= 1.0) * (pt * 0.998) + \
-			      (abs(eta) <= 1.2) * (pt > 1.0) * (0.998) + \
-			      (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 0.2 && pt <= 1.0) * (pt*0.99) + \
-			      (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 1.0) * (0.99) + \
-			      (abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 0.2 && pt <= 1.0) * (pt*0.95) + \
-			      (abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 1.0) * (0.95) + \
-			      (abs(eta) > 4.0) * (0.00)
+                          (abs(eta) <= 1.2) * (pt > 0.2 && pt <= 1.0) * (pt * 0.998) + \
+                          (abs(eta) <= 1.2) * (pt > 1.0) * (0.998) + \
+                          (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 0.2 && pt <= 1.0) * (pt*0.99) + \
+                          (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 1.0) * (0.99) + \
+                          (abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 0.2 && pt <= 1.0) * (pt*0.95) + \
+                          (abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 1.0) * (0.95) + \
+                          (abs(eta) > 4.0) * (0.00)
   }
 
 }
@@ -257,23 +226,24 @@ module MomentumSmearing ChargedHadronMomentumSmearing {
                                            (abs(eta) <= 1.5) * (pt > 1.0   && pt <= 1.0e1) * (0.013) + \
                                            (abs(eta) <= 1.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.02) + \
                                            (abs(eta) <= 1.5) * (pt > 2.0e2)                * (0.05) + \
-					       (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.1   && pt <= 1.0)   * (0.015) + \
-					       (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0   && pt <= 1.0e1) * (0.015) + \
-					       (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.04) + \
-					       (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 2.0e2)                * (0.05) + \
-					       (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 0.1 && pt <= 1.0) * (0.017) + \
-					       (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 1.0 && pt <= 10.0) * (0.03) + \
-					       (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 10.0 && pt <= 100.0) * (0.05) + \
-					       (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 100.0) * (0.30) + \
-					       (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 0.1 && pt <= 1.0) * (0.02) + \
-					       (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 1.0 && pt <= 10.0) * (0.04) + \
-					       (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 10.0 && pt <= 100.0) * (0.07) + \
-					       (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 100.0) * (0.30) + \
-					       (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 0.1 && pt <= 1.0) * (0.025) + \
-					       (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 1.0 && pt <= 10.0) * (0.05) + \
-					       (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 10.0 && pt <= 100.0) * (0.20) + \
-					       (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 100.0) * (0.80)
+                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.1   && pt <= 1.0)   * (0.015) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0   && pt <= 1.0e1) * (0.015) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.04) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 2.0e2)                * (0.05) + \
+                         (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 0.1   && pt <= 1.0)   * (0.017) + \
+                         (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 1.0   && pt <= 10.0)  * (0.03) + \
+                         (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 10.0  && pt <= 100.0) * (0.05) + \
+                         (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 100.0)                * (0.30) + \
+                         (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 0.1   && pt <= 1.0)   * (0.02) + \
+                         (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 1.0   && pt <= 10.0)  * (0.04) + \
+                         (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 10.0  && pt <= 100.0) * (0.07) + \
+                         (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 100.0)                * (0.30) + \
+                         (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 0.1   && pt <= 1.0)   * (0.025) + \
+                         (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 1.0   && pt <= 10.0)  * (0.05) + \
+                         (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 10.0  && pt <= 100.0) * (0.20) + \
+			 (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 100.0)                * (0.80)
   }
+
 }
 
 #################################
@@ -283,11 +253,11 @@ module MomentumSmearing ChargedHadronMomentumSmearing {
 module EnergySmearing ElectronEnergySmearing {
   set InputArray ElectronTrackingEfficiency/electrons
   set OutputArray electrons
-  set ResolutionFormula {     (abs(eta) <= 2.5) * (energy > 0.1 && energy <= 2.5e1) * (energy*0.025) + \
-			      (abs(eta) <= 2.5) * (energy > 2.5e1) * (energy*0.035) + \
-			      (abs(eta) > 2.5 && abs(eta) <= 3.0) * (energy*0.035) + \
-			      (abs(eta) > 3.0 && abs(eta) <= 5.0) * (energy*0.07)
+  set ResolutionFormula { (abs(eta) <= 1.5) * (energy > 0.1   && energy <= 2.5e1) * (energy*0.015) + \
+                          (abs(eta) <= 1.5) * (energy > 2.5e1)                    * sqrt(energy^2*0.005^2 + energy*0.027^2 + 0.15^2) + \
+                          (abs(eta) > 1.5 && abs(eta) <= 4.0)                     * sqrt(energy^2*0.008^2 + energy*0.092^2 + 0.088^2)
   }
+
 }
 
 ###############################
@@ -297,27 +267,26 @@ module EnergySmearing ElectronEnergySmearing {
 module MomentumSmearing MuonMomentumSmearing {
   set InputArray MuonTrackingEfficiency/muons
   set OutputArray muons
-
-  set ResolutionFormula { (abs(eta) <= 1.5) * (pt > 0.1 && pt <= 1.0) * (0.015) + \
-				(abs(eta) <= 1.5) * (pt > 1.0 && pt <= 1.0e1) * (0.012) + \
-			      (abs(eta) <= 1.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.015) + \
-			      (abs(eta) <= 1.5) * (pt > 2.0e2) * (0.03) + \
-			      (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.1 && pt <= 1.0) * (0.015) + \
-			      (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0 && pt <= 1.0e1) * (0.015) + \
-			      (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.025) + \
-			      (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 2.0e2) * (0.03) +\
-			      (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 0.1 && pt <= 1.0) * (0.017) + \
-			      (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 1.0 && pt <= 10.0) * (0.03) + \
-			      (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 10.0 && pt <= 100.0) * (0.05) + \
-			      (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 100.0) * (0.30) + \
-			      (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 0.1 && pt <= 1.0) * (0.02) + \
-			      (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 1.0 && pt <= 10.0) * (0.04) + \
-			      (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 10.0 && pt <= 100.0) * (0.07) + \
-			      (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 100.0) * (0.30) + \
-			      (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 0.1 && pt <= 1.0) * (0.025) + \
-			      (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 1.0 && pt <= 10.0) * (0.05) + \
-			      (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 10.0 && pt <= 100.0) * (0.20) + \
-			      (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 100.0) * (0.80)
+  set ResolutionFormula {                  (abs(eta) <= 1.5) * (pt > 0.1   && pt <= 1.0)   * (0.015) + \
+                                           (abs(eta) <= 1.5) * (pt > 1.0   && pt <= 1.0e1) * (0.012) + \
+                                           (abs(eta) <= 1.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.015) + \
+                                           (abs(eta) <= 1.5) * (pt > 2.0e2)                * (0.03) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.1   && pt <= 1.0)   * (0.015) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0   && pt <= 1.0e1) * (0.015) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.025) + \
+                         (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 2.0e2)                * (0.03) +\
+                         (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 0.1   && pt <= 1.0)   * (0.017) + \
+                         (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 1.0   && pt <= 10.0)  * (0.03) + \
+                         (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 10.0  && pt <= 100.0) * (0.05) + \
+                         (abs(eta) > 2.5 && abs(eta) <= 3.0) * (pt > 100.0)                * (0.30) + \
+                         (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 0.1   && pt <= 1.0)   * (0.02) + \
+                         (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 1.0   && pt <= 10.0)  * (0.04) + \
+                         (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 10.0  && pt <= 100.0) * (0.07) + \
+                         (abs(eta) > 3.0 && abs(eta) <= 3.5) * (pt > 100.0)                * (0.30) + \
+                         (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 0.1   && pt <= 1.0)   * (0.025) + \
+                         (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 1.0   && pt <= 10.0)  * (0.05) + \
+                         (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 10.0  && pt <= 100.0) * (0.20) + \
+                         (abs(eta) > 3.5 && abs(eta) <= 4.0) * (pt > 100.0)                * (0.80)
   }
 }
 
