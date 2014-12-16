@@ -1,16 +1,15 @@
 /****************************************************************************************************************************
-
         -this program create a sample on minimum bias events for SLHC-14TeV
         -reference for the Tune:pp option used can be found here: https://cds.cern.ch/record/1697700/files/GEN-14-001-pas.pdf 
-
         -source minbias_setup_slc6, then:
+
         -compile with ---> gcc -I$HEPMC/include/ -L$HEPMC/lib -I$PYTHIA8DATA/../include -L$PYTHIA8DATA/../lib -I$LHAPDF/include -L$LHAPDF/lib 
                                -lLHAPDF -lHepMC -lpythia8tohepmc -lpythia8 -o genMinBias_14TeV genMinBias_14TeV.cpp
 ****************************************************************************************************************************/
 
 #include "Pythia8/Pythia.h"
-#include "Pythia8/Pythia8ToHepMC.h"
-#include "Pythia8/LHAPDFInterface.h"
+#include "Pythia8Plugins/HepMC2.h"
+#include "Pythia8Plugins/LHAPDF5.h"
 
 #include "HepMC/GenEvent.h"
 #include "HepMC/IO_GenEvent.h"
@@ -20,11 +19,9 @@ using namespace Pythia8;
 using namespace std;
 
 //********************************************************************************************
+int main(int argc, char** argv) {
 
-int main(int argc, char** argv) 
-{
-    if(argc < 4)
-    {
+    if(argc < 4){
         cout << "missing argument!" << endl
              << "-----------------" << endl
 	     << "usage: " << endl
@@ -76,8 +73,7 @@ int main(int argc, char** argv)
      pythia.readString("Tune:pp  = 5");  // cms tune   
      pythia.readString("Tune:ee  = 3");
 
-     pythia.readString("PDF:useLHAPDF = on");
-     pythia.readString("PDF:LHAPDFset = cteq6ll.LHpdf");
+     pythia.readString("PDF:pSet = LHAPDF5:cteq6ll.LHpdf");
 
     }
     else if (tunePythia == 14){
@@ -85,7 +81,6 @@ int main(int argc, char** argv)
       pythia.readString("MultipartonInteractions:pT0Ref=2.4024");
       pythia.readString("MultipartonInteractions:ecmPow=0.25208");
       pythia.readString("MultipartonInteractions:expPow=1.6");
-
       pythia.readString("Tune:pp = 14");
       pythia.readString("Tune:ee = 7");
 
@@ -100,8 +95,7 @@ int main(int argc, char** argv)
      pythia.readString("Tune:pp  = 15");  // cms tune   
      pythia.readString("Tune:ee  = 3");
 
-     pythia.readString("PDF:useLHAPDF = on");
-     pythia.readString("PDF:LHAPDFset = cteq6ll.LHpdf");
+     pythia.readString("PDF:pSet = LHAPDF5:cteq6ll.LHpdf");
 
     }
 
@@ -125,7 +119,8 @@ int main(int argc, char** argv)
 	ToHepMC.fill_next_event( pythia, hepmcevt );
 	hepmc_file_out << hepmcevt;
         delete hepmcevt;
-    }
+    }    
+
     // Done.                           
     return 0;
 }

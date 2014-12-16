@@ -199,7 +199,7 @@ SrcSuf = cc
 LHAPDF=$(LHAPATH)/../../..
 HEPMC=$(LHAPATH)/../../../../../hepmc/2.06.07-cms
 
-shell export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(PYTHIA8DATA)../lib
+shell export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(PYTHIA8DATA)/../../../lib
 shell export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(LHAPDF)/lib
 shell export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(HEPMC)/lib
 
@@ -243,8 +243,8 @@ DELPHES_LIBS += -L$(PYTHIA8)/lib -lpythia8 -lLHAPDF -lgfortran -lz
 else
 ifneq ($(PYTHIA8DATA),)
 HAS_PYTHIA8 = true
-CXXFLAGS += -I$(PYTHIA8DATA)/../include
-DELPHES_LIBS += -L$(PYTHIA8DATA)/../lib -lpythia8 -lLHAPDF -lgfortran -lz
+CXXFLAGS += -I$(PYTHIA8DATA)/../../../include
+DELPHES_LIBS += -L$(PYTHIA8DATA)/../../../lib -lpythia8 -lLHAPDF -lgfortran -lz
 endif
 endif
 
@@ -426,7 +426,7 @@ $(EXECUTABLE): %$(ExeSuf): $(DELPHES_DICT_OBJ) $(DELPHES_OBJ) $(TCL_OBJ)
 
 genMinBias_14TeV: external/MinBiasProduction/genMinBias_14TeV.cpp
 	@echo ">> Compiling $<"
-	@$(CXX) -o $@ $< -I$(HEPMC)/include -L$(HEPMC)/lib -I$(PYTHIA8DATA)/../include -L$(PYTHIA8DATA)/../lib -I$(LHAPDF)/include -L$(LHAPDF)/lib -lHepMC -lpythia8tohepmc -lpythia8 -lLHAPDF -lgfortran
+	@$(CXX) -o $@ $< -I$(HEPMC)/include -L$(HEPMC)/lib -I$(PYTHIA8DATA)/../../../include -L$(PYTHIA8DATA)/../../../lib -I$(LHAPDF)/include -L$(LHAPDF)/lib -lHepMC -lpythia8tohepmc -lpythia8 -lLHAPDF -lgfortran
 
 countEvents: external/LHEActions/countEvents.cpp
 	@echo ">> Compiling $<"

@@ -185,10 +185,9 @@ int main(int argc, char *argv[]){
 
     pythia->readString(sRandomSeed.c_str());          // random seed set
     pythia->readString("Beams:frameType = 4");        
-
-    Pythia8::LHAupLHEF lhareader(inputFile.c_str());
-
-    pythia->init(&lhareader);
+    pythia->readString(("Beams:LHEF = "+inputFile).c_str());
+    pythia->init();
+    
     if(pythia->LHAeventSkip(startEvent)){
       std::cout << "### skipped first " << startEvent << " events" << std::endl;
     }
@@ -263,7 +262,7 @@ int main(int argc, char *argv[]){
 
     delete pythia;
     delete confReader;
-    	    
+
     return 0;
   }
   
@@ -273,7 +272,7 @@ int main(int argc, char *argv[]){
     std::cerr << "** ERROR: " << e.what() << std::endl;
     return 1;
   }
-
+    
   return 0 ;
 }
 
@@ -421,7 +420,7 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia* pythia,
     Pythia8::Particle &particle = pythia->event[i];
         
     pid    = particle.id();
-    status = pythia->event.statusHepMC(i);
+    status = particle.statusHepMC();
     px = particle.px(); 
     py = particle.py(); 
     pz = particle.pz(); 
@@ -453,12 +452,11 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia* pythia,
     candidate->Position.SetXYZT(x, y, z, t);
 
     allParticleOutputArray->Add(candidate);
-
     if(status == 1){ // stable particles are Pythia8 status 1, allParticle are all the pythia8 particles
       stableParticleOutputArray->Add(candidate);
     }
     else if(pdgCode <= 5 || pdgCode == 21 || pdgCode == 15){ // only partons + gluon 
-      partonOutputArray->Add(candidate);
+     partonOutputArray->Add(candidate);
     }
   }
 }

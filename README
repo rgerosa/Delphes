@@ -45,7 +45,7 @@ fastjet 3.1.0 version, in case you want another one change FASTJET_TGZ entry. If
     cd ..
     cd ..
     cat $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/fastjet.xml | sed -e "s%/afs/cern.ch/cms/slc6_amd64_gcc472/external/fastjet/3.0.3-cms%$FASTJET_BASE%g" > fastjet.xml
-    cat fastjet.xml | sed -e "s%<lib name=\"fastjet\"/>%<lib name=\"fastjet\"/> <lib name=\"fastjetcontribfragile\"/>" > fastjet2.xml
+    cat fastjet.xml | sed -e "s%<lib name=\"fastjet\"/>%<lib name=\"fastjet\"/> <lib name=\"fastjetcontribfragile\"/>%g" > fastjet2.xml
     mv fastjet2.xml fastjet.xml
     mv fastjet.xml $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/
     scram setup fastjet
@@ -57,10 +57,17 @@ INSTALL PYTHIA 8.2
     cd $CMSSW_BASE/src
     wget http://home.thep.lu.se/~torbjorn/pythia8/pythia8201.tgz
     tar xvfz pythia8201.tgz
-    cd pythia8201/
+    rm pythia8201.tgz
+    cd pythia8201/    
     ./configure --enable-shared  --with-hepmc2=/afs/cern.ch/cms/slc6_amd64_gcc472/external/hepmc/2.06.07-cms3 --with-hepmc2-lib=/afs/cern.ch/cms/slc6_amd64_gcc472/external/hepmc/2.06.07-cms3/lib/ --with-hepmc2-include=/afs/cern.ch/cms/slc6_amd64_gcc472/external/hepmc/2.06.07-cms3/include --with-lhapdf5=$LHAPATH --with-lhapdf5-lib=$LHAPATH/../../../lib --with-lhapdf5-include=$LHAPATH/../../../include --with-lhapdf5-bin=$LHAPATH/../../../bin
     make -j
+    export PYTHIA_BASE=$PWD 
     cd ..
+    cat $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/pythia8.xml | sed -e "s%/afs/cern.ch/cms/slc6_amd64_gcc472/external/pythia8/185%$PYTHIA_BASE%g" > pythia8.xml
+    cat pythia8.xml | sed -e"s%<lib name=\"pythia8tohepmc\"/>%<lib name=\"pythia8lhapdf5\"/>%g" > pythia8_2.xml
+    mv pythia8_2.xml pythia8.xml
+    mv pythia8.xml $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/
+    scram setup pythia8
 
 ================
 INSTALL DELPHES
