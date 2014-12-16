@@ -70,6 +70,9 @@ def writeJobs(workingdir,executable,executableDumper,configCard,inputdir,inputPU
 
     jobid = 0 ;
     nentries = 0;
+
+    random.seed();
+
     ## loop on the list
     for ifile in listoffiles:
      ## discover how many LHE events are there     
@@ -89,9 +92,6 @@ def writeJobs(workingdir,executable,executableDumper,configCard,inputdir,inputPU
      residualEvents = nentries-options.eventsPerJob*njobs ;
      if residualEvents > 0 : njobs = njobs+1;
      
-     ## random number for pileup file      
-     random.seed();
-     pileupEntry = random.randint(0,len(listofPUfiles)-1);
 
      ## create this jobs
      print "create job for file ",jobid/njobs," total file ",len(listoffiles)," name ",ifile;
@@ -99,6 +99,9 @@ def writeJobs(workingdir,executable,executableDumper,configCard,inputdir,inputPU
      for i in range(njobs):
       ## create job directory         
       ## avoid to many jobs
+      ## random number for pileup file      
+      pileupEntry = random.randint(0,len(listofPUfiles)-1);
+
       if jobid >= options.njobmax and options.njobmax != 0: break; 
       jobdir = '%s/JOB_%d'%(workingdir,jobid)
       os.system("mkdir -p "+jobdir)        
