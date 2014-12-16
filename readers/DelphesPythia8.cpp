@@ -337,8 +337,6 @@ bool LHEEventPreselection(const LHEF::Reader & reader, const float & Mjj_cut, co
   lheEvt->ScalePDF  = reader.hepeup.SCALUP ;
   lheEvt->AlphaQED  = reader.hepeup.AQEDUP ;
   lheEvt->AlphaQCD  = reader.hepeup.AQCDUP ;
-  lheEvt->PDF1 = reader.hepeup.XPDWUP.first ;
-  lheEvt->PDF2 = reader.hepeup.XPDWUP.second ;
   
 
   for (size_t iPart = 0 ; iPart < reader.hepeup.IDUP.size (); ++iPart){

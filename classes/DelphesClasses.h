@@ -60,8 +60,6 @@ class LHEFEvent: public Event {
   Float_t ScalePDF; // scale in GeV used in the calculation of the PDFs in the event | hepup.SCALUP
   Float_t AlphaQED; // value of the QED coupling used in the event | hepup.AQEDUP
   Float_t AlphaQCD; // value of the QCD coupling used in the event | hepup.AQCDUP
-  Float_t PDF1 ;
-  Float_t PDF2 ;
 
   ClassDef(LHEFEvent, 2)
 };
