@@ -426,7 +426,7 @@ $(EXECUTABLE): %$(ExeSuf): $(DELPHES_DICT_OBJ) $(DELPHES_OBJ) $(TCL_OBJ)
 
 genMinBias_14TeV: external/MinBiasProduction/genMinBias_14TeV.cpp
 	@echo ">> Compiling $<"
-	@$(CXX) -o $@ $< -I$(HEPMC)/include -L$(HEPMC)/lib -I$(PYTHIA8DATA)/../../../include -L$(PYTHIA8DATA)/../../../lib -I$(LHAPDF)/include -L$(LHAPDF)/lib -lHepMC -lpythia8tohepmc -lpythia8 -lLHAPDF -lgfortran
+	@$(CXX) -o $@ $< -I$(HEPMC)/include -L$(HEPMC)/lib -I$(PYTHIA8DATA)/../../../include -L$(PYTHIA8DATA)/../../../lib -I$(LHAPDF)/include -L$(LHAPDF)/lib -lHepMC  -lpythia8 -lLHAPDF -lgfortran -lpythia8lhapdf5
 
 countEvents: external/LHEActions/countEvents.cpp
 	@echo ">> Compiling $<"

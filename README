@@ -49,6 +49,7 @@ fastjet 3.1.0 version, in case you want another one change FASTJET_TGZ entry. If
     mv fastjet2.xml fastjet.xml
     mv fastjet.xml $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/
     scram setup fastjet
+    cmsenv
 
 ===================
 INSTALL PYTHIA 8.2
@@ -64,10 +65,12 @@ INSTALL PYTHIA 8.2
     export PYTHIA_BASE=$PWD 
     cd ..
     cat $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/pythia8.xml | sed -e "s%/afs/cern.ch/cms/slc6_amd64_gcc472/external/pythia8/185%$PYTHIA_BASE%g" > pythia8.xml
-    cat pythia8.xml | sed -e"s%<lib name=\"pythia8tohepmc\"/>%<lib name=\"pythia8lhapdf5\"/>%g" > pythia8_2.xml
-    mv pythia8_2.xml pythia8.xml
+    cat pythia8.xml | sed -e "s%<lib name=\"pythia8tohepmc\"/>%<lib name=\"pythia8lhapdf5\"/>%g" > pythia8_2.xml
+    cat pythia8_2.xml | sed -e "s%$PYTHIA8_BASE/xmldoc%$PYTHIA8_BASE/share/Pythia8/xmldoc/%g" > pythia8_3.xml
+    mv pythia8_3.xml pythia8.xml
     mv pythia8.xml $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/
     scram setup pythia8
+    cmsenv
 
 ================
 INSTALL DELPHES
