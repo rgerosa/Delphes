@@ -2,9 +2,9 @@
 GETTING STARTED WITH CMS VERSION OF DELPHES WITHIN CMSSW
 =========================================================
 
-	cmsrel CMSSW_6_2_0_SLHC21
-    	cd CMSSW_6_2_0_SLHC21/src
-    	cmsenv
+    cmsrel CMSSW_6_2_0_SLHC21
+    cd CMSSW_6_2_0_SLHC21/src
+    cmsenv
     
 ================================
 INSTALL FASTJET RELEASE +CONTRIB
@@ -13,31 +13,28 @@ INSTALL FASTJET RELEASE +CONTRIB
 For the moment follow this recipe, we will setup and automatic script. Inside whatever directory in the $CMSSW_BASE/src run the following commands (N.B. this recipe refers to
 fastjet 3.1.0 version, in case you want another one change FASTJET_TGZ entry. If csh shell change export FASTJET_BASE=$PWD into setenv FASTJET_BASE $PWD)
 
-	mkdir fastjet
-	cd fastjet
-	FASTJET_URL="http://fastjet.fr/repo"
-    	FASTJET_TGZ="fastjet-3.1.0.tar.gz" 
-    	FASTJET_DIR=`echo $PWD/$FASTJET_TGZ | sed 's/.tar.gz//'`
-    	FASTJET_VER=`echo $FASTJET_TGZ | sed 's/.tar.gz//' |cut -d'-' -f2`
-    	wget "$FASTJET_URL/$FASTJET_TGZ" -O $FASTJET_TGZ
-    	tar fzx $FASTJET_TGZ
-    	rm -rf $FASTJET_TGZ
-    	export FASTJET_BASE=$PWD
-    	cd $FASTJET_DIR
-    	./configure --prefix=$FASTJET_BASE
-    	make -j
-    	make check -j
-    	make install -j
-    	cd ..
-    	svn checkout http://fastjet.hepforge.org/svn/contrib/trunk fjcontrib 
-    	cd fjcontrib
-
-Here you have to open by hand the following file contribs.svn and set the following lines: 
-    GenericSubtractor                tags/2.0.0-alpha-PUWS14.1
-    RecursiveTools                   tags/1.0.0-alpha1
-
-Then you can move on with the last commands:    
-
+    cd $CMSSW_BASE/src
+    mkdir fastjet
+    cd fastjet
+    FASTJET_URL="http://fastjet.fr/repo"
+    FASTJET_TGZ="fastjet-3.1.0.tar.gz" 
+    FASTJET_DIR=`echo $PWD/$FASTJET_TGZ | sed 's/.tar.gz//'`
+    FASTJET_VER=`echo $FASTJET_TGZ | sed 's/.tar.gz//' |cut -d'-' -f2`
+    wget "$FASTJET_URL/$FASTJET_TGZ" -O $FASTJET_TGZ
+    tar fzx $FASTJET_TGZ
+    rm -rf $FASTJET_TGZ
+    export FASTJET_BASE=$PWD
+    cd $FASTJET_DIR
+    ./configure --prefix=$FASTJET_BASE
+    make -j
+    make check -j
+    make install -j
+    cd ..
+    svn checkout http://fastjet.hepforge.org/svn/contrib/trunk fjcontrib 
+    cd fjcontrib
+    cat contribs.svn | sed -e "s%GenericSubtractor                tags/1.2.0%GenericSubtractor                tags/2.0.0-alpha-PUWS14.1%g" > temp.svn
+    cat temp.svn | sed -e "s%RecursiveTools                   tags/1.0.0%RecursiveTools                   tags/1.0.0-alpha1%g" > contribs.svn
+    rm temp.svn
     ./scripts/update-contribs.sh 
     ./configure --fastjet-config=$FASTJET_BASE/bin/fastjet-config CXXFLAGS="-I$FASTJET_BASE/include -I$FASTJET_BASE/tools"
     make -j
@@ -47,143 +44,48 @@ Then you can move on with the last commands:
     make fragile-shared-install -j
     cd ..
     cd ..
+    cat $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/fastjet.xml | sed -e "s%/afs/cern.ch/cms/slc6_amd64_gcc472/external/fastjet/3.0.3-cms%$FASTJET_BASE%g" > fastjet.xml
+    cat fastjet.xml | sed -e "s%<lib name=\"fastjet\"/>%<lib name=\"fastjet\"/> <lib name=\"fastjetcontribfragile\"/>" > fastjet2.xml
+    mv fastjet2.xml fastjet.xml
+    mv fastjet.xml $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/
+    scram setup fastjet
 
-At this point you have a local installation complete for fastjet + contrib package. If you want to make it "global" inside the cmssw release in order to set all the environment
-variable correctly and pass this versione to scram do:
+===================
+INSTALL PYTHIA 8.2
+===================
 
-    1) open $CMSSW_BASE/config/toolbox/$SCRAM_ARCH/tools/selected/fastjet.xml and change: 
-       <environment name="FASTJET_BASE" default=" <output of echo $FASTJET_BASE set during installation"/>
-       <environment name="LIBDIR" default="$FASTJET_BASE/lib"/>
-       <environment name="INCLUDE" default="$FASTJET_BASE/include"/>
-    2) Run: scram setup fastjet  
+    cd $CMSSW_BASE/src
+    wget http://home.thep.lu.se/~torbjorn/pythia8/pythia8201.tgz
+    tar xvfz pythia8201.tgz
+    cd pythia8201/
+    ./configure --enable-shared  --with-hepmc2=/afs/cern.ch/cms/slc6_amd64_gcc472/external/hepmc/2.06.07-cms3 --with-hepmc2-lib=/afs/cern.ch/cms/slc6_amd64_gcc472/external/hepmc/2.06.07-cms3/lib/ --with-hepmc2-include=/afs/cern.ch/cms/slc6_amd64_gcc472/external/hepmc/2.06.07-cms3/include --with-lhapdf5=$LHAPATH --with-lhapdf5-lib=$LHAPATH/../../../lib --with-lhapdf5-include=$LHAPATH/../../../include --with-lhapdf5-bin=$LHAPATH/../../../bin
+    make -j
+    cd ..
 
-
-==========================
+================
 INSTALL DELPHES
-==========================
+================
 
-cd $CMSSW_BASE/src 
-git clone git@github.com:rgerosa/Delphes.git
-cd Delphes
-./configure
-make -j
+    cd $CMSSW_BASE/src 
+    git clone git@github.com:rgerosa/Delphes.git
+    cd Delphes
+    ./configure
+    make -j
 
-===========================
+===============================
 MINIMUM BIAS SAMPLE GENERATION
-===========================
+===============================
 Pythia8 setup hard-coded inside external/MinBiasProduction/genMinBias_14TeV.cpp
 
 produce a hepmc pileup file:
-source external/MinBiasProduction/minbias_library_setup.sh
-./genMinBias_14TeV number_of_events output_file_name 
+ 
+    ./genMinBias_14TeV number_of_events output_file_name <tune>
+    ./hepmc2pileup output_file_name input_hepmc_file 
 
-===========================
-Quick start with Delphes
-===========================
+===============================
+Run Delphes on LHE File
+===============================
 
-Finally, we can run Delphes:
+Take an input LHE file, run Pythia 8 showering + Delphes
 
-   ./DelphesHepMC
-
-Command line parameters:
-
-   ./DelphesHepMC config_file output_file [input_file(s)]
-     config_file - configuration file in Tcl format
-     output_file - output file in ROOT format,
-     input_file(s) - input file(s) in HepMC format,
-     with no input_file, or when input_file is -, read standard input.
-
-Let's simulate some Z->ee events:
-
-   wget http://cp3.irmp.ucl.ac.be/downloads/z_ee.hep.gz
-   gunzip z_ee.hep.gz
-   ./DelphesSTDHEP examples/delphes_card_CMS.tcl delphes_output.root z_ee.hep
-
-or
-
-   curl -s http://cp3.irmp.ucl.ac.be/downloads/z_ee.hep.gz | gunzip | ./DelphesSTDHEP examples/delphes_card_CMS.tcl delphes_output.root
-
-For more detailed documentation, please visit 
-
-https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook
-
-=================================
-Simple analysis using TTree::Draw
-=================================
-
-Now we can start ROOT and look at the data stored in the output ROOT file.
-
-Start ROOT and load Delphes shared library:
-
-   root -l
-   gSystem->Load("libDelphes");
-
-Open ROOT file and do some basic analysis using Draw or TBrowser:
-
-   TFile::Open("delphes_output.root");
-   Delphes->Draw("Electron.PT");
-   TBrowser browser;
-
-Note 1: Delphes - tree name, it can be learned e.g. from TBrowser
-
-Note 2: Electron - branch name; PT - variable (leaf) of this branch
-
-Complete description of all branches can be found in
-
-   doc/RootTreeDescription.html
-
-This information is also available at
-
-   https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/RootTreeDescription
-
-====================
-Macro-based analysis
-====================
-
-Analysis macro consists of histogram booking, event loop (histogram filling),
-histogram display.
-
-Start ROOT and load Delphes shared library:
-
-   root -l
-   gSystem->Load("libDelphes");
-
-Basic analysis macro:
-{
-  // Create chain of root trees
-  TChain chain("Delphes");
-  chain.Add("delphes_output.root");  
-  // Create object of class ExRootTreeReader
-  ExRootTreeReader *treeReader = new ExRootTreeReader(&chain);
-  Long64_t numberOfEntries = treeReader->GetEntries();  
-  // Get pointers to branches used in this analysis
-  TClonesArray *branchElectron = treeReader->UseBranch("Electron");
-  // Book histograms
-  TH1 *histElectronPT = new TH1F("electron pt", "electron P_{T}", 50, 0.0, 100.0);
-  // Loop over all events
-  for(Int_t entry = 0; entry < numberOfEntries; ++entry){
-    // Load selected branches with data from specified event
-    treeReader->ReadEntry(entry); 
-    // If event contains at least 1 electron
-    if(branchElectron->GetEntries() > 0){
-      // Take first electron
-      Electron *electron = (Electron*) branchElectron->At(0);      
-      // Plot electron transverse momentum
-      histElectronPT->Fill(electron->PT);      
-      // Print electron transverse momentum
-      cout << electron->PT << endl;
-    }
-  }
-  // Show resulting histograms
-  histElectronPT->Draw();
-}
-
-==================================
-More advanced macro-based analysis
-==================================
-
-The 'examples' directory contains ROOT macros Example1.C, Example2.C and Example3.C.
-
-Here are the commands to run these ROOT macros:
-
-   root -l examples/Example1.C\(\"delphes_output.root\"\);
+    ./DelphesPythia8 <Delphes Card> <input LHE file> <output.root> <mjj cut> <filter full hadronic event> <starting event> <number of events>
