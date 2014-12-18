@@ -412,7 +412,7 @@ void ConvertInput(Long64_t eventCounter, Pythia8::Pythia* pythia,
   element->ProcTime = procStopWatch->RealTime();
 
   pdg = TDatabasePDG::Instance();
-
+  
   for(int i = 0; i < int(pythia->event.size()); ++i){
 
     Pythia8::Particle &particle = pythia->event[i];
