@@ -890,7 +890,7 @@ module Isolation PhotonIsolation {
   # isolation cone
   set DeltaRMax 0.3
   # minimum pT  
-  set PTMin     1.0
+  set PTMin     0.5
   # iso ratio to cut
   set PTRatioMax 9999.
 }
@@ -947,7 +947,7 @@ module Isolation ElectronIsolation {
   set RhoInputArray RhoKt4/rho
   set OutputArray electrons
   set DeltaRMax 0.3
-  set PTMin 1.0
+  set PTMin 0.5
   set PTRatioMax 9999.
 }
 
@@ -989,7 +989,7 @@ module Isolation MuonIsolation {
   set RhoInputArray RhoKt4/rho
   set OutputArray muons
   set DeltaRMax 0.3
-  set PTMin 1.0
+  set PTMin 0.5
   set PTRatioMax 9999.
 }
 
