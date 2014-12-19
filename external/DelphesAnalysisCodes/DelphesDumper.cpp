@@ -176,11 +176,12 @@ int main (int argc, char *argv[]){
   int nlhe=4;
   int nlhes=2;
     
-  float leptonLHEpt_tmp[nlhe], leptonLHEeta_tmp[nlhe], leptonLHEphi_tmp[nlhe], leptonLHEpid_tmp[nlhe], leptonLHEch_tmp[nlhe], leptonLHEm_tmp[nlhe] ;
-  float neutrinoLHEpt_tmp[nlhe], neutrinoLHEeta_tmp[nlhe], neutrinoLHEphi_tmp[nlhe], neutrinoLHEpid_tmp[nlhe];
-  float jetLHEPartonpt_tmp[nlhe], jetLHEPartoneta_tmp[nlhe], jetLHEPartonphi_tmp[nlhe], jetLHEPartonpid_tmp[nlhe];
-  float jetLHEGluonpt_tmp[nlhe], jetLHEGluoneta_tmp[nlhe], jetLHEGluonphi_tmp[nlhe], jetLHEGluonpid_tmp[nlhe] ;
-  float vbosonLHEpt_tmp[nlhe], vbosonLHEeta_tmp[nlhe], vbosonLHEphi_tmp[nlhe], vbosonLHEpid_tmp[nlhe], vbosonLHEch_tmp[nlhe],vbosonLHEm_tmp[nlhe] ;
+  float leptonLHEpt_tmp[nlhe], leptonLHEeta_tmp[nlhe], leptonLHEphi_tmp[nlhe], leptonLHEch_tmp[nlhe], leptonLHEm_tmp[nlhe] ;
+  float neutrinoLHEpt_tmp[nlhe], neutrinoLHEeta_tmp[nlhe], neutrinoLHEphi_tmp[nlhe];
+  float jetLHEPartonpt_tmp[nlhe], jetLHEPartoneta_tmp[nlhe], jetLHEPartonphi_tmp[nlhe];
+  float jetLHEGluonpt_tmp[nlhe], jetLHEGluoneta_tmp[nlhe], jetLHEGluonphi_tmp[nlhe];
+  float vbosonLHEpt_tmp[nlhe], vbosonLHEeta_tmp[nlhe], vbosonLHEphi_tmp[nlhe], vbosonLHEch_tmp[nlhe],vbosonLHEm_tmp[nlhe] ;
+  int  leptonLHEpid_tmp[nlhe], , neutrinoLHEpid_tmp[nlhe],  jetLHEPartonpid_tmp[nlhe], , jetLHEGluonpid_tmp[nlhe],  vbosonLHEpid_tmp[nlhe];
 	
 	
   for(int ilhe =0; ilhe<nlhe; ilhe++){
@@ -244,11 +245,11 @@ int main (int argc, char *argv[]){
   //------Gen Particles  
   int ngen=4;
   float leptonGenpt_tmp[ngen];
-  float leptonGenpid_tmp[ngen];
+  int leptonGenpid_tmp[ngen];
   float leptonGenphi_tmp[ngen];
   float leptonGeneta_tmp[ngen];
   float neutrinoGenpt_tmp[ngen];
-  float neutrinoGenpid_tmp[ngen];
+  int neutrinoGenpid_tmp[ngen];
   float neutrinoGenphi_tmp[ngen];
   float neutrinoGeneta_tmp[ngen];
   
