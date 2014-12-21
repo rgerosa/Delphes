@@ -114,7 +114,7 @@ def writeJobs(workingdir,executable,executableDumper,configCard,inputdir,inputPU
       os.system("cp %s %s/temp.tcl"%(configCard,jobdir));                       
       pileupName = listofPUfiles[pileupEntry].split("/"); 
       configName = configCard.split("/"); 
-      os.system("cat "+jobdir+"/temp.tcl | sed -e s%/afs/cern.ch/user/s/spigazzi/work/public/PU_14TeV/MinBias_14TeV_100k_TunePP15.pileup%"+str(pileupName[len(pileupName)-1])+"%g > "+jobdir+"/"+configName[len(configName)-1]);     
+      os.system("cat "+jobdir+"/temp.tcl | sed -e s%MB_1.mb%"+str(pileupName[len(pileupName)-1])+"%g > "+jobdir+"/"+configName[len(configName)-1]);     
       ## remove the temp card
       os.system("rm %s/temp.tcl"%jobdir);
 
