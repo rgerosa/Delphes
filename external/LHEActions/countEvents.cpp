@@ -20,6 +20,7 @@ int main(int argc, char ** argv)
     }
 
   std::ifstream ifs (argv[1]) ;
+  if (ifs.fail()) return 0;
   LHEF::Reader reader (ifs) ;
 
   int counter = 0 ;
