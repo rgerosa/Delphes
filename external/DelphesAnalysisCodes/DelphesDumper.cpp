@@ -181,7 +181,7 @@ int main (int argc, char *argv[]){
   float jetLHEPartonpt_tmp[nlhe], jetLHEPartoneta_tmp[nlhe], jetLHEPartonphi_tmp[nlhe];
   float jetLHEGluonpt_tmp[nlhe], jetLHEGluoneta_tmp[nlhe], jetLHEGluonphi_tmp[nlhe];
   float vbosonLHEpt_tmp[nlhe], vbosonLHEeta_tmp[nlhe], vbosonLHEphi_tmp[nlhe], vbosonLHEch_tmp[nlhe],vbosonLHEm_tmp[nlhe] ;
-  int  leptonLHEpid_tmp[nlhe], , neutrinoLHEpid_tmp[nlhe],  jetLHEPartonpid_tmp[nlhe], , jetLHEGluonpid_tmp[nlhe],  vbosonLHEpid_tmp[nlhe];
+  int   leptonLHEpid_tmp[nlhe], neutrinoLHEpid_tmp[nlhe],  jetLHEPartonpid_tmp[nlhe], jetLHEGluonpid_tmp[nlhe],  vbosonLHEpid_tmp[nlhe];
 	
 	
   for(int ilhe =0; ilhe<nlhe; ilhe++){
