@@ -130,7 +130,7 @@ int main (int argc, char** argv){
   TH1F* MissingETPhi_Resp_Puppi = new TH1F ("MissingETPhi_Resp_Puppi","",50,-0.7,0.7);
 
   // loop on the events and fill the histos
-  for(int iEntry = 0; iEntry < inputChain->GetEntries()/10 ; iEntry++){
+  for(int iEntry = 0; iEntry < inputChain->GetEntries() ; iEntry++){
 
     if(iEntry%10000 == 0) std::cout<<"reading entry "<<iEntry<<std::endl;
 
