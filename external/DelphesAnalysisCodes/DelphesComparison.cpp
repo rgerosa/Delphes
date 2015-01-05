@@ -249,7 +249,6 @@ int main (int argc, char** argv){
   TChain* chain_1 = new TChain("Delphes");
   TChain* chain_2 = new TChain("Delphes");
 
-
   for( size_t iVec = 0; iVec < inputFileList_1.size() ; iVec++){
     chain_1->Add(inputFileList_1.at(iVec).c_str());
   }
@@ -257,7 +256,7 @@ int main (int argc, char** argv){
   for( size_t iVec = 0; iVec < inputFileList_2.size() ; iVec++){
     chain_2->Add(inputFileList_2.at(iVec).c_str());
   }
-  
+
   // Take input informations
   TClonesArray* NPU_1 = new TClonesArray("ScalarHT");
   TClonesArray* NPU_2 = new TClonesArray("ScalarHT");
