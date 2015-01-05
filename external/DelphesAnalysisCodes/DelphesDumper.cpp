@@ -1,9 +1,9 @@
-
 #include <algorithm>
 #include <vector>
 #include <iostream>
 #include <fstream>
 #include <utility>
+
 #include "TROOT.h"
 #include "TSystem.h"
 #include "TString.h"
@@ -20,18 +20,15 @@
 
 #include "TStopwatch.h"
 #include "classes/DelphesClasses.h"
+
 #include "external/ExRootAnalysis/ExRootTreeReader.h"
 
 
 using namespace std;
 
-//****************************************************************************************
-
-//****************************************************************************************
+//******************************************
 // runs over all entries in the delphes tree
-
- 
-//****************************************************************************************
+//******************************************
 
 struct Lepton {
   unsigned int type; //0:electron , 1:muon
@@ -51,7 +48,6 @@ struct JetDescendingPt {
     return a->PT > b->PT;
   }
 };
-
 
 struct leptonDescendingPt {
   bool operator() (const Lepton& a, const Lepton& b){
@@ -98,16 +94,19 @@ bool FillChain(TChain& chain, const std::string& inputFileList){
   return true;
 }
 
-//****************************************************************************************
+//************************
 // main
+//************************
+
 int main (int argc, char *argv[]){
 
-  //----------------------------------------------------------------------------------------
+  //----------------------------------
   //importing delphes libraries
   gSystem->Load("libDelphes");
-  //----------------------------------------------------------------------------------------
+  //----------------------------------
   //complex object definitions
   //change it for root input
+
   TChain* delphesNtuples = new TChain("Delphes");
   ExRootTreeReader *delphesTree = new ExRootTreeReader(delphesNtuples);
 
@@ -117,11 +116,10 @@ int main (int argc, char *argv[]){
     return 0;
   }
 
-  //TTree *LT ;//=  (TTree*)(delphesNtuples);
   TFile* outputFile = TFile::Open(argv[2],"recreate");
   TTree* easyTree = new TTree("easyDelphes","easyDelphes");
-  //----------------------------------------------------------------------------------------
 
+  //-------------------------------------------------
   TString inputFileName = Form("%s",std::string(argv[1]).c_str());
   if(inputFileName.Contains(".root"))
     delphesNtuples -> Add(argv[1]);
@@ -144,10 +142,9 @@ int main (int argc, char *argv[]){
        
   //----------------------------------------------------------------------------------------
   //variable management
-  //
   // -> all objects in the output tree are stored in decreasing pt order.
-    
   //--------- getting objects from the delphes tree
+
   TClonesArray* branchLHEParticle = delphesTree->UseBranch("LHEParticles");
   TClonesArray* branchEl          = delphesTree->UseBranch("Electron");
   TClonesArray* branchMu          = delphesTree->UseBranch("Muon");
@@ -170,18 +167,20 @@ int main (int argc, char *argv[]){
   TClonesArray* branchPuppiRhokt4 = delphesTree->UseBranch("PuppiRhoKt4");
   TClonesArray* branchPuppiRhoGFJ= delphesTree->UseBranch("PuppiRhoGridFastJet");
              
-  //--------- Creating branches for the new (light) tree
-    
+  //--------- Creating branches for the new (light) tree    
   //--------- LHE Information
-  int nlhe=4;
-  int nlhes=2;
+
+  int nlhe  = 4;
+  int nlhes = 2;
     
-  float leptonLHEpt_tmp[nlhe], leptonLHEeta_tmp[nlhe], leptonLHEphi_tmp[nlhe], leptonLHEch_tmp[nlhe], leptonLHEm_tmp[nlhe] ;
+  float leptonLHEpt_tmp[nlhe], leptonLHEeta_tmp[nlhe], leptonLHEphi_tmp[nlhe], leptonLHEm_tmp[nlhe];
   float neutrinoLHEpt_tmp[nlhe], neutrinoLHEeta_tmp[nlhe], neutrinoLHEphi_tmp[nlhe];
   float jetLHEPartonpt_tmp[nlhe], jetLHEPartoneta_tmp[nlhe], jetLHEPartonphi_tmp[nlhe];
   float jetLHEGluonpt_tmp[nlhe], jetLHEGluoneta_tmp[nlhe], jetLHEGluonphi_tmp[nlhe];
-  float vbosonLHEpt_tmp[nlhe], vbosonLHEeta_tmp[nlhe], vbosonLHEphi_tmp[nlhe], vbosonLHEch_tmp[nlhe],vbosonLHEm_tmp[nlhe] ;
+  float vbosonLHEpt_tmp[nlhe], vbosonLHEeta_tmp[nlhe], vbosonLHEphi_tmp[nlhe], vbosonLHEm_tmp[nlhe];
+  int   vbosonLHEch_tmp[nlhe], leptonLHEch_tmp[nlhe];
   int   leptonLHEpid_tmp[nlhe], neutrinoLHEpid_tmp[nlhe],  jetLHEPartonpid_tmp[nlhe], jetLHEGluonpid_tmp[nlhe],  vbosonLHEpid_tmp[nlhe];
+  int   leptonLHEspin_tmp[nlhe], neutrinoLHEspin_tmp[nlhe],  jetLHEPartonspin_tmp[nlhe], jetLHEGluonspin_tmp[nlhe],  vbosonLHEspin_tmp[nlhe];
 	
 	
   for(int ilhe =0; ilhe<nlhe; ilhe++){
@@ -189,31 +188,37 @@ int main (int argc, char *argv[]){
     TString leptonLHEetaStr = "leptonLHEeta"; leptonLHEetaStr += (ilhe+1);
     TString leptonLHEphiStr = "leptonLHEphi"; leptonLHEphiStr += (ilhe+1);
     TString leptonLHEpidStr = "leptonLHEpid"; leptonLHEpidStr += (ilhe+1);
+    TString leptonLHEspinStr = "leptonLHEspin"; leptonLHEspinStr += (ilhe+1);
     TString leptonLHEchStr = "leptonLHEch"; leptonLHEchStr += (ilhe+1);
     TString leptonLHEmStr = "leptonLHEm"; leptonLHEmStr += (ilhe+1);
     TString neutrinoLHEptStr = "neutrinoLHEpt"; neutrinoLHEptStr += (ilhe+1);
     TString neutrinoLHEetaStr = "neutrinoLHEeta"; neutrinoLHEetaStr += (ilhe+1);
     TString neutrinoLHEphiStr = "neutrinoLHEphi"; neutrinoLHEphiStr += (ilhe+1);
     TString neutrinoLHEpidStr = "neutrinoLHEpid"; neutrinoLHEpidStr += (ilhe+1);
+    TString neutrinoLHEspinStr = "neutrinoLHEspin"; neutrinoLHEspinStr += (ilhe+1);
     TString jetLHEPartonptStr = "jetLHEPartonpt"; jetLHEPartonptStr += (ilhe+1);
     TString jetLHEPartonetaStr = "jetLHEPartoneta"; jetLHEPartonetaStr += (ilhe+1);
     TString jetLHEPartonphiStr = "jetLHEPartonphi"; jetLHEPartonphiStr += (ilhe+1);
     TString jetLHEPartonpidStr = "jetLHEPartonpid"; jetLHEPartonpidStr += (ilhe+1);
+    TString jetLHEPartonspinStr = "jetLHEPartonspin"; jetLHEPartonspinStr += (ilhe+1);
         
     easyTree -> Branch(leptonLHEptStr,&leptonLHEpt_tmp[ilhe],leptonLHEptStr+"/F");
     easyTree -> Branch(leptonLHEetaStr,&leptonLHEeta_tmp[ilhe],leptonLHEetaStr+"/F");
     easyTree -> Branch(leptonLHEphiStr,&leptonLHEphi_tmp[ilhe],leptonLHEphiStr+"/F");
-    easyTree -> Branch(leptonLHEpidStr,&leptonLHEpid_tmp[ilhe],leptonLHEpidStr+"/F");
-    easyTree -> Branch(leptonLHEchStr,&leptonLHEch_tmp[ilhe],leptonLHEchStr+"/F");
+    easyTree -> Branch(leptonLHEpidStr,&leptonLHEpid_tmp[ilhe],leptonLHEpidStr+"/I");
+    easyTree -> Branch(leptonLHEspinStr,&leptonLHEspin_tmp[ilhe],leptonLHEspinStr+"/I");
+    easyTree -> Branch(leptonLHEchStr,&leptonLHEch_tmp[ilhe],leptonLHEchStr+"/I");
     easyTree -> Branch(leptonLHEmStr,&leptonLHEm_tmp[ilhe],leptonLHEmStr+"/F");
     easyTree -> Branch(neutrinoLHEptStr,&neutrinoLHEpt_tmp[ilhe],neutrinoLHEptStr+"/F");
     easyTree -> Branch(neutrinoLHEetaStr,&neutrinoLHEeta_tmp[ilhe],neutrinoLHEetaStr+"/F");
     easyTree -> Branch(neutrinoLHEphiStr,&neutrinoLHEphi_tmp[ilhe],neutrinoLHEphiStr+"/F");
     easyTree -> Branch(neutrinoLHEpidStr,&neutrinoLHEpid_tmp[ilhe],neutrinoLHEpidStr+"/F");
+    easyTree -> Branch(neutrinoLHEspinStr,&neutrinoLHEspin_tmp[ilhe],neutrinoLHEspinStr+"/F");
     easyTree -> Branch(jetLHEPartonptStr,&jetLHEPartonpt_tmp[ilhe],jetLHEPartonptStr+"/F");
     easyTree -> Branch(jetLHEPartonetaStr,&jetLHEPartoneta_tmp[ilhe],jetLHEPartonetaStr+"/F");
     easyTree -> Branch(jetLHEPartonphiStr,&jetLHEPartonphi_tmp[ilhe],jetLHEPartonphiStr+"/F");
-    easyTree -> Branch(jetLHEPartonpidStr,&jetLHEPartonpid_tmp[ilhe],jetLHEPartonpidStr+"/F");
+    easyTree -> Branch(jetLHEPartonpidStr,&jetLHEPartonpid_tmp[ilhe],jetLHEPartonpidStr+"/I");
+    easyTree -> Branch(jetLHEPartonspinStr,&jetLHEPartonspin_tmp[ilhe],jetLHEPartonspinStr+"/I");
         
   }
     
@@ -222,23 +227,27 @@ int main (int argc, char *argv[]){
     TString vbosonLHEetaStr = "vbosonLHEeta"; vbosonLHEetaStr += (ilhe+1);
     TString vbosonLHEphiStr = "vbosonLHEphi"; vbosonLHEphiStr += (ilhe+1);
     TString vbosonLHEpidStr = "vbosonLHEpid"; vbosonLHEpidStr += (ilhe+1);
+    TString vbosonLHEspinStr = "vbosonLHEspin"; vbosonLHEspinStr += (ilhe+1);
     TString vbosonLHEchStr = "vbosonLHEch"; vbosonLHEchStr += (ilhe+1);
     TString vbosonLHEmStr = "vbosonLHEm"; vbosonLHEmStr += (ilhe+1);
     TString jetLHEGluonptStr = "jetLHEGluonpt"; jetLHEGluonptStr += (ilhe+1);
     TString jetLHEGluonetaStr = "jetLHEGluoneta"; jetLHEGluonetaStr += (ilhe+1);
     TString jetLHEGluonphiStr = "jetLHEGluonphi"; jetLHEGluonphiStr += (ilhe+1);
     TString jetLHEGluonpidStr = "jetLHEGluonpid"; jetLHEGluonpidStr += (ilhe+1);
+    TString jetLHEGluonspinStr = "jetLHEGluonspin"; jetLHEGluonspinStr += (ilhe+1);
         
     easyTree -> Branch(vbosonLHEptStr,&vbosonLHEpt_tmp[ilhe],vbosonLHEptStr+"/F");
     easyTree -> Branch(vbosonLHEetaStr,&vbosonLHEeta_tmp[ilhe],vbosonLHEetaStr+"/F");
     easyTree -> Branch(vbosonLHEphiStr,&vbosonLHEphi_tmp[ilhe],vbosonLHEphiStr+"/F");
-    easyTree -> Branch(vbosonLHEpidStr,&vbosonLHEpid_tmp[ilhe],vbosonLHEpidStr+"/F");
-    easyTree -> Branch(vbosonLHEchStr,&vbosonLHEch_tmp[ilhe],vbosonLHEchStr+"/F");
+    easyTree -> Branch(vbosonLHEpidStr,&vbosonLHEpid_tmp[ilhe],vbosonLHEpidStr+"/I");
+    easyTree -> Branch(vbosonLHEspinStr,&vbosonLHEspin_tmp[ilhe],vbosonLHEspinStr+"/I");
+    easyTree -> Branch(vbosonLHEchStr,&vbosonLHEch_tmp[ilhe],vbosonLHEchStr+"/I");
     easyTree -> Branch(vbosonLHEmStr,&vbosonLHEm_tmp[ilhe],vbosonLHEmStr+"/F");
     easyTree -> Branch(jetLHEGluonptStr,&jetLHEGluonpt_tmp[ilhe],jetLHEGluonptStr+"/F");
     easyTree -> Branch(jetLHEGluonetaStr,&jetLHEGluoneta_tmp[ilhe],jetLHEGluonetaStr+"/F");
     easyTree -> Branch(jetLHEGluonphiStr,&jetLHEGluonphi_tmp[ilhe],jetLHEGluonphiStr+"/F");
-    easyTree -> Branch(jetLHEGluonpidStr,&jetLHEGluonpid_tmp[ilhe],jetLHEGluonpidStr+"/F");
+    easyTree -> Branch(jetLHEGluonpidStr,&jetLHEGluonpid_tmp[ilhe],jetLHEGluonpidStr+"/I");
+    easyTree -> Branch(jetLHEGluonspinStr,&jetLHEGluonspin_tmp[ilhe],jetLHEGluonspinStr+"/I");
 	            
   }
   
@@ -311,37 +320,6 @@ int main (int argc, char *argv[]){
   easyTree -> Branch("nSoftJets",&nSoftJets_tmp,"nSoftJets/F");
 
   
-  /*  int ntjet=8;
-	
-      float jetTrackpt_tmp[ntjet], jetTracketa_tmp[ntjet], jetTrackphi_tmp[ntjet],  jetTrackm_tmp[ntjet] ;
-      float jetTrackAreaX_tmp[ntjet], jetTrackAreaY_tmp[ntjet], jetTrackAreaZ_tmp[ntjet], jetTrackAreaT_tmp[ntjet];
-      float HtSoft_tmp, nSoftJets_tmp;
-	
-      easyTree -> Branch("HtSoft",&HtSoft_tmp,"HtSoft/F");
-      easyTree -> Branch("nSoftJets",&nSoftJets_tmp,"nSoftJets/F");
-    
-      for(int ijet = 0; ijet<ntjet; ijet++){
-      TString jetTrackptStr = "jetTrackpt"; jetTrackptStr += (ijet+1);
-      TString jetTracketaStr = "jetTracketa"; jetTracketaStr += (ijet+1);
-      TString jetTrackphiStr = "jetTrackphi"; jetTrackphiStr += (ijet+1);
-      TString jetTrackmStr = "jetTrackm"; jetTrackmStr += (ijet+1);
-      TString jetTrackAreaxStr = "jetTrackAreaX"; jetTrackAreaxStr += (ijet+1);
-      TString jetTrackAreayStr = "jetTrackAreaY"; jetTrackAreayStr += (ijet+1);
-      TString jetTrackAreazStr = "jetTrackAreaZ"; jetTrackAreazStr += (ijet+1);
-      TString jetTrackAreatStr = "jetTrackAreaT"; jetTrackAreatStr += (ijet+1);
-        
-      easyTree -> Branch(jetTrackptStr,&jetTrackpt_tmp[ijet],jetTrackptStr+"/F");
-      easyTree -> Branch(jetTracketaStr,&jetTracketa_tmp[ijet],jetTracketaStr+"/F");
-      easyTree -> Branch(jetTrackphiStr,&jetTrackphi_tmp[ijet],jetTrackphiStr+"/F");
-      easyTree -> Branch(jetTrackmStr,&jetTrackm_tmp[ijet],jetTrackmStr+"/F");
-      easyTree -> Branch(jetTrackAreaxStr,&jetTrackAreaX_tmp[ijet],jetTrackAreaxStr+"/F");
-      easyTree -> Branch(jetTrackAreayStr,&jetTrackAreaY_tmp[ijet],jetTrackAreayStr+"/F");
-      easyTree -> Branch(jetTrackAreazStr,&jetTrackAreaZ_tmp[ijet],jetTrackAreazStr+"/F");
-      easyTree -> Branch(jetTrackAreatStr,&jetTrackAreaT_tmp[ijet],jetTrackAreatStr+"/F");
-        
-      }
-  */	
-    
   //---------  JETS (JetPUID) Information
   int njet=8;
 	
@@ -653,45 +631,46 @@ int main (int argc, char *argv[]){
 
   
 
-    
-    
-  for(int iEvent = 0; iEvent <  numberOfEntries; iEvent++)
-    {
-      if (iEvent % 1000 == 0)
-        {
-	  cout << "iEvent = " << iEvent << endl;
-        }
-      delphesTree -> ReadEntry(iEvent);
+  for(int iEvent = 0; iEvent <  numberOfEntries; iEvent++){
+    if (iEvent % 1000 == 0){
+      cout << "iEvent = " << iEvent << endl;
+    }
+    delphesTree -> ReadEntry(iEvent);
         
-      //------ LHE Particle Branches -----------------//
+    //------ LHE Particle Branches -----------------//
         
+    vector< int> lhepartonID;
+    vector< int> lhegluonID;
+    vector< int> lheleptonID;
+    vector< int> lheneutrinoID;
+    vector< int> lhevbosonID;
         
+    vector<LHEParticle*> lheParton;
+    vector<LHEParticle*> lheGluon;
+    vector<LHEParticle*> lheLepton;
+    vector<LHEParticle*> lheNeutrino;
+    vector<LHEParticle*> lheVBoson;
         
-      vector< int> lhepartonID;
-      vector< int> lhegluonID;
-      vector< int> lheleptonID;
-      vector< int> lheneutrinoID;
-      vector< int> lhevbosonID;
-        
-      vector<LHEParticle*> lheParton;
-      vector<LHEParticle*> lheGluon;
-      vector<LHEParticle*> lheLepton;
-      vector<LHEParticle*> lheNeutrino;
-      vector<LHEParticle*> lheVBoson;
-        
-      for(int k =0; k<4; k++){
-	leptonLHEpt_tmp[k]=-999;	leptonLHEeta_tmp[k]=-999;	leptonLHEphi_tmp[k]=-999;	 leptonLHEpid_tmp[k]=-999;	leptonLHEch_tmp[k]=-999;	leptonLHEm_tmp[k]=-999;
-	neutrinoLHEpt_tmp[k]=-999; neutrinoLHEeta_tmp[k]=-999;  neutrinoLHEphi_tmp[k]=-999;  neutrinoLHEpid_tmp[k]=-999;
-	jetLHEPartonpt_tmp[k]=-999; jetLHEPartoneta_tmp[k]=-999; jetLHEPartonphi_tmp[k]=-999; jetLHEPartonpid_tmp[k]=-999;
-	jetLHEGluonpt_tmp[k]=-999;  jetLHEGluoneta_tmp[k]=-999;  jetLHEGluonphi_tmp[k]=-999;  jetLHEGluonpid_tmp[k]=-999;
-	vbosonLHEpt_tmp[k]=-999;  vbosonLHEeta_tmp[k]=-999;  vbosonLHEphi_tmp[k]=-999;  vbosonLHEpid_tmp[k]=-999; vbosonLHEch_tmp[k]=-999;  vbosonLHEm_tmp[k]=-999;
-      }
+    for(int k =0; k<4; k++){
+      leptonLHEpt_tmp[k]=-999;	
+      leptonLHEeta_tmp[k]=-999;	
+      leptonLHEphi_tmp[k]=-999;	 
+      leptonLHEpid_tmp[k]=-999;	
+      leptonLHEspin_tmp[k]=-999;	
+      leptonLHEch_tmp[k]=-999;	
+      leptonLHEm_tmp[k]=-999;
+
+      neutrinoLHEpt_tmp[k]=-999; neutrinoLHEeta_tmp[k]=-999;  neutrinoLHEphi_tmp[k]=-999;  neutrinoLHEpid_tmp[k]=-999; neutrinoLHEspin_tmp[k]=-999;
+      jetLHEPartonpt_tmp[k]=-999; jetLHEPartoneta_tmp[k]=-999; jetLHEPartonphi_tmp[k]=-999; jetLHEPartonpid_tmp[k]=-999;  jetLHEPartonspin_tmp[k]=-999;
+      jetLHEGluonpt_tmp[k]=-999;  jetLHEGluoneta_tmp[k]=-999;  jetLHEGluonphi_tmp[k]=-999;  jetLHEGluonpid_tmp[k]=-999;  jetLHEGluonspin_tmp[k]=-999;
+      vbosonLHEpt_tmp[k]=-999;  vbosonLHEeta_tmp[k]=-999;  vbosonLHEphi_tmp[k]=-999;  vbosonLHEpid_tmp[k]=-999;  vbosonLHEspin_tmp[k]=-999; 
+      vbosonLHEch_tmp[k]=-999;  vbosonLHEm_tmp[k]=-999;
+    }
         
         
       int lhe_entries = branchLHEParticle->GetEntriesFast();
         
-        
-        
+                
       for (int i = 0 ; i < lhe_entries  ; i++) {
 	LHEParticle *lhepart = (LHEParticle*) branchLHEParticle->At(i);
 	int type   =  lhepart-> PID;
@@ -728,8 +707,7 @@ int main (int argc, char *argv[]){
       } //lheloop
       
             
-      // sorting in PT
-            
+      // sorting in PT            
       sort(lheParton.begin(), lheParton.end(),lheParticleDescendingPt());
       sort(lheLepton.begin(), lheLepton.end(),lheParticleDescendingPt());
       sort(lheNeutrino.begin(), lheNeutrino.end(),lheParticleDescendingPt());
@@ -747,6 +725,7 @@ int main (int argc, char *argv[]){
 	jetLHEPartoneta_tmp[j] = lheParton.at(j)->Eta;
 	jetLHEPartonphi_tmp[j] = lheParton.at(j)->Phi;
 	jetLHEPartonpid_tmp[j] = lheParton.at(j)->PID;
+	jetLHEPartonspin_tmp[j] = lheParton.at(j)->Spin;
                 
       }
             
@@ -755,6 +734,7 @@ int main (int argc, char *argv[]){
 	jetLHEGluoneta_tmp[j] = lheGluon.at(j)->Eta;
 	jetLHEGluonphi_tmp[j] = lheGluon.at(j)->Phi;
 	jetLHEGluonpid_tmp[j] = lheGluon.at(j)->PID;
+	jetLHEGluonspin_tmp[j] = lheGluon.at(j)->Spin;
                 
       }
 
@@ -763,6 +743,7 @@ int main (int argc, char *argv[]){
 	leptonLHEeta_tmp[j] = lheLepton.at(j)->Eta;
 	leptonLHEphi_tmp[j] = lheLepton.at(j)->Phi;
 	leptonLHEpid_tmp[j] = lheLepton.at(j)->PID;
+	leptonLHEspin_tmp[j] = lheLepton.at(j)->Spin;
 	leptonLHEch_tmp[j] = lheLepton.at(j)->Charge;
 	leptonLHEm_tmp[j] = lheLepton.at(j)->Mass;
                 
@@ -776,6 +757,7 @@ int main (int argc, char *argv[]){
 	vbosonLHEeta_tmp[j] = lheVBoson.at(j)->Eta;
 	vbosonLHEphi_tmp[j] = lheVBoson.at(j)->Phi;
 	vbosonLHEpid_tmp[j] = lheVBoson.at(j)->PID;
+	vbosonLHEspin_tmp[j] = lheVBoson.at(j)->Spin;
 	vbosonLHEch_tmp[j] = lheVBoson.at(j)->Charge;
 	vbosonLHEm_tmp[j] = lheVBoson.at(j)->Mass;
                 
@@ -786,6 +768,7 @@ int main (int argc, char *argv[]){
 	neutrinoLHEeta_tmp[j] = lheNeutrino.at(j)->Eta;
 	neutrinoLHEphi_tmp[j] = lheNeutrino.at(j)->Phi;
 	neutrinoLHEpid_tmp[j] = lheNeutrino.at(j)->PID;
+	neutrinoLHEspin_tmp[j] = lheNeutrino.at(j)->Spin;
       }
             
       //--------- GenParticle filling
