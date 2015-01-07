@@ -1,0 +1,1429 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <memory>
+
+#include "TFile.h"
+#include "TCanvas.h"
+#include "TTree.h"
+#include "TChain.h"
+#include "TClonesArray.h"
+#include "TH1F.h"
+#include "TROOT.h"
+#include "TStyle.h"
+#include "TLatex.h"
+#include "TLegend.h"
+#include "TPaveStats.h"
+#include "TLorentzVector.h"
+#include "TH2F.h"
+#include "TGraphAsymmErrors.h"
+
+#include "classes/DelphesClasses.h"
+
+#define etaBinCut    2.5
+#define matchingCone 0.3
+#define ptBinCut     120
+#define leptonIsoThreshold 0.5
+
+/////////////////////////////////////////////////////                                                                                                                        
+
+int main (int argc, char** argv){
+
+  if(argc < 3 ) {
+    std::cerr<<" to be used as: ./<exe file> <directory with delphes trees> <outputPlot> "<<std::endl;
+    return -1;
+  }
+
+  // Setting for style                                                                                                                                                         
+  std::string ROOTStyle;
+  if(getenv ("ROOTStyle")!=NULL){
+    ROOTStyle = getenv ("ROOTStyle");
+    gROOT->ProcessLine((".x "+ROOTStyle+"/setTDRStyle.C(1)").c_str());
+  }
+
+  gStyle->SetOptStat(111110);
+  gStyle->SetPadLeftMargin(0.13);
+  gStyle->SetPadTopMargin(0.09);
+  gStyle->SetErrorX(0.5);
+
+  // output folders                                                                                                                                                             
+  std::string outputFileDirectory = argv[2];
+
+  system(("mkdir -p "+outputFileDirectory).c_str());
+  system(("rm -r "   +outputFileDirectory+"/*").c_str());
+
+  // input files and chain to be analyzed 
+  std::string inputFileDirectory = argv[1]; 
+
+  TChain *inputChain = new TChain("Delphes");
+  inputChain->Add((inputFileDirectory+"/*1.root").c_str());
+  //  inputChain->Add((inputFileDirectory+"/*2.root").c_str());
+  // inputChain->Add((inputFileDirectory+"/*3.root").c_str());
+  
+  std::cout<<"number of events to analyze : "<<inputChain->GetEntries()<<std::endl;
+  
+  // threshold for jet and leptons
+  float leptonPtThreshold = 0;
+  if(argc > 3) leptonPtThreshold = atof(argv[3]);
+
+  float jetPtThreshold = 0;
+  if(argc > 4) jetPtThreshold = atof(argv[4]);
+
+  // set the branch address to be used
+  TClonesArray* Muons = new TClonesArray("Muon");
+  inputChain->SetBranchAddress("Muon",&Muons);
+
+  TClonesArray* Electrons = new TClonesArray("Electron");
+  inputChain->SetBranchAddress("Electron",&Electrons);
+
+  TClonesArray* RecoJets = new TClonesArray("Jet");
+  inputChain->SetBranchAddress("JetPUID",&RecoJets);
+
+  TClonesArray* PuppiJets = new TClonesArray("Jet");
+  inputChain->SetBranchAddress("PuppiJetPUID",&PuppiJets);
+
+  TClonesArray* GenJets = new TClonesArray("Jet");
+  inputChain->SetBranchAddress("GenJet",&GenJets);
+
+  TClonesArray* NPU = new TClonesArray("ScalarHT");
+  inputChain->SetBranchAddress("NPU",&NPU);
+
+  inputChain->SetBranchStatus("LHE*",0);
+  inputChain->SetBranchStatus("Track*",0);
+  inputChain->SetBranchStatus("*Rho*",0);
+  inputChain->SetBranchStatus("*MissingET*",0);
+  inputChain->SetBranchStatus("NPU",1);
+  inputChain->SetBranchStatus("Muon",1);
+  inputChain->SetBranchStatus("Electron",1);
+  inputChain->SetBranchStatus("JetPUID",1);
+  inputChain->SetBranchStatus("PuppiJetPUID",1);
+  inputChain->SetBranchStatus("GenJet",1);
+
+ 
+  // histogram to fill on the met
+  TH1F* leadingJetPt  = new TH1F ("leadingJetPt","",50,0,500);
+  TH1F* leadingJetEta = new TH1F ("leadingJetEta","",50,-5,5);
+
+  leadingJetPt->Sumw2();
+  leadingJetEta->Sumw2();
+
+  TH1F* trailingJetPt  = new TH1F ("trailingJetPt","",50,0,500);
+  TH1F* trailingJetEta = new TH1F ("trailingJetEta","",50,-5,5);
+
+  trailingJetPt->Sumw2();
+  trailingJetEta->Sumw2();
+
+  TH1F* leadingPuppiJetPt  = new TH1F ("leadingPuppiJetPt","",50,0,500);
+  TH1F* leadingPuppiJetEta = new TH1F ("leadingPuppiJetEta","",50,-5,5);
+
+  leadingPuppiJetPt->Sumw2();
+  leadingPuppiJetEta->Sumw2();
+
+  TH1F* trailingPuppiJetPt  = new TH1F ("trailingPuppiJetPt","",50,0,500);
+  TH1F* trailingPuppiJetEta = new TH1F ("trailingPuppiJetEta","",50,-5,5);
+
+  trailingPuppiJetPt->Sumw2();
+  trailingPuppiJetEta->Sumw2();
+
+  TH1F* NumeratorReco_vsEta  = new TH1F ("NumeratorReco_vsEta","",50,-5,5);
+  TH1F* NumeratorPuppi_vsEta  = new TH1F ("NumeratorPuppi_vsEta","",50,-5,5);
+
+  NumeratorReco_vsEta->Sumw2();
+  NumeratorPuppi_vsEta->Sumw2();
+
+  TH1F* NumeratorReco_vsPt_central   = new TH1F ("NumeratorReco_vsPt_central","",50,0,500);
+  TH1F* NumeratorPuppi_vsPt_central  = new TH1F ("NumeratorPuppi_vsPt_central","",50,0,500);
+
+  NumeratorReco_vsPt_central->Sumw2();
+  NumeratorPuppi_vsPt_central->Sumw2();
+
+  TH1F* NumeratorReco_vsPt_forward   = new TH1F ("NumeratorReco_vsPt_forward","",50,0,500);
+  TH1F* NumeratorPuppi_vsPt_forward  = new TH1F ("NumeratorPuppi_vsPt_forward","",50,0,500);
+
+  NumeratorReco_vsPt_forward->Sumw2();
+  NumeratorPuppi_vsPt_forward->Sumw2();
+
+  TH1F* NumeratorReco_vsPU_central   = new TH1F ("NumeratorReco_vsPU_central","",50,90,190);
+  TH1F* NumeratorPuppi_vsPU_central  = new TH1F ("NumeratorPuppi_vsPU_central","",50,90,190);
+
+  NumeratorReco_vsPU_central->Sumw2();
+  NumeratorPuppi_vsPU_central->Sumw2();
+
+  TH1F* NumeratorReco_vsPU_forward   = new TH1F ("NumeratorReco_vsPU_forward","",50,90,190);
+  TH1F* NumeratorPuppi_vsPU_forward  = new TH1F ("NumeratorPuppi_vsPU_forward","",50,90,190);
+
+  NumeratorReco_vsPU_forward->Sumw2();
+  NumeratorPuppi_vsPU_forward->Sumw2();
+
+  TH1F* DenominatorReco_vsEta  = new TH1F ("DenominatorReco_vsEta","",50,-5,5);
+  TH1F* DenominatorPuppi_vsEta  = new TH1F ("DenominatorPuppi_vsEta","",50,-5,5);
+
+  DenominatorReco_vsEta->Sumw2();
+  DenominatorPuppi_vsEta->Sumw2();
+
+  TH1F* DenominatorReco_vsPt_central   = new TH1F ("DenominatorReco_vsPt_central","",50,0,500);
+  TH1F* DenominatorPuppi_vsPt_central  = new TH1F ("DenominatorPuppi_vsPt_central","",50,0,500);
+
+  DenominatorReco_vsPt_central->Sumw2();
+  DenominatorPuppi_vsPt_central->Sumw2();
+
+  TH1F* DenominatorReco_vsPt_forward   = new TH1F ("DenominatorReco_vsPt_forward","",50,0,500);
+  TH1F* DenominatorPuppi_vsPt_forward  = new TH1F ("DenominatorPuppi_vsPt_forward","",50,0,500);
+
+  DenominatorReco_vsPt_forward->Sumw2();
+  DenominatorPuppi_vsPt_forward->Sumw2();
+
+  TH1F* DenominatorReco_vsPU_central   = new TH1F ("DenominatorReco_vsPU_central","",50,90,190);
+  TH1F* DenominatorPuppi_vsPU_central  = new TH1F ("DenominatorPuppi_vsPU_central","",50,90,190);
+
+  DenominatorReco_vsPU_central->Sumw2();
+  DenominatorPuppi_vsPU_central->Sumw2();
+
+  TH1F* DenominatorReco_vsPU_forward   = new TH1F ("DenominatorReco_vsPU_forward","",50,90,190);
+  TH1F* DenominatorPuppi_vsPU_forward  = new TH1F ("DenominatorPuppi_vsPU_forward","",50,90, 190);
+
+  DenominatorReco_vsPU_forward->Sumw2();
+  DenominatorPuppi_vsPU_forward->Sumw2();
+
+  TH1F* ResponseReco_lowPt_central   = new TH1F ("ResponseReco_lowPt_central","",50,-1,1);
+  TH1F* ResponseReco_lowPt_forward   = new TH1F ("ResponseReco_lowPt_forward","",50,-1,1);
+  TH1F* ResponsePuppi_lowPt_central  = new TH1F ("ResponsePuppi_lowPt_central","",50,-1,1);
+  TH1F* ResponsePuppi_lowPt_forward  = new TH1F ("ResponsePuppi_lowPt_forward","",50,-1,1);
+
+  ResponseReco_lowPt_central->Sumw2();
+  ResponseReco_lowPt_forward->Sumw2();
+  ResponsePuppi_lowPt_central->Sumw2();
+  ResponsePuppi_lowPt_forward->Sumw2();
+
+  TH1F* ResponseReco_highPt_central   = new TH1F ("ResponseReco_highPt_central","",50,-1,1);
+  TH1F* ResponseReco_highPt_forward   = new TH1F ("ResponseReco_highPt_forward","",50,-1,1);
+  TH1F* ResponsePuppi_highPt_central  = new TH1F ("ResponsePuppi_highPt_central","",50,-1,1);
+  TH1F* ResponsePuppi_highPt_forward  = new TH1F ("ResponsePuppi_highPt_forward","",50,-1,1);
+
+  ResponseReco_highPt_central->Sumw2();
+  ResponseReco_highPt_forward->Sumw2();
+  ResponsePuppi_highPt_central->Sumw2();
+  ResponsePuppi_highPt_forward->Sumw2();
+
+  // loop on the events and fill the histos
+  std::vector<Muon*> tightMuons;
+  std::vector<Electron*> tightElectrons;
+
+  std::vector<Jet*> cleanedJets;
+  std::vector<Jet*> cleanedPuppiJets;
+
+  for(int iEntry = 0; iEntry < inputChain->GetEntries() ; iEntry++){
+
+    // clean leptons
+    //    for_each(tightMuons.begin(),tightMuons.end(), std::default_delete<Muon>());
+    // for_each(tightElectrons.begin(),tightElectrons.end(), std::default_delete<Electron>());
+
+    tightMuons.clear();
+    tightElectrons.clear();
+
+    // clean jets 
+    //for_each(cleanedJets.begin(),cleanedJets.end(), std::default_delete<Jet>());
+    //for_each(cleanedPuppiJets.begin(),cleanedPuppiJets.end(), std::default_delete<Jet>());
+
+    cleanedJets.clear();
+    cleanedPuppiJets.clear();
+
+    if(iEntry%10000 == 0) std::cout<<"reading entry "<<iEntry<<std::endl;
+
+    inputChain->GetEntry(iEntry);
+
+    int nLep = 0;
+    int nJet = 0;
+    
+    // require at least two leptons over a fixed PT cut, no isolation required
+    
+    for(int iMuon = 0; iMuon < Muons->GetEntries(); iMuon++){
+      Muon* muon = (Muon*) Muons->At(iMuon);      
+      if(muon->PT >= leptonPtThreshold and muon->IsolationVarRhoCorr <= leptonIsoThreshold){
+	nLep++; 
+        tightMuons.push_back(muon);
+      }
+    }
+    
+    for(int iElectron = 0; iElectron < Electrons->GetEntries(); iElectron++){
+      Electron* elec = (Electron*) Electrons->At(iElectron);
+      if(elec->PT >= leptonPtThreshold and elec->IsolationVarRhoCorr <= leptonIsoThreshold){
+	nLep++; 
+        tightElectrons.push_back(elec);
+      }
+    }
+
+    if(nLep < 2 or nLep >=3) continue ; // require two tight leptons (no loose lepton veto here)
+
+	 
+    // require at least two jets (reco) over a fixed PT cut cleaed
+    for(int iJet = 0; iJet < RecoJets->GetEntries(); iJet++){
+
+      Jet* jet = (Jet*) RecoJets->At(iJet);
+
+      if(jet->PT >= jetPtThreshold){
+
+        bool discardJet = false;
+
+        for(size_t iMuon = 0; iMuon < tightMuons.size(); iMuon++){
+	  if(tightMuons.at(iMuon)->P4().DeltaR(jet->P4()) < matchingCone)
+	    discardJet = true;
+	}
+
+        if(discardJet) continue ;
+
+        for(size_t iElectron = 0; iElectron < tightElectrons.size(); iElectron++){
+	  if(tightElectrons.at(iElectron)->P4().DeltaR(jet->P4()) < matchingCone)
+	    discardJet = true;
+	}
+        if(discardJet) continue ;
+	nJet++; 
+	cleanedJets.push_back(jet);
+      }
+   }
+
+    if(nJet < 2) continue ;
+    
+    // require at least two jets (reco) over a fixed PT cut
+    nJet = 0;
+
+    for(int iJet = 0; iJet < PuppiJets->GetEntries(); iJet++){
+
+      Jet* jet = (Jet*) PuppiJets->At(iJet);
+
+      if(jet->PT >= jetPtThreshold){
+
+        bool discardJet = false;
+
+        for(size_t iMuon = 0; iMuon < tightMuons.size(); iMuon++){
+	  if(tightMuons.at(iMuon)->P4().DeltaR(jet->P4()) < matchingCone)
+	    discardJet = true;
+	}
+
+        if(discardJet) continue ;
+
+        for(size_t iElectron = 0; iElectron < tightElectrons.size(); iElectron++){
+	  if(tightElectrons.at(iElectron)->P4().DeltaR(jet->P4()) < matchingCone)
+	    discardJet = true;
+	}
+        if(discardJet) continue ;
+	nJet++; 
+	cleanedPuppiJets.push_back(jet);
+      }
+    }
+      
+
+    if(nJet < 2) continue ;
+     
+    // fill histo
+
+    ScalarHT* npu = (ScalarHT*) NPU->At(0);
+      
+
+    // leading and trailing reco jets
+    leadingJetPt->Fill(cleanedJets.at(0)->PT);
+    leadingJetEta->Fill(cleanedJets.at(0)->Eta);
+
+    trailingJetPt->Fill(cleanedJets.at(1)->PT);
+    trailingJetEta->Fill(cleanedJets.at(1)->Eta);
+
+    // leading and trailing puppi jets
+    leadingPuppiJetPt->Fill(cleanedPuppiJets.at(0)->PT);
+    leadingPuppiJetEta->Fill(cleanedPuppiJets.at(0)->Eta);
+
+    trailingPuppiJetPt->Fill(cleanedPuppiJets.at(1)->PT);
+    trailingPuppiJetEta->Fill(cleanedPuppiJets.at(1)->Eta);
+
+    // numerartors
+    DenominatorReco_vsEta->Fill(cleanedJets.at(0)->Eta);
+    DenominatorReco_vsEta->Fill(cleanedJets.at(1)->Eta);
+    DenominatorPuppi_vsEta->Fill(cleanedPuppiJets.at(0)->Eta);
+    DenominatorPuppi_vsEta->Fill(cleanedPuppiJets.at(1)->Eta);
+
+    // leading    
+    if(fabs(cleanedJets.at(0)->Eta) < etaBinCut ){       
+      DenominatorReco_vsPt_central->Fill(cleanedJets.at(0)->PT);
+      DenominatorReco_vsPU_central->Fill(npu->HT);
+    }
+    else {
+      DenominatorReco_vsPt_forward->Fill(cleanedJets.at(0)->PT);
+      DenominatorReco_vsPU_forward->Fill(npu->HT);
+    }
+    
+    if(fabs(cleanedPuppiJets.at(0)->Eta) < etaBinCut){       
+      DenominatorPuppi_vsPt_central->Fill(cleanedPuppiJets.at(0)->PT);
+      DenominatorPuppi_vsPU_central->Fill(npu->HT);
+    }
+    else{
+      DenominatorPuppi_vsPt_forward->Fill(cleanedPuppiJets.at(0)->PT);
+      DenominatorPuppi_vsPU_forward->Fill(npu->HT);
+    }
+
+    if(fabs(cleanedJets.at(1)->Eta) < etaBinCut ) {      
+      DenominatorReco_vsPt_central->Fill(cleanedJets.at(1)->PT);
+      DenominatorReco_vsPU_central->Fill(npu->HT);
+    }
+    else {
+      DenominatorReco_vsPt_forward->Fill(cleanedJets.at(1)->PT);
+      DenominatorReco_vsPU_forward->Fill(npu->HT);
+    }
+
+    if(fabs(cleanedPuppiJets.at(1)->Eta) < etaBinCut ) {
+      DenominatorPuppi_vsPt_central->Fill(cleanedPuppiJets.at(1)->PT);
+      DenominatorPuppi_vsPU_central->Fill(npu->HT);
+    }
+    else {
+      DenominatorPuppi_vsPt_forward->Fill(cleanedPuppiJets.at(1)->PT);
+      DenominatorPuppi_vsPU_forward->Fill(npu->HT);
+    }
+
+    bool recoMatched_1  = false;
+    bool recoMatched_2  = false;
+
+    bool puppiMatched_1 = false;
+    bool puppiMatched_2 = false;
+    
+    for(int iJet = 0; iJet < GenJets->GetEntries(); iJet++){
+      Jet* jet = (Jet*) GenJets->At(iJet);
+
+      if(jet->P4().DeltaR(cleanedJets.at(0)->P4()) < matchingCone and !recoMatched_1){ // positive match with leading jet
+
+        recoMatched_1 = true;
+ 
+        if(cleanedJets.at(0)->PT < ptBinCut and fabs(cleanedJets.at(0)->Eta) < etaBinCut) 
+	  ResponseReco_lowPt_central->Fill((cleanedJets.at(0)->PT-jet->PT)/cleanedJets.at(0)->PT);
+        else if(cleanedJets.at(0)->PT < ptBinCut and fabs(cleanedJets.at(0)->Eta) > etaBinCut)
+	  ResponseReco_lowPt_forward->Fill((cleanedJets.at(0)->PT-jet->PT)/cleanedJets.at(0)->PT);       
+        else if(cleanedJets.at(0)->PT >= ptBinCut and fabs(cleanedJets.at(0)->Eta) < etaBinCut)
+	  ResponseReco_highPt_central->Fill((cleanedJets.at(0)->PT-jet->PT)/cleanedJets.at(0)->PT);
+        else if(cleanedJets.at(0)->PT >= ptBinCut and fabs(cleanedJets.at(0)->Eta) > etaBinCut)
+	  ResponseReco_highPt_forward->Fill((cleanedJets.at(0)->PT-jet->PT)/cleanedJets.at(0)->PT);
+
+	NumeratorReco_vsEta->Fill(cleanedJets.at(0)->Eta);
+
+	if(fabs(cleanedJets.at(0)->Eta) < etaBinCut ){
+	  NumeratorReco_vsPt_central->Fill(cleanedJets.at(0)->PT);
+	  NumeratorReco_vsPU_central->Fill(npu->HT);
+	}
+	else {
+	  NumeratorReco_vsPt_forward->Fill(cleanedJets.at(0)->PT);
+	  NumeratorReco_vsPU_forward->Fill(npu->HT);
+	}
+      }
+      else if(jet->P4().DeltaR(cleanedJets.at(1)->P4()) < matchingCone  and !recoMatched_2){
+
+        recoMatched_2 = true;
+
+	NumeratorReco_vsEta->Fill(cleanedJets.at(1)->Eta);
+
+        if(cleanedJets.at(1)->PT < ptBinCut and fabs(cleanedJets.at(1)->Eta) < etaBinCut) 
+	  ResponseReco_lowPt_central->Fill((cleanedJets.at(1)->PT-jet->PT)/cleanedJets.at(1)->PT);
+        else if(cleanedJets.at(1)->PT < ptBinCut and fabs(cleanedJets.at(1)->Eta) > etaBinCut)
+	  ResponseReco_lowPt_forward->Fill((cleanedJets.at(1)->PT-jet->PT)/cleanedJets.at(1)->PT);       
+        else if(cleanedJets.at(1)->PT >= ptBinCut and fabs(cleanedJets.at(1)->Eta) < etaBinCut)
+	  ResponseReco_highPt_central->Fill((cleanedJets.at(1)->PT-jet->PT)/cleanedJets.at(1)->PT);
+        else if(cleanedJets.at(1)->PT >= ptBinCut and fabs(cleanedJets.at(1)->Eta) > etaBinCut)
+	  ResponseReco_highPt_forward->Fill((cleanedJets.at(1)->PT-jet->PT)/cleanedJets.at(1)->PT);
+
+	if(fabs(cleanedJets.at(1)->Eta) < etaBinCut ){
+	  NumeratorReco_vsPt_central->Fill(cleanedJets.at(1)->PT);
+	  NumeratorReco_vsPU_central->Fill(npu->HT);
+	}
+	else {
+	  NumeratorReco_vsPt_forward->Fill(cleanedJets.at(1)->PT);
+	  NumeratorReco_vsPU_forward->Fill(npu->HT);
+	}
+      }
+
+      if(jet->P4().DeltaR(cleanedPuppiJets.at(0)->P4()) < matchingCone and !puppiMatched_1 ){ // positive match with leading jet
+
+        puppiMatched_1 = true;
+
+	NumeratorPuppi_vsEta->Fill(cleanedPuppiJets.at(0)->Eta);
+
+        if(cleanedPuppiJets.at(0)->PT < ptBinCut and fabs(cleanedPuppiJets.at(0)->Eta) < etaBinCut) 
+	  ResponsePuppi_lowPt_central->Fill((cleanedPuppiJets.at(0)->PT-jet->PT)/cleanedPuppiJets.at(0)->PT);
+        else if(cleanedPuppiJets.at(0)->PT < ptBinCut and fabs(cleanedPuppiJets.at(0)->Eta) > etaBinCut)
+	  ResponsePuppi_lowPt_forward->Fill((cleanedPuppiJets.at(0)->PT-jet->PT)/cleanedPuppiJets.at(0)->PT);       
+        else if(cleanedPuppiJets.at(0)->PT >= ptBinCut and fabs(cleanedPuppiJets.at(0)->Eta) < etaBinCut)
+	  ResponsePuppi_highPt_central->Fill((cleanedPuppiJets.at(0)->PT-jet->PT)/cleanedPuppiJets.at(0)->PT);
+        else if(cleanedPuppiJets.at(0)->PT >= ptBinCut and fabs(cleanedPuppiJets.at(0)->Eta) > etaBinCut)
+	  ResponsePuppi_highPt_forward->Fill((cleanedPuppiJets.at(0)->PT-jet->PT)/cleanedPuppiJets.at(0)->PT);
+
+	if(fabs(cleanedPuppiJets.at(0)->Eta) < etaBinCut ){
+	  NumeratorPuppi_vsPt_central->Fill(cleanedPuppiJets.at(0)->PT);
+	  NumeratorPuppi_vsPU_central->Fill(npu->HT);
+	}
+	else{
+	  NumeratorPuppi_vsPt_forward->Fill(cleanedPuppiJets.at(0)->PT);
+	  NumeratorPuppi_vsPU_forward->Fill(npu->HT);
+	}         
+      }
+
+      else if(jet->P4().DeltaR(cleanedPuppiJets.at(1)->P4()) < matchingCone and !puppiMatched_2){
+
+	puppiMatched_2 = true ;
+
+	NumeratorPuppi_vsEta->Fill(cleanedPuppiJets.at(1)->Eta);
+
+        if(cleanedPuppiJets.at(1)->PT < ptBinCut and fabs(cleanedPuppiJets.at(1)->Eta) < etaBinCut) 
+	  ResponsePuppi_lowPt_central->Fill((cleanedPuppiJets.at(1)->PT-jet->PT)/cleanedPuppiJets.at(1)->PT);
+        else if(cleanedPuppiJets.at(1)->PT < ptBinCut and fabs(cleanedPuppiJets.at(1)->Eta) > etaBinCut)
+	  ResponsePuppi_lowPt_forward->Fill((cleanedPuppiJets.at(1)->PT-jet->PT)/cleanedPuppiJets.at(1)->PT);       
+        else if(cleanedPuppiJets.at(1)->PT >= ptBinCut and fabs(cleanedPuppiJets.at(1)->Eta) < etaBinCut)
+	  ResponsePuppi_highPt_central->Fill((cleanedPuppiJets.at(1)->PT-jet->PT)/cleanedPuppiJets.at(1)->PT);
+        else if(cleanedPuppiJets.at(1)->PT >= ptBinCut and fabs(cleanedPuppiJets.at(1)->Eta) > etaBinCut)
+	  ResponsePuppi_highPt_forward->Fill((cleanedPuppiJets.at(1)->PT-jet->PT)/cleanedPuppiJets.at(1)->PT);
+
+	if(fabs(cleanedPuppiJets.at(1)->Eta) < etaBinCut ){
+	  NumeratorPuppi_vsPt_central->Fill(cleanedPuppiJets.at(1)->PT);
+	  NumeratorPuppi_vsPU_central->Fill(npu->HT);
+	}
+	else{
+	  NumeratorPuppi_vsPt_forward->Fill(cleanedPuppiJets.at(1)->PT);
+	  NumeratorPuppi_vsPU_forward->Fill(npu->HT);
+	}         
+      }
+    }       
+  }
+
+  
+  ///////////////////////////////////////////////                                                                                                                       
+  // Plot                                                                                                                                                                       
+  ///////////////////////////////////////////////                                                                                                                            
+
+  // make the canvas and basic banners                                                                                                                                       
+  TCanvas *cCanvas = new TCanvas("cCanvas","",180,52,550,550);
+  cCanvas->SetTicks();
+  cCanvas->SetFillColor(0);
+  cCanvas->SetBorderMode(0);
+  cCanvas->SetBorderSize(2);
+  cCanvas->SetTickx(1);
+  cCanvas->SetTicky(1);
+  cCanvas->SetRightMargin(0.05);
+  cCanvas->SetBottomMargin(0.12);
+  cCanvas->SetFrameBorderMode(0);
+
+  TLatex * tex = new TLatex(0.94,0.92," 13 TeV");
+  tex->SetNDC();
+  tex->SetTextAlign(31);
+  tex->SetTextFont(42);
+  tex->SetTextSize(0.04);
+  tex->SetLineWidth(2);
+  TLatex * tex2 = new TLatex(0.14,0.92,"Delphes");
+  tex2->SetNDC();
+  tex2->SetTextFont(61);
+  tex2->SetTextSize(0.04);
+  tex2->SetLineWidth(2);
+  TLatex * tex3 = new TLatex(0.286,0.92,"Simulation Preliminary");
+  tex3->SetNDC();
+  tex3->SetTextFont(52);
+  tex3->SetTextSize(0.035);
+  tex3->SetLineWidth(2);
+
+  TLegend* legend = new TLegend(0.16,0.78,0.36,0.89);
+  legend->SetBorderSize(0);
+  legend->SetFillColor(0);
+  legend->SetFillStyle(0);
+  legend->SetTextSize(0.031);
+  legend->SetTextFont(42);
+
+  // leading jet pt
+
+  leadingJetPt->SetLineWidth(2);
+  leadingJetPt->SetLineColor(kBlue);
+  leadingJetPt->GetXaxis()->SetTitle("p_{T} (GeV)");
+  leadingJetPt->GetYaxis()->SetTitle("Entries");
+  leadingJetPt->Draw("hist");
+
+  gPad->Update();
+  TPaveStats *tps1 = (TPaveStats*) leadingJetPt->FindObject("stats");
+  tps1->SetTextColor(kBlue);
+  tps1->SetLineColor(kBlue);
+  tps1->SetX1NDC(0.72);
+  tps1->SetY1NDC(0.68);
+  tps1->SetX2NDC(0.93);
+  tps1->SetY2NDC(0.89);
+  double X1 = tps1->GetX1NDC();
+  double Y1 = tps1->GetY1NDC();
+  double X2 = tps1->GetX2NDC();
+  double Y2 = tps1->GetY2NDC();
+  
+  leadingPuppiJetPt->SetLineWidth(2);
+  leadingPuppiJetPt->SetLineColor(kRed);
+  leadingPuppiJetPt->Draw("hist");
+  
+  gPad->Update();
+  TPaveStats *tps2 = (TPaveStats*) leadingPuppiJetPt->FindObject("stats");
+  tps2->SetTextColor(kRed);
+  tps2->SetLineColor(kRed);
+  tps2->SetX1NDC(X1);
+  tps2->SetX2NDC(X2);
+  tps2->SetY1NDC(Y1-(Y2-Y1));
+  tps2->SetY2NDC(Y1);
+
+  leadingJetPt->GetYaxis()->SetRangeUser(0.001,std::max(leadingJetPt->GetMaximum(),leadingPuppiJetPt->GetMaximum())*1.25);
+
+  leadingJetPt->Draw("hist");
+  leadingPuppiJetPt->Draw("hist same");
+
+  tps1->SetFillStyle(0);
+  tps2->SetFillStyle(0);
+
+  tps1->Draw("same");
+  tps2->Draw("same");
+
+  legend->AddEntry(leadingJetPt,"leading CHS jet","l");
+  legend->AddEntry(leadingPuppiJetPt,"leading Puppi jet","l");
+
+  tex->Draw("same");
+  tex2->Draw("same");
+  tex3->Draw("same");
+  legend->Draw("same");
+
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/leadingJetPt.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/leadingJetPt.png").c_str(),"png");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/leadingJetPt.root").c_str(),"root");
+
+  cCanvas->SetLogy();
+
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/leadingJetPt_log.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/leadingJetPt_log.png").c_str(),"png");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/leadingJetPt_log.root").c_str(),"root");
+  cCanvas->SetLogy(0);
+  gPad->Update();
+
+
+  legend->Clear();
+
+  // trailing jet pt
+
+  trailingJetPt->SetLineWidth(2);
+  trailingJetPt->SetLineColor(kBlue);
+  trailingJetPt->GetXaxis()->SetTitle("p_{T} (GeV)");
+  trailingJetPt->GetYaxis()->SetTitle("Entries");
+  trailingJetPt->Draw("hist");
+
+  gPad->Update();
+  tps1 = (TPaveStats*) trailingJetPt->FindObject("stats");
+  tps1->SetTextColor(kBlue);
+  tps1->SetLineColor(kBlue);
+  tps1->SetX1NDC(0.72);
+  tps1->SetY1NDC(0.68);
+  tps1->SetX2NDC(0.93);
+  tps1->SetY2NDC(0.89);
+  X1 = tps1->GetX1NDC();
+  Y1 = tps1->GetY1NDC();
+  X2 = tps1->GetX2NDC();
+  Y2 = tps1->GetY2NDC();
+  
+  trailingPuppiJetPt->SetLineWidth(2);
+  trailingPuppiJetPt->SetLineColor(kRed);
+  trailingPuppiJetPt->Draw("hist");
+  
+  gPad->Update();
+  tps2 = (TPaveStats*) trailingPuppiJetPt->FindObject("stats");
+  tps2->SetTextColor(kRed);
+  tps2->SetLineColor(kRed);
+  tps2->SetX1NDC(X1);
+  tps2->SetX2NDC(X2);
+  tps2->SetY1NDC(Y1-(Y2-Y1));
+  tps2->SetY2NDC(Y1);
+
+  trailingJetPt->GetYaxis()->SetRangeUser(0.001,std::max(trailingJetPt->GetMaximum(),trailingPuppiJetPt->GetMaximum())*1.25);
+
+  trailingJetPt->Draw("hist");
+  trailingPuppiJetPt->Draw("hist same");
+
+  tps1->SetFillStyle(0);
+  tps2->SetFillStyle(0);
+
+  tps1->Draw("same");
+  tps2->Draw("same");
+
+  legend->AddEntry(trailingJetPt,"trailing CHS jet","l");
+  legend->AddEntry(trailingPuppiJetPt,"trailing Puppi jet","l");
+
+  tex->Draw("same");
+  tex2->Draw("same");
+  tex3->Draw("same");
+  legend->Draw("same");
+
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/trailingJetPt.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/trailingJetPt.png").c_str(),"png");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/trailingJetPt.root").c_str(),"root");
+
+  cCanvas->SetLogy();
+
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/trailingJetPt_log.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/trailingJetPt_log.png").c_str(),"png");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/trailingJetPt_log.root").c_str(),"root");
+  cCanvas->SetLogy(0);
+  gPad->Update();
+
+  legend->Clear();
+
+  //leading jet eta
+  leadingJetEta->SetLineWidth(2);
+  leadingJetEta->SetLineColor(kBlue);
+  leadingJetEta->GetXaxis()->SetTitle("#eta");
+  leadingJetEta->GetYaxis()->SetTitle("Entries");
+  leadingJetEta->Draw("hist");
+
+  gPad->Update();
+  tps1 = (TPaveStats*) leadingJetEta->FindObject("stats");
+  tps1->SetTextColor(kBlue);
+  tps1->SetLineColor(kBlue);
+  tps1->SetX1NDC(0.72);
+  tps1->SetY1NDC(0.68);
+  tps1->SetX2NDC(0.93);
+  tps1->SetY2NDC(0.89);
+  X1 = tps1->GetX1NDC();
+  Y1 = tps1->GetY1NDC();
+  X2 = tps1->GetX2NDC();
+  Y2 = tps1->GetY2NDC();
+  
+  leadingPuppiJetEta->SetLineWidth(2);
+  leadingPuppiJetEta->SetLineColor(kRed);
+  leadingPuppiJetEta->Draw("hist");
+  
+  gPad->Update();
+  tps2 = (TPaveStats*) leadingPuppiJetEta->FindObject("stats");
+  tps2->SetTextColor(kRed);
+  tps2->SetLineColor(kRed);
+  tps2->SetX1NDC(X1);
+  tps2->SetX2NDC(X2);
+  tps2->SetY1NDC(Y1-(Y2-Y1));
+  tps2->SetY2NDC(Y1);
+
+  leadingJetEta->GetYaxis()->SetRangeUser(0.001,std::max(leadingJetEta->GetMaximum(),leadingPuppiJetEta->GetMaximum())*1.25);
+
+  leadingJetEta->Draw("hist");
+  leadingPuppiJetEta->Draw("hist same");
+
+  tps1->SetFillStyle(0);
+  tps2->SetFillStyle(0);
+
+  tps1->Draw("same");
+  tps2->Draw("same");
+
+  legend->AddEntry(leadingJetEta,"leading CHS jet","l");
+  legend->AddEntry(leadingPuppiJetEta,"leading Puppi jet","l");
+
+  tex->Draw("same");
+  tex2->Draw("same");
+  tex3->Draw("same");
+  legend->Draw("same");
+
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/leadingJetEta.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/leadingJetEta.png").c_str(),"png");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/leadingJetEta.root").c_str(),"root");
+
+  cCanvas->SetLogy();
+
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/leadingJetEta_log.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/leadingJetEta_log.png").c_str(),"png");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/leadingJetEta_log.root").c_str(),"root");
+  cCanvas->SetLogy(0);
+  gPad->Update();
+
+
+  legend->Clear();
+
+  //leading jet eta
+  trailingJetEta->SetLineWidth(2);
+  trailingJetEta->SetLineColor(kBlue);
+  trailingJetEta->GetXaxis()->SetTitle("#eta");
+  trailingJetEta->GetYaxis()->SetTitle("Entries");
+  trailingJetEta->Draw("hist");
+
+  gPad->Update();
+  tps1 = (TPaveStats*) trailingJetEta->FindObject("stats");
+  tps1->SetTextColor(kBlue);
+  tps1->SetLineColor(kBlue);
+  tps1->SetX1NDC(0.72);
+  tps1->SetY1NDC(0.68);
+  tps1->SetX2NDC(0.93);
+  tps1->SetY2NDC(0.89);
+  X1 = tps1->GetX1NDC();
+  Y1 = tps1->GetY1NDC();
+  X2 = tps1->GetX2NDC();
+  Y2 = tps1->GetY2NDC();
+  
+  trailingPuppiJetEta->SetLineWidth(2);
+  trailingPuppiJetEta->SetLineColor(kRed);
+  trailingPuppiJetEta->Draw("hist");
+  
+  gPad->Update();
+  tps2 = (TPaveStats*) trailingPuppiJetEta->FindObject("stats");
+  tps2->SetTextColor(kRed);
+  tps2->SetLineColor(kRed);
+  tps2->SetX1NDC(X1);
+  tps2->SetX2NDC(X2);
+  tps2->SetY1NDC(Y1-(Y2-Y1));
+  tps2->SetY2NDC(Y1);
+
+  trailingJetEta->GetYaxis()->SetRangeUser(0.001,std::max(trailingJetEta->GetMaximum(),trailingPuppiJetEta->GetMaximum())*1.25);
+
+  trailingJetEta->Draw("hist");
+  trailingPuppiJetEta->Draw("hist same");
+
+  tps1->SetFillStyle(0);
+  tps2->SetFillStyle(0);
+
+  tps1->Draw("same");
+  tps2->Draw("same");
+
+  legend->AddEntry(trailingJetEta,"trailing CHS jet","l");
+  legend->AddEntry(trailingPuppiJetEta,"trailing Puppi jet","l");
+
+  tex->Draw("same");
+  tex2->Draw("same");
+  tex3->Draw("same");
+  legend->Draw("same");
+
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/trailingJetEta.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/trailingJetEta.png").c_str(),"png");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/trailingJetEta.root").c_str(),"root");
+
+  cCanvas->SetLogy();
+
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/trailingJetEta_log.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/trailingJetEta_log.png").c_str(),"png");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/trailingJetEta_log.root").c_str(),"root");
+  cCanvas->SetLogy(0);
+  gPad->Update();
+
+
+  legend->Clear();
+
+  // efficiency plots ///////////////////
+
+  TGraphAsymmErrors* EfficiencyReco_vsEta = new TGraphAsymmErrors();
+  EfficiencyReco_vsEta->SetName("EfficiencyReco_vsEta");
+
+  TGraphAsymmErrors* EfficiencyPuppi_vsEta = new TGraphAsymmErrors();
+  EfficiencyPuppi_vsEta->SetName("EfficiencyPuppi_vsEta");
+
+  EfficiencyReco_vsEta->BayesDivide(NumeratorReco_vsEta,DenominatorReco_vsEta);
+  EfficiencyPuppi_vsEta->BayesDivide(NumeratorPuppi_vsEta,DenominatorPuppi_vsEta);
+
+
+  TH2F* frameEfficiency_vsEta = new TH2F("frameEfficiency_vsEta","",50,-5,5,500,
+					 1.1*std::min(EfficiencyReco_vsEta->GetHistogram()->GetMinimum(),EfficiencyPuppi_vsEta->GetHistogram()->GetMinimum()),
+					 1.1*std::max(EfficiencyReco_vsEta->GetHistogram()->GetMaximum(),EfficiencyPuppi_vsEta->GetHistogram()->GetMaximum()));
+  frameEfficiency_vsEta->SetLineWidth(2);
+  frameEfficiency_vsEta->SetMarkerStyle(21);
+  frameEfficiency_vsEta->SetMarkerSize(0.3);
+  //  frameEfficiency_vsEta->GetXaxis()->SetNdivisions(505);
+  //  frameEfficiency_vsEta->GetYaxis()->SetNdivisions(505);
+  frameEfficiency_vsEta->GetXaxis()->SetTitle("#eta");
+  frameEfficiency_vsEta->GetXaxis()->SetLabelOffset(0.012);
+  frameEfficiency_vsEta->GetXaxis()->SetLabelSize(0.038);
+  frameEfficiency_vsEta->GetXaxis()->SetTitleSize(0.05);
+  frameEfficiency_vsEta->GetXaxis()->SetTitleOffset(1.10);
+  frameEfficiency_vsEta->GetYaxis()->SetTitle("efficiency");
+  frameEfficiency_vsEta->GetYaxis()->SetLabelOffset(0.012);
+  frameEfficiency_vsEta->GetYaxis()->SetLabelSize(0.038);
+  frameEfficiency_vsEta->GetYaxis()->SetTitleSize(0.05);
+  frameEfficiency_vsEta->GetYaxis()->SetTitleOffset(1.18);
+  frameEfficiency_vsEta->SetStats(0);
+  frameEfficiency_vsEta->Draw();
+
+  EfficiencyReco_vsEta->SetLineWidth(2);
+  EfficiencyReco_vsEta->SetLineColor(kBlue);
+  EfficiencyReco_vsEta->SetMarkerStyle(20);
+  EfficiencyReco_vsEta->SetMarkerColor(kBlue);
+  EfficiencyReco_vsEta->GetXaxis()->SetTitle("#eta");
+  EfficiencyReco_vsEta->GetYaxis()->SetTitle("Efficiency");
+  EfficiencyReco_vsEta->Draw("p");
+
+  EfficiencyPuppi_vsEta->SetLineWidth(2);
+  EfficiencyPuppi_vsEta->SetLineColor(kRed);
+  EfficiencyPuppi_vsEta->SetMarkerStyle(20);
+  EfficiencyPuppi_vsEta->SetMarkerColor(kRed);
+  EfficiencyPuppi_vsEta->GetXaxis()->SetTitle("#eta");
+  EfficiencyPuppi_vsEta->GetYaxis()->SetTitle("Efficiency");
+  EfficiencyPuppi_vsEta->Draw("psame");
+
+  legend->AddEntry(EfficiencyReco_vsEta,"CHS jets","l");
+  legend->AddEntry(EfficiencyPuppi_vsEta,"Puppi jets","l");
+
+  tex->Draw("same");
+  tex2->Draw("same");
+  tex3->Draw("same");
+  legend->Draw("same");
+
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsEta.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsEta.png").c_str(),"png");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsEta.root").c_str(),"root");
+
+  cCanvas->SetLogy();
+
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsEta_log.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsEta_log.png").c_str(),"png");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsEta_log.root").c_str(),"root");
+  cCanvas->SetLogy(0);
+  gPad->Update();
+
+
+  legend->Clear();
+
+  // efficiency vs pt
+  TGraphAsymmErrors* EfficiencyReco_vsPt_central = new TGraphAsymmErrors();
+  EfficiencyReco_vsPt_central->SetName("EfficiencyReco_vsPt_central");
+
+  TGraphAsymmErrors* EfficiencyPuppi_vsPt_central = new TGraphAsymmErrors();
+  EfficiencyPuppi_vsPt_central->SetName("EfficiencyPuppi_vsPt_central");
+
+  EfficiencyReco_vsPt_central->BayesDivide(NumeratorReco_vsPt_central,DenominatorReco_vsPt_central);
+  EfficiencyPuppi_vsPt_central->BayesDivide(NumeratorPuppi_vsPt_central,DenominatorPuppi_vsPt_central);
+
+  
+  TH2F* frameEfficiency_vsPt = new TH2F("frameEfficiency_vsPt","",50,0,500,500,
+					0.8*std::min(EfficiencyReco_vsPt_central->GetHistogram()->GetMinimum(),EfficiencyPuppi_vsPt_central->GetHistogram()->GetMinimum()),
+					1.1*std::max(EfficiencyReco_vsPt_central->GetHistogram()->GetMaximum(),EfficiencyPuppi_vsPt_central->GetHistogram()->GetMaximum()));
+  frameEfficiency_vsPt->SetLineWidth(2);
+  frameEfficiency_vsPt->SetMarkerStyle(21);
+  frameEfficiency_vsPt->SetMarkerSize(0.3);
+  //  frameEfficiency_vsPt->GetXaxis()->SetNdivisions(505);
+  //  frameEfficiency_vsPt->GetYaxis()->SetNdivisions(505);
+  frameEfficiency_vsPt->GetXaxis()->SetTitle("p_{T} (GeV)");
+  frameEfficiency_vsPt->GetXaxis()->SetLabelOffset(0.012);
+  frameEfficiency_vsPt->GetXaxis()->SetLabelSize(0.038);
+  frameEfficiency_vsPt->GetXaxis()->SetTitleSize(0.05);
+  frameEfficiency_vsPt->GetXaxis()->SetTitleOffset(1.10);
+  frameEfficiency_vsPt->GetYaxis()->SetTitle("efficiency");
+  frameEfficiency_vsPt->GetYaxis()->SetLabelOffset(0.012);
+  frameEfficiency_vsPt->GetYaxis()->SetLabelSize(0.038);
+  frameEfficiency_vsPt->GetYaxis()->SetTitleSize(0.05);
+  frameEfficiency_vsPt->GetYaxis()->SetTitleOffset(1.18);
+  frameEfficiency_vsPt->SetStats(0);
+  frameEfficiency_vsPt->Draw();
+
+  EfficiencyReco_vsPt_central->SetLineWidth(2);
+  EfficiencyReco_vsPt_central->SetLineColor(kBlue);
+  EfficiencyReco_vsPt_central->SetMarkerStyle(20);
+  EfficiencyReco_vsPt_central->SetMarkerColor(kBlue);
+  EfficiencyReco_vsPt_central->GetXaxis()->SetTitle("p_{T} (GeV)");
+  EfficiencyReco_vsPt_central->GetYaxis()->SetTitle("Efficiency");
+  EfficiencyReco_vsPt_central->Draw("p");
+
+  EfficiencyPuppi_vsPt_central->SetLineWidth(2);
+  EfficiencyPuppi_vsPt_central->SetLineColor(kRed);
+  EfficiencyPuppi_vsPt_central->SetMarkerStyle(20);
+  EfficiencyPuppi_vsPt_central->SetMarkerColor(kRed);
+  EfficiencyPuppi_vsPt_central->GetXaxis()->SetTitle("p_{T} (GeV)");
+  EfficiencyPuppi_vsPt_central->GetYaxis()->SetTitle("Efficiency");
+  EfficiencyPuppi_vsPt_central->Draw("psame");
+
+  legend->AddEntry(EfficiencyReco_vsPt_central,"CHS jets","l");
+  legend->AddEntry(EfficiencyPuppi_vsPt_central,"Puppi jets","l");
+
+  tex->Draw("same");
+  tex2->Draw("same");
+  tex3->Draw("same");
+  legend->Draw("same");
+
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsPt_central.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsPt_central.png").c_str(),"png");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsPt_central.root").c_str(),"root");
+
+  cCanvas->SetLogy();
+
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsPt_central_log.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsPt_central_log.png").c_str(),"png");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsPt_central_log.root").c_str(),"root");
+  cCanvas->SetLogy(0);
+  gPad->Update();
+
+
+  legend->Clear();
+
+  // efficiency vs pt
+  TGraphAsymmErrors* EfficiencyReco_vsPt_forward = new TGraphAsymmErrors();
+  EfficiencyReco_vsPt_forward->SetName("EfficiencyReco_vsPt_forward");
+
+  TGraphAsymmErrors* EfficiencyPuppi_vsPt_forward = new TGraphAsymmErrors();
+  EfficiencyPuppi_vsPt_forward->SetName("EfficiencyPuppi_vsPt_forward");
+
+  EfficiencyReco_vsPt_forward->BayesDivide(NumeratorReco_vsPt_forward,DenominatorReco_vsPt_forward);
+  EfficiencyPuppi_vsPt_forward->BayesDivide(NumeratorPuppi_vsPt_forward,DenominatorPuppi_vsPt_forward);
+
+  frameEfficiency_vsPt->Delete();
+  frameEfficiency_vsPt = new TH2F("frameEfficiency_vsPt","",50,0,500,500,
+				  0.8*std::min(EfficiencyReco_vsPt_forward->GetHistogram()->GetMinimum(),EfficiencyPuppi_vsPt_forward->GetHistogram()->GetMinimum()),
+				  1.1*std::max(EfficiencyReco_vsPt_forward->GetHistogram()->GetMaximum(),EfficiencyPuppi_vsPt_forward->GetHistogram()->GetMaximum()));
+
+  frameEfficiency_vsPt->SetLineWidth(2);
+  frameEfficiency_vsPt->SetMarkerStyle(21);
+  frameEfficiency_vsPt->SetMarkerSize(0.3);
+  //  frameEfficiency_vsPt->GetXaxis()->SetNdivisions(505);
+  //  frameEfficiency_vsPt->GetYaxis()->SetNdivisions(505);
+  frameEfficiency_vsPt->GetXaxis()->SetTitle("p_{T} (GeV)");
+  frameEfficiency_vsPt->GetXaxis()->SetLabelOffset(0.012);
+  frameEfficiency_vsPt->GetXaxis()->SetLabelSize(0.038);
+  frameEfficiency_vsPt->GetXaxis()->SetTitleSize(0.05);
+  frameEfficiency_vsPt->GetXaxis()->SetTitleOffset(1.10);
+  frameEfficiency_vsPt->GetYaxis()->SetTitle("efficiency");
+  frameEfficiency_vsPt->GetYaxis()->SetLabelOffset(0.012);
+  frameEfficiency_vsPt->GetYaxis()->SetLabelSize(0.038);
+  frameEfficiency_vsPt->GetYaxis()->SetTitleSize(0.05);
+  frameEfficiency_vsPt->GetYaxis()->SetTitleOffset(1.18);
+  frameEfficiency_vsPt->SetStats(0);
+  frameEfficiency_vsPt->Draw();
+
+  EfficiencyReco_vsPt_forward->SetLineWidth(2);
+  EfficiencyReco_vsPt_forward->SetLineColor(kBlue);
+  EfficiencyReco_vsPt_forward->SetMarkerStyle(20);
+  EfficiencyReco_vsPt_forward->SetMarkerColor(kBlue);
+  EfficiencyReco_vsPt_forward->GetXaxis()->SetTitle("p_{T} (GeV)");
+  EfficiencyReco_vsPt_forward->GetYaxis()->SetTitle("Efficiency");
+  EfficiencyReco_vsPt_forward->Draw("p");
+
+  EfficiencyPuppi_vsPt_forward->SetLineWidth(2);
+  EfficiencyPuppi_vsPt_forward->SetLineColor(kRed);
+  EfficiencyPuppi_vsPt_forward->SetMarkerStyle(20);
+  EfficiencyPuppi_vsPt_forward->SetMarkerColor(kRed);
+  EfficiencyPuppi_vsPt_forward->GetXaxis()->SetTitle("#eta");
+  EfficiencyPuppi_vsPt_forward->GetYaxis()->SetTitle("Efficiency");
+  EfficiencyPuppi_vsPt_forward->Draw("psame");
+
+  legend->AddEntry(EfficiencyReco_vsPt_forward,"CHS jets","l");
+  legend->AddEntry(EfficiencyPuppi_vsPt_forward,"Puppi jets","l");
+
+  tex->Draw("same");
+  tex2->Draw("same");
+  tex3->Draw("same");
+  legend->Draw("same");
+
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsPt_forward.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsPt_forward.png").c_str(),"png");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsPt_forward.root").c_str(),"root");
+
+  cCanvas->SetLogy();
+
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsPt_forward_log.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsPt_forward_log.png").c_str(),"png");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsPt_forward_log.root").c_str(),"root");
+  cCanvas->SetLogy(0);
+  gPad->Update();
+
+
+  legend->Clear();
+
+  //vs PU
+  TGraphAsymmErrors* EfficiencyReco_vsPU_central = new TGraphAsymmErrors();
+  EfficiencyReco_vsPU_central->SetName("EfficiencyReco_vsPU_central");
+
+  TGraphAsymmErrors* EfficiencyPuppi_vsPU_central = new TGraphAsymmErrors();
+  EfficiencyPuppi_vsPU_central->SetName("EfficiencyPuppi_vsPU_central");
+
+  EfficiencyReco_vsPU_central->BayesDivide(NumeratorReco_vsPU_central,DenominatorReco_vsPU_central);
+  EfficiencyPuppi_vsPU_central->BayesDivide(NumeratorPuppi_vsPU_central,DenominatorPuppi_vsPU_central);
+
+
+  TH2F* frameEfficiency_vsPU = new TH2F("frameEfficiency_vsPU","",50,90,190,500,
+					0.9*std::min(EfficiencyReco_vsPU_central->GetHistogram()->GetMinimum(),EfficiencyPuppi_vsPU_central->GetHistogram()->GetMinimum()),
+					1.1*std::max(EfficiencyReco_vsPU_central->GetHistogram()->GetMaximum(),EfficiencyPuppi_vsPU_central->GetHistogram()->GetMaximum()));
+  frameEfficiency_vsPU->SetLineWidth(2);
+  frameEfficiency_vsPU->SetMarkerStyle(21);
+  frameEfficiency_vsPU->SetMarkerSize(0.3);
+  //  frameEfficiency_vsPU->GetXaxis()->SetNdivisions(505);
+  //  frameEfficiency_vsPU->GetYaxis()->SetNdivisions(505);
+  frameEfficiency_vsPU->GetXaxis()->SetTitle("N_{PU}");
+  frameEfficiency_vsPU->GetXaxis()->SetLabelOffset(0.012);
+  frameEfficiency_vsPU->GetXaxis()->SetLabelSize(0.038);
+  frameEfficiency_vsPU->GetXaxis()->SetTitleSize(0.05);
+  frameEfficiency_vsPU->GetXaxis()->SetTitleOffset(1.10);
+  frameEfficiency_vsPU->GetYaxis()->SetTitle("efficiency");
+  frameEfficiency_vsPU->GetYaxis()->SetLabelOffset(0.012);
+  frameEfficiency_vsPU->GetYaxis()->SetLabelSize(0.038);
+  frameEfficiency_vsPU->GetYaxis()->SetTitleSize(0.05);
+  frameEfficiency_vsPU->GetYaxis()->SetTitleOffset(1.18);
+  frameEfficiency_vsPU->SetStats(0);
+  frameEfficiency_vsPU->Draw();
+
+  EfficiencyReco_vsPU_central->SetLineWidth(2);
+  EfficiencyReco_vsPU_central->SetLineColor(kBlue);
+  EfficiencyReco_vsPU_central->SetMarkerStyle(20);
+  EfficiencyReco_vsPU_central->SetMarkerColor(kBlue);
+  EfficiencyReco_vsPU_central->GetXaxis()->SetTitle("N_{PU}");
+  EfficiencyReco_vsPU_central->GetYaxis()->SetTitle("Efficiency");
+  EfficiencyReco_vsPU_central->Draw("p");
+
+  EfficiencyPuppi_vsPU_central->SetLineWidth(2);
+  EfficiencyPuppi_vsPU_central->SetLineColor(kRed);
+  EfficiencyPuppi_vsPU_central->SetMarkerStyle(20);
+  EfficiencyPuppi_vsPU_central->SetMarkerColor(kRed);
+  EfficiencyPuppi_vsPU_central->GetXaxis()->SetTitle("N_{PU}");
+  EfficiencyPuppi_vsPU_central->GetYaxis()->SetTitle("Efficiency");
+  EfficiencyPuppi_vsPU_central->Draw("psame");
+
+  legend->AddEntry(EfficiencyReco_vsPU_central,"CHS jets","l");
+  legend->AddEntry(EfficiencyPuppi_vsPU_central,"Puppi jets","l");
+
+  tex->Draw("same");
+  tex2->Draw("same");
+  tex3->Draw("same");
+  legend->Draw("same");
+
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsPU_central.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsPU_central.png").c_str(),"png");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsPU_central.root").c_str(),"root");
+
+  cCanvas->SetLogy();
+
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsPU_central_log.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsPU_central_log.png").c_str(),"png");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsPU_central_log.root").c_str(),"root");
+  cCanvas->SetLogy(0);
+  gPad->Update();
+
+
+  legend->Clear();
+
+  // efficiency vs pt
+  TGraphAsymmErrors* EfficiencyReco_vsPU_forward = new TGraphAsymmErrors();
+  EfficiencyReco_vsPU_forward->SetName("EfficiencyReco_vsPU_forward");
+
+  TGraphAsymmErrors* EfficiencyPuppi_vsPU_forward = new TGraphAsymmErrors();
+  EfficiencyPuppi_vsPU_forward->SetName("EfficiencyPuppi_vsPU_forward");
+
+  EfficiencyReco_vsPU_forward->BayesDivide(NumeratorReco_vsPU_forward,DenominatorReco_vsPU_forward);
+  EfficiencyPuppi_vsPU_forward->BayesDivide(NumeratorPuppi_vsPU_forward,DenominatorPuppi_vsPU_forward);
+
+  frameEfficiency_vsPU->Delete();
+  frameEfficiency_vsPU = new TH2F("frameEfficiency_vsPU","",50,90,190,500,
+				  0.9*std::min(EfficiencyReco_vsPU_forward->GetHistogram()->GetMinimum(),EfficiencyPuppi_vsPU_forward->GetHistogram()->GetMinimum()),
+				  1.1*std::max(EfficiencyReco_vsPU_forward->GetHistogram()->GetMaximum(),EfficiencyPuppi_vsPU_forward->GetHistogram()->GetMaximum()));
+
+  frameEfficiency_vsPU->SetLineWidth(2);
+  frameEfficiency_vsPU->SetMarkerStyle(21);
+  frameEfficiency_vsPU->SetMarkerSize(0.3);
+  //  frameEfficiency_vsPU->GetXaxis()->SetNdivisions(505);
+  //  frameEfficiency_vsPU->GetYaxis()->SetNdivisions(505);
+  frameEfficiency_vsPU->GetXaxis()->SetTitle("N_{PU}");
+  frameEfficiency_vsPU->GetXaxis()->SetLabelOffset(0.012);
+  frameEfficiency_vsPU->GetXaxis()->SetLabelSize(0.038);
+  frameEfficiency_vsPU->GetXaxis()->SetTitleSize(0.05);
+  frameEfficiency_vsPU->GetXaxis()->SetTitleOffset(1.10);
+  frameEfficiency_vsPU->GetYaxis()->SetTitle("efficiency");
+  frameEfficiency_vsPU->GetYaxis()->SetLabelOffset(0.012);
+  frameEfficiency_vsPU->GetYaxis()->SetLabelSize(0.038);
+  frameEfficiency_vsPU->GetYaxis()->SetTitleSize(0.05);
+  frameEfficiency_vsPU->GetYaxis()->SetTitleOffset(1.18);
+  frameEfficiency_vsPU->SetStats(0);
+  frameEfficiency_vsPU->Draw();
+
+  EfficiencyReco_vsPU_forward->SetLineWidth(2);
+  EfficiencyReco_vsPU_forward->SetLineColor(kBlue);
+  EfficiencyReco_vsPU_forward->SetMarkerStyle(20);
+  EfficiencyReco_vsPU_forward->SetMarkerColor(kBlue);
+  EfficiencyReco_vsPU_forward->GetXaxis()->SetTitle("N_{PU}");
+  EfficiencyReco_vsPU_forward->GetYaxis()->SetTitle("Efficiency");
+  EfficiencyReco_vsPU_forward->Draw("p");
+
+  EfficiencyPuppi_vsPU_forward->SetLineWidth(2);
+  EfficiencyPuppi_vsPU_forward->SetLineColor(kRed);
+  EfficiencyPuppi_vsPU_forward->SetMarkerStyle(20);
+  EfficiencyPuppi_vsPU_forward->SetMarkerColor(kRed);
+  EfficiencyPuppi_vsPU_forward->GetXaxis()->SetTitle("N_{PU}");
+  EfficiencyPuppi_vsPU_forward->GetYaxis()->SetTitle("Efficiency");
+  EfficiencyPuppi_vsPU_forward->Draw("psame");
+
+  legend->AddEntry(EfficiencyReco_vsPU_forward,"CHS jets","l");
+  legend->AddEntry(EfficiencyPuppi_vsPU_forward,"Puppi jets","l");
+
+  tex->Draw("same");
+  tex2->Draw("same");
+  tex3->Draw("same");
+  legend->Draw("same");
+
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsPU_forward.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsPU_forward.png").c_str(),"png");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsPU_forward.root").c_str(),"root");
+
+  cCanvas->SetLogy();
+
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsPU_forward_log.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsPU_forward_log.png").c_str(),"png");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/Efficiency_vsPU_forward_log.root").c_str(),"root");
+  cCanvas->SetLogy(0);
+  gPad->Update();
+
+
+  legend->Clear();
+
+  //Response plot
+
+  ResponseReco_lowPt_central->SetLineWidth(2);
+  ResponseReco_lowPt_central->SetLineColor(kBlue);
+  ResponseReco_lowPt_central->GetXaxis()->SetTitle("(p_{T}^{Reco}-p_{T}^{Gen})/p_{T}^{Reco}");
+  ResponseReco_lowPt_central->GetYaxis()->SetTitle("Entries");
+  ResponseReco_lowPt_central->Draw("hist");
+
+  gPad->Update();
+  tps1 = (TPaveStats*) ResponseReco_lowPt_central->FindObject("stats");
+  tps1->SetTextColor(kBlue);
+  tps1->SetLineColor(kBlue);
+  tps1->SetX1NDC(0.72);
+  tps1->SetY1NDC(0.68);
+  tps1->SetX2NDC(0.93);
+  tps1->SetY2NDC(0.89);
+  X1 = tps1->GetX1NDC();
+  Y1 = tps1->GetY1NDC();
+  X2 = tps1->GetX2NDC();
+  Y2 = tps1->GetY2NDC();
+  
+  ResponsePuppi_lowPt_central->SetLineWidth(2);
+  ResponsePuppi_lowPt_central->SetLineColor(kRed);
+  ResponsePuppi_lowPt_central->Draw("hist");
+  
+  gPad->Update();
+  tps2 = (TPaveStats*) ResponsePuppi_lowPt_central->FindObject("stats");
+  tps2->SetTextColor(kRed);
+  tps2->SetLineColor(kRed);
+  tps2->SetX1NDC(X1);
+  tps2->SetX2NDC(X2);
+  tps2->SetY1NDC(Y1-(Y2-Y1));
+  tps2->SetY2NDC(Y1);
+
+  ResponseReco_lowPt_central->GetYaxis()->SetRangeUser(0.001,std::max(ResponseReco_lowPt_central->GetMaximum(),ResponsePuppi_lowPt_central->GetMaximum())*1.25);
+
+  ResponseReco_lowPt_central->Draw("hist");
+  ResponsePuppi_lowPt_central->Draw("hist same");
+
+  tps1->SetFillStyle(0);
+  tps2->SetFillStyle(0);
+
+  tps1->Draw("same");
+  tps2->Draw("same");
+
+  legend->AddEntry(ResponseReco_lowPt_central,"CHS jets","l");
+  legend->AddEntry(ResponsePuppi_lowPt_central,"Puppi jets","l");
+
+  tex->Draw("same");
+  tex2->Draw("same");
+  tex3->Draw("same");
+  legend->Draw("same");
+
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/ResponseReco_lowPt_central.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/ResponseReco_lowPt_central.png").c_str(),"png");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/ResponseReco_lowPt_central.root").c_str(),"root");
+
+  cCanvas->SetLogy();
+
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/ResponseReco_lowPt_central_log.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/ResponseReco_lowPt_central_log.png").c_str(),"png");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/ResponseReco_lowPt_central_log.root").c_str(),"root");
+  cCanvas->SetLogy(0);
+  gPad->Update();
+
+
+  legend->Clear();
+
+  //
+
+  ResponseReco_lowPt_forward->SetLineWidth(2);
+  ResponseReco_lowPt_forward->SetLineColor(kBlue);
+  ResponseReco_lowPt_forward->GetXaxis()->SetTitle("(p_{T}^{Reco}-p_{T}^{Gen})/p_{T}^{Reco}");
+  ResponseReco_lowPt_forward->GetYaxis()->SetTitle("Entries");
+  ResponseReco_lowPt_forward->Draw("hist");
+
+  gPad->Update();
+  tps1 = (TPaveStats*) ResponseReco_lowPt_forward->FindObject("stats");
+  tps1->SetTextColor(kBlue);
+  tps1->SetLineColor(kBlue);
+  tps1->SetX1NDC(0.72);
+  tps1->SetY1NDC(0.68);
+  tps1->SetX2NDC(0.93);
+  tps1->SetY2NDC(0.89);
+  X1 = tps1->GetX1NDC();
+  Y1 = tps1->GetY1NDC();
+  X2 = tps1->GetX2NDC();
+  Y2 = tps1->GetY2NDC();
+  
+  ResponsePuppi_lowPt_forward->SetLineWidth(2);
+  ResponsePuppi_lowPt_forward->SetLineColor(kRed);
+  ResponsePuppi_lowPt_forward->Draw("hist");
+  
+  gPad->Update();
+  tps2 = (TPaveStats*) ResponsePuppi_lowPt_forward->FindObject("stats");
+  tps2->SetTextColor(kRed);
+  tps2->SetLineColor(kRed);
+  tps2->SetX1NDC(X1);
+  tps2->SetX2NDC(X2);
+  tps2->SetY1NDC(Y1-(Y2-Y1));
+  tps2->SetY2NDC(Y1);
+
+  ResponseReco_lowPt_forward->GetYaxis()->SetRangeUser(0.001,std::max(ResponseReco_lowPt_forward->GetMaximum(),ResponsePuppi_lowPt_forward->GetMaximum())*1.25);
+
+  ResponseReco_lowPt_forward->Draw("hist");
+  ResponsePuppi_lowPt_forward->Draw("hist same");
+
+  tps1->SetFillStyle(0);
+  tps2->SetFillStyle(0);
+
+  tps1->Draw("same");
+  tps2->Draw("same");
+
+  legend->AddEntry(ResponseReco_lowPt_forward,"CHS jets","l");
+  legend->AddEntry(ResponsePuppi_lowPt_forward,"Puppi jets","l");
+
+  tex->Draw("same");
+  tex2->Draw("same");
+  tex3->Draw("same");
+  legend->Draw("same");
+
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/ResponseReco_lowPt_forward.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/ResponseReco_lowPt_forward.png").c_str(),"png");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/ResponseReco_lowPt_forward.root").c_str(),"root");
+
+  cCanvas->SetLogy();
+
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/ResponseReco_lowPt_forward_log.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/ResponseReco_lowPt_forward_log.png").c_str(),"png");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/ResponseReco_lowPt_forward_log.root").c_str(),"root");
+  cCanvas->SetLogy(0);
+  gPad->Update();
+
+  legend->Clear();
+
+  //
+  ResponseReco_highPt_central->SetLineWidth(2);
+  ResponseReco_highPt_central->SetLineColor(kBlue);
+  ResponseReco_highPt_central->GetXaxis()->SetTitle("(p_{T}^{Reco}-p_{T}^{Gen})/p_{T}^{Reco}");
+  ResponseReco_highPt_central->GetYaxis()->SetTitle("Entries");
+  ResponseReco_highPt_central->Draw("hist");
+
+  gPad->Update();
+  tps1 = (TPaveStats*) ResponseReco_highPt_central->FindObject("stats");
+  tps1->SetTextColor(kBlue);
+  tps1->SetLineColor(kBlue);
+  tps1->SetX1NDC(0.72);
+  tps1->SetY1NDC(0.68);
+  tps1->SetX2NDC(0.93);
+  tps1->SetY2NDC(0.89);
+  X1 = tps1->GetX1NDC();
+  Y1 = tps1->GetY1NDC();
+  X2 = tps1->GetX2NDC();
+  Y2 = tps1->GetY2NDC();
+  
+  ResponsePuppi_highPt_central->SetLineWidth(2);
+  ResponsePuppi_highPt_central->SetLineColor(kRed);
+  ResponsePuppi_highPt_central->Draw("hist");
+  
+  gPad->Update();
+  tps2 = (TPaveStats*) ResponsePuppi_highPt_central->FindObject("stats");
+  tps2->SetTextColor(kRed);
+  tps2->SetLineColor(kRed);
+  tps2->SetX1NDC(X1);
+  tps2->SetX2NDC(X2);
+  tps2->SetY1NDC(Y1-(Y2-Y1));
+  tps2->SetY2NDC(Y1);
+
+  ResponseReco_highPt_central->GetYaxis()->SetRangeUser(0.001,std::max(ResponseReco_highPt_central->GetMaximum(),ResponsePuppi_highPt_central->GetMaximum())*1.25);
+
+  ResponseReco_highPt_central->Draw("hist");
+  ResponsePuppi_highPt_central->Draw("hist same");
+
+  tps1->SetFillStyle(0);
+  tps2->SetFillStyle(0);
+
+  tps1->Draw("same");
+  tps2->Draw("same");
+
+  legend->AddEntry(ResponseReco_highPt_central,"CHS jets","l");
+  legend->AddEntry(ResponsePuppi_highPt_central,"Puppi jets","l");
+
+  tex->Draw("same");
+  tex2->Draw("same");
+  tex3->Draw("same");
+  legend->Draw("same");
+
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/ResponseReco_highPt_central.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/ResponseReco_highPt_central.png").c_str(),"png");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/ResponseReco_highPt_central.root").c_str(),"root");
+
+  cCanvas->SetLogy();
+
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/ResponseReco_highPt_central_log.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/ResponseReco_highPt_central_log.png").c_str(),"png");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/ResponseReco_highPt_central_log.root").c_str(),"root");
+  cCanvas->SetLogy(0);
+  gPad->Update();
+
+
+  legend->Clear();
+
+  //
+  ResponseReco_highPt_forward->SetLineWidth(2);
+  ResponseReco_highPt_forward->SetLineColor(kBlue);
+  ResponseReco_highPt_forward->GetXaxis()->SetTitle("(p_{T}^{Reco}-p_{T}^{Gen})/p_{T}^{Reco}");
+  ResponseReco_highPt_forward->GetYaxis()->SetTitle("Entries");
+  ResponseReco_highPt_forward->Draw("hist");
+
+  gPad->Update();
+  tps1 = (TPaveStats*) ResponseReco_highPt_forward->FindObject("stats");
+  tps1->SetTextColor(kBlue);
+  tps1->SetLineColor(kBlue);
+  tps1->SetX1NDC(0.72);
+  tps1->SetY1NDC(0.68);
+  tps1->SetX2NDC(0.93);
+  tps1->SetY2NDC(0.89);
+  X1 = tps1->GetX1NDC();
+  Y1 = tps1->GetY1NDC();
+  X2 = tps1->GetX2NDC();
+  Y2 = tps1->GetY2NDC();
+  
+  ResponsePuppi_highPt_forward->SetLineWidth(2);
+  ResponsePuppi_highPt_forward->SetLineColor(kRed);
+  ResponsePuppi_highPt_forward->Draw("hist");
+  
+  gPad->Update();
+  tps2 = (TPaveStats*) ResponsePuppi_highPt_forward->FindObject("stats");
+  tps2->SetTextColor(kRed);
+  tps2->SetLineColor(kRed);
+  tps2->SetX1NDC(X1);
+  tps2->SetX2NDC(X2);
+  tps2->SetY1NDC(Y1-(Y2-Y1));
+  tps2->SetY2NDC(Y1);
+
+  ResponseReco_highPt_forward->GetYaxis()->SetRangeUser(0.001,std::max(ResponseReco_highPt_forward->GetMaximum(),ResponsePuppi_highPt_forward->GetMaximum())*1.25);
+
+  ResponseReco_highPt_forward->Draw("hist");
+  ResponsePuppi_highPt_forward->Draw("hist same");
+
+  tps1->SetFillStyle(0);
+  tps2->SetFillStyle(0);
+
+  tps1->Draw("same");
+  tps2->Draw("same");
+
+  legend->AddEntry(ResponseReco_highPt_forward,"CHS jets","l");
+  legend->AddEntry(ResponsePuppi_highPt_forward,"Puppi jets","l");
+
+  tex->Draw("same");
+  tex2->Draw("same");
+  tex3->Draw("same");
+  legend->Draw("same");
+
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/ResponseReco_highPt_forward.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/ResponseReco_highPt_forward.png").c_str(),"png");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/ResponseReco_highPt_forward.root").c_str(),"root");
+
+  cCanvas->SetLogy();
+
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/ResponseReco_highPt_forward_log.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/ResponseReco_highPt_forward_log.png").c_str(),"png");
+  cCanvas->SaveAs(std::string(outputFileDirectory+"/ResponseReco_highPt_forward_log.root").c_str(),"root");
+  cCanvas->SetLogy(0);
+  gPad->Update();
+
+
+  legend->Clear();
+
+  return 0;
+    
+}
