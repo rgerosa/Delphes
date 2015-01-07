@@ -23,7 +23,7 @@
 int main (int argc, char** argv){
 
   if(argc < 3 ) {
-    std::cerr<<" to be used as: ./<exe file> <cfg file> <outputPlot> "<<std::endl;
+    std::cerr<<" to be used as: ./<exe file> <directory with deplhes trees> <outputPlot> "<<std::endl;
     return -1;
   }
 
@@ -57,10 +57,10 @@ int main (int argc, char** argv){
 
   // threshold for jet and leptons
   float leptonPtThreshold = 0;
-  if(argc > 2) leptonPtThreshold = atof(argv[3]);
+  if(argc > 3) leptonPtThreshold = atof(argv[3]);
 
   float jetPtThreshold = 0;
-  if(argc > 3) jetPtThreshold = atof(argv[4]);
+  if(argc > 4) jetPtThreshold = atof(argv[4]);
 
 
   // set the branch address to be used

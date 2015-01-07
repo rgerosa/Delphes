@@ -219,7 +219,7 @@ DISPLAY_LIBS = $(shell $(RC) --evelibs) $(SYSLIBS)
 
 ifneq ($(CMSSW_FWLITE_INCLUDE_PATH),)
 HAS_CMSSW = true
-CXXFLAGS += -std=c++0x -I$(subst :, -I,$(CMSSW_FWLITE_INCLUDE_PATH)) 
+CXXFLAGS += -std=c++11 -I$(subst :, -I,$(CMSSW_FWLITE_INCLUDE_PATH)) 
 DELPHES_LIBS += -L$(subst include,lib,$(subst :, -L,$(CMSSW_FWLITE_INCLUDE_PATH))) -lGenVector
 ifneq ($(CMSSW_RELEASE_BASE),)
 CXXFLAGS += -I$(CMSSW_RELEASE_BASE)/src

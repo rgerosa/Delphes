@@ -2225,7 +2225,7 @@ module TreeWriter TreeWriter {
   ## output of the calorimeter simulation
   #add Branch Calorimeter/towers caloTowers Tower
   #add Branch Calorimeter/photons RawPhotons Photon
-  add Branch Calorimeter/eflowTracks eflowTracks Track
+  #add Branch Calorimeter/eflowTracks eflowTracks Track
   #add Branch Calorimeter/eflowTracks eflowTowers Tower
 
   ## tracks after CHS
