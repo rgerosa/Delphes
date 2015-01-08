@@ -58,7 +58,7 @@ int main (int argc, char** argv){
   string inputFileDirectory = argv[1]; 
 
   TChain *inputChain = new TChain("Delphes");
-  inputChain->Add((inputFileDirectory+"/*.root").c_str());
+  inputChain->Add((inputFileDirectory+"/*1.root").c_str());
 
   cout<<"number of events to analyze : "<<inputChain->GetEntries()<<endl;
   
