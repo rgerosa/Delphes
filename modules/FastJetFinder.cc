@@ -52,6 +52,14 @@ using namespace std;
 using namespace fastjet;
 using namespace contrib;
 
+float deltaPhi(float phi1, float phi2){
+
+  if(fabs(phi1-phi2) < TMath::Pi()) return fabs(phi1-phi2) ;
+  else return 2*TMath::Pi() - fabs(phi1-phi2);
+
+}
+
+
 //------------------------------------------------------------------------------
 
 FastJetFinder::FastJetFinder() :
@@ -98,6 +106,7 @@ void FastJetFinder::Init(){
   fAreaAlgorithm  = GetInt("AreaAlgorithm", 0);
   fComputeRho     = GetBool("ComputeRho", false);
   fComputeRhoGrid = GetBool("ComputeRhoGrid", false);
+  fComputeRhoGridParticles = GetBool("ComputeRhoGridParticles", false);
 
   // - ghost based areas -
   fGhostEtaMax = GetDouble("GhostEtaMax", 5.0);
@@ -217,7 +226,10 @@ void FastJetFinder::Process(){
   // construct jets
   fastjet::ClusterSequenceArea *sequence = new ClusterSequenceArea(inputList, *fDefinition, *fAreaDefinition);
 
-  // compute rho and store it
+  /////////////////////////////////////////////////
+  // compute rho and store it using jet clustering
+  /////////////////////////////////////////////////
+
   if(fComputeRho && fAreaDefinition){
     for(itEtaRangeMap = fEtaRangeMap.begin(); itEtaRangeMap != fEtaRangeMap.end(); ++itEtaRangeMap){
       Selector select_rapidity = SelectorAbsRapRange(itEtaRangeMap->first, itEtaRangeMap->second); // define an eta region
@@ -232,6 +244,10 @@ void FastJetFinder::Process(){
       fRhoOutputArray->Add(candidate);
     }
   }
+
+  /////////////////////////////////////////////////
+  // use grid median background method
+  ////////////////////////////////////////////////
 
   else if(fComputeRhoGrid && fAreaDefinition){
     for(itEtaRangeMap = fEtaRangeMap.begin(); itEtaRangeMap != fEtaRangeMap.end(); ++itEtaRangeMap){
@@ -252,6 +268,63 @@ void FastJetFinder::Process(){
       candidate->Edges[1] = itEtaRangeMap->second;
       fRhoOutputArray->Add(candidate);
     }    
+  }
+
+  /////////////////////////////////////////////////
+  // use CMSSW like method
+  ////////////////////////////////////////////////
+  else if(fComputeRhoGridParticles){
+
+    for(itEtaRangeMap = fEtaRangeMap.begin(); itEtaRangeMap != fEtaRangeMap.end(); ++itEtaRangeMap){
+      // define eta bins
+      vector<float> phibins;
+      for (int i = 0; i<10 ;i++) 
+	phibins.push_back(-TMath::Pi()+(2*i+1)*TMath::TwoPi()/20.);
+       //define the eta bins --> region dependent
+      vector<float> etabins;
+      if (fabs(itEtaRangeMap->first) == 0 and fabs(itEtaRangeMap->second) == 2.5) { // just in the central region
+	for (int i = 0; i<8 ;++i) 
+	  etabins.push_back(-2.5+0.6*i);
+      } 
+      else if (fabs(itEtaRangeMap->first) == 2.5 and fabs(itEtaRangeMap->second) == 5) { // forward generic region
+	for (int i=0;i<10;++i) {
+	  if (i<5) etabins.push_back(-5.1+0.6*i);
+	  else etabins.push_back(2.7+0.6*(i-5));
+	}
+      } 
+      else if ( fabs(itEtaRangeMap->first) == 0 and fabs(itEtaRangeMap->second) == 5) { // all detector
+	for (int i=0;i<18;++i) etabins.push_back(-5.1+0.6*i);
+      }
+
+      float etadist = etabins[1]-etabins[0]; // distance in eta
+      float phidist = phibins[1]-phibins[0]; // distance in phi
+      float etahalfdist = (etabins[1]-etabins[0])/2.;
+      float phihalfdist = (phibins[1]-phibins[0])/2.;
+      vector<float> sumPFNallSMDQ;
+      sumPFNallSMDQ.reserve(etabins.size()*phibins.size());
+      for (unsigned int ieta=0;ieta<etabins.size();++ieta) {
+	for (unsigned int iphi=0;iphi<phibins.size();++iphi) {
+	  float pfniso_ieta_iphi = 0;
+	  for(std::vector<fastjet::PseudoJet>::const_iterator itPart = inputList.begin(); itPart != inputList.end(); itPart++) {
+	    if (fabs(etabins[ieta]-itPart->eta())>etahalfdist) continue;
+            
+	    if (fabs(deltaPhi(phibins[iphi],itPart->phi()))>phihalfdist) continue;
+	    pfniso_ieta_iphi+=itPart->pt();
+	  }
+	  sumPFNallSMDQ.push_back(pfniso_ieta_iphi);
+	}
+      }
+      float evt_smdq = 0;
+      std::sort(sumPFNallSMDQ.begin(),sumPFNallSMDQ.end());
+      if (sumPFNallSMDQ.size()%2) evt_smdq = sumPFNallSMDQ[(sumPFNallSMDQ.size()-1)/2];
+      else evt_smdq = (sumPFNallSMDQ[sumPFNallSMDQ.size()/2]+sumPFNallSMDQ[(sumPFNallSMDQ.size()-2)/2])/2.;
+      //store rho
+      candidate = factory->NewCandidate();
+      candidate->Momentum.SetPtEtaPhiE(evt_smdq/(etadist*phidist), 0.0, 0.0, evt_smdq/(etadist*phidist));
+      candidate->Edges[0] = itEtaRangeMap->first;
+      candidate->Edges[1] = itEtaRangeMap->second;
+      fRhoOutputArray->Add(candidate);
+    }
   }
 
   else{

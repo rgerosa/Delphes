@@ -58,7 +58,7 @@ int main (int argc, char** argv){
   string inputFileDirectory = argv[1]; 
 
   TChain *inputChain = new TChain("Delphes");
-  inputChain->Add((inputFileDirectory+"/*1.root").c_str());
+  inputChain->Add((inputFileDirectory+"/*.root").c_str());
 
   cout<<"number of events to analyze : "<<inputChain->GetEntries()<<endl;
   
@@ -71,147 +71,152 @@ int main (int argc, char** argv){
   if(argc > 4) 
     jetPtThreshold = atof(argv[4]);
 
+  float PU = 0;
+  if(argc > 5)
+    PU = atof(argv[5]);
+
+
   // histogram to fill on the met
-  TH1F* leadingJetPt  = new TH1F ("leadingJetPt","",50,0,500);
-  TH1F* leadingJetEta = new TH1F ("leadingJetEta","",50,-5,5);
+  TH1F* leadingJetPt  = new TH1F ("leadingJetPt","",35,0,500);
+  TH1F* leadingJetEta = new TH1F ("leadingJetEta","",35,-5,5);
 
   leadingJetPt->Sumw2();
   leadingJetEta->Sumw2();
 
-  TH1F* trailingJetPt  = new TH1F ("trailingJetPt","",50,0,500);
-  TH1F* trailingJetEta = new TH1F ("trailingJetEta","",50,-5,5);
+  TH1F* trailingJetPt  = new TH1F ("trailingJetPt","",35,0,500);
+  TH1F* trailingJetEta = new TH1F ("trailingJetEta","",35,-5,5);
 
   trailingJetPt->Sumw2();
   trailingJetEta->Sumw2();
 
-  TH1F* leadingPuppiJetPt  = new TH1F ("leadingPuppiJetPt","",50,0,500);
-  TH1F* leadingPuppiJetEta = new TH1F ("leadingPuppiJetEta","",50,-5,5);
+  TH1F* leadingPuppiJetPt  = new TH1F ("leadingPuppiJetPt","",35,0,500);
+  TH1F* leadingPuppiJetEta = new TH1F ("leadingPuppiJetEta","",35,-5,5);
 
   leadingPuppiJetPt->Sumw2();
   leadingPuppiJetEta->Sumw2();
 
-  TH1F* trailingPuppiJetPt  = new TH1F ("trailingPuppiJetPt","",50,0,500);
-  TH1F* trailingPuppiJetEta = new TH1F ("trailingPuppiJetEta","",50,-5,5);
+  TH1F* trailingPuppiJetPt  = new TH1F ("trailingPuppiJetPt","",35,0,500);
+  TH1F* trailingPuppiJetEta = new TH1F ("trailingPuppiJetEta","",35,-5,5);
 
   trailingPuppiJetPt->Sumw2();
   trailingPuppiJetEta->Sumw2();
 
-  TH1F* NumeratorReco_vsEta  = new TH1F ("NumeratorReco_vsEta","",50,-5,5);
-  TH1F* NumeratorPuppi_vsEta  = new TH1F ("NumeratorPuppi_vsEta","",50,-5,5);
+  TH1F* NumeratorReco_vsEta  = new TH1F ("NumeratorReco_vsEta","",35,-5,5);
+  TH1F* NumeratorPuppi_vsEta  = new TH1F ("NumeratorPuppi_vsEta","",35,-5,5);
 
   NumeratorReco_vsEta->Sumw2();
   NumeratorPuppi_vsEta->Sumw2();
 
-  TH1F* NumeratorReco_vsEta_purity   = new TH1F ("NumeratorReco_vsEta_purity","",50,-5,5);
-  TH1F* NumeratorPuppi_vsEta_purity  = new TH1F ("NumeratorPuppi_vsEta_purity","",50,-5,5);
+  TH1F* NumeratorReco_vsEta_purity   = new TH1F ("NumeratorReco_vsEta_purity","",35,-5,5);
+  TH1F* NumeratorPuppi_vsEta_purity  = new TH1F ("NumeratorPuppi_vsEta_purity","",35,-5,5);
 
   NumeratorReco_vsEta_purity->Sumw2();
   NumeratorPuppi_vsEta_purity->Sumw2();
 
-  TH1F* NumeratorReco_vsPt_central   = new TH1F ("NumeratorReco_vsPt_central","",50,0,500);
-  TH1F* NumeratorPuppi_vsPt_central  = new TH1F ("NumeratorPuppi_vsPt_central","",50,0,500);
+  TH1F* NumeratorReco_vsPt_central   = new TH1F ("NumeratorReco_vsPt_central","",35,jetPtThreshold,500);
+  TH1F* NumeratorPuppi_vsPt_central  = new TH1F ("NumeratorPuppi_vsPt_central","",35,jetPtThreshold,500);
 
   NumeratorReco_vsPt_central->Sumw2();
   NumeratorPuppi_vsPt_central->Sumw2();
 
-  TH1F* NumeratorReco_vsPt_central_purity   = new TH1F ("NumeratorReco_vsPt_central_purity","",50,0,500);
-  TH1F* NumeratorPuppi_vsPt_central_purity  = new TH1F ("NumeratorPuppi_vsPt_central_purity","",50,0,500);
+  TH1F* NumeratorReco_vsPt_central_purity   = new TH1F ("NumeratorReco_vsPt_central_purity","",35,jetPtThreshold,500);
+  TH1F* NumeratorPuppi_vsPt_central_purity  = new TH1F ("NumeratorPuppi_vsPt_central_purity","",35,jetPtThreshold,500);
 
   NumeratorReco_vsPt_central_purity->Sumw2();
   NumeratorPuppi_vsPt_central_purity->Sumw2();
 
-  TH1F* NumeratorReco_vsPt_forward   = new TH1F ("NumeratorReco_vsPt_forward","",50,0,500);
-  TH1F* NumeratorPuppi_vsPt_forward  = new TH1F ("NumeratorPuppi_vsPt_forward","",50,0,500);
+  TH1F* NumeratorReco_vsPt_forward   = new TH1F ("NumeratorReco_vsPt_forward","",35,jetPtThreshold,500);
+  TH1F* NumeratorPuppi_vsPt_forward  = new TH1F ("NumeratorPuppi_vsPt_forward","",35,jetPtThreshold,500);
 
   NumeratorReco_vsPt_forward->Sumw2();
   NumeratorPuppi_vsPt_forward->Sumw2();
 
-  TH1F* NumeratorReco_vsPt_forward_purity   = new TH1F ("NumeratorReco_vsPt_forward_purity","",50,0,500);
-  TH1F* NumeratorPuppi_vsPt_forward_purity  = new TH1F ("NumeratorPuppi_vsPt_forward_purity","",50,0,500);
+  TH1F* NumeratorReco_vsPt_forward_purity   = new TH1F ("NumeratorReco_vsPt_forward_purity","",35,jetPtThreshold,500);
+  TH1F* NumeratorPuppi_vsPt_forward_purity  = new TH1F ("NumeratorPuppi_vsPt_forward_purity","",35,jetPtThreshold,500);
 
   NumeratorReco_vsPt_forward_purity->Sumw2();
   NumeratorPuppi_vsPt_forward_purity->Sumw2();
 
-  TH1F* NumeratorReco_vsPU_central   = new TH1F ("NumeratorReco_vsPU_central","",40,100,180);
-  TH1F* NumeratorPuppi_vsPU_central  = new TH1F ("NumeratorPuppi_vsPU_central","",40,100,180);
+  TH1F* NumeratorReco_vsPU_central   = new TH1F ("NumeratorReco_vsPU_central","",40,PU-40,PU+40);
+  TH1F* NumeratorPuppi_vsPU_central  = new TH1F ("NumeratorPuppi_vsPU_central","",40,PU-40,PU+40);
 
   NumeratorReco_vsPU_central->Sumw2();
   NumeratorPuppi_vsPU_central->Sumw2();
 
-  TH1F* NumeratorReco_vsPU_central_purity   = new TH1F ("NumeratorReco_vsPU_central_purity","",40,100,180);
-  TH1F* NumeratorPuppi_vsPU_central_purity  = new TH1F ("NumeratorPuppi_vsPU_central_purity","",40,100,180);
+  TH1F* NumeratorReco_vsPU_central_purity   = new TH1F ("NumeratorReco_vsPU_central_purity","",40,PU-40,PU+40);
+  TH1F* NumeratorPuppi_vsPU_central_purity  = new TH1F ("NumeratorPuppi_vsPU_central_purity","",40,PU-40,PU+40);
 
   NumeratorReco_vsPU_central_purity->Sumw2();
   NumeratorPuppi_vsPU_central_purity->Sumw2();
 
-  TH1F* NumeratorReco_vsPU_forward   = new TH1F ("NumeratorReco_vsPU_forward","",40,100,180);
-  TH1F* NumeratorPuppi_vsPU_forward  = new TH1F ("NumeratorPuppi_vsPU_forward","",40,100,180);
+  TH1F* NumeratorReco_vsPU_forward   = new TH1F ("NumeratorReco_vsPU_forward","",40,PU-40,PU+40);
+  TH1F* NumeratorPuppi_vsPU_forward  = new TH1F ("NumeratorPuppi_vsPU_forward","",40,PU-40,PU+40);
 
   NumeratorReco_vsPU_forward->Sumw2();
   NumeratorPuppi_vsPU_forward->Sumw2();
 
-  TH1F* NumeratorReco_vsPU_forward_purity   = new TH1F ("NumeratorReco_vsPU_forward_purity","",40,100,180);
-  TH1F* NumeratorPuppi_vsPU_forward_purity  = new TH1F ("NumeratorPuppi_vsPU_forward_purity","",40,100,180);
+  TH1F* NumeratorReco_vsPU_forward_purity   = new TH1F ("NumeratorReco_vsPU_forward_purity","",40,PU-40,PU+40);
+  TH1F* NumeratorPuppi_vsPU_forward_purity  = new TH1F ("NumeratorPuppi_vsPU_forward_purity","",40,PU-40,PU+40);
 
   NumeratorReco_vsPU_forward_purity->Sumw2();
   NumeratorPuppi_vsPU_forward_purity->Sumw2();
 
-  TH1F* DenominatorReco_vsEta  = new TH1F ("DenominatorReco_vsEta","",50,-5,5);
-  TH1F* DenominatorPuppi_vsEta  = new TH1F ("DenominatorPuppi_vsEta","",50,-5,5);
+  TH1F* DenominatorReco_vsEta  = new TH1F ("DenominatorReco_vsEta","",35,-5,5);
+  TH1F* DenominatorPuppi_vsEta  = new TH1F ("DenominatorPuppi_vsEta","",35,-5,5);
 
   DenominatorReco_vsEta->Sumw2();
   DenominatorPuppi_vsEta->Sumw2();
 
-  TH1F* DenominatorReco_vsEta_purity  = new TH1F ("DenominatorReco_vsEta_purity","",50,-5,5);
-  TH1F* DenominatorPuppi_vsEta_purity  = new TH1F ("DenominatorPuppi_vsEta_purity","",50,-5,5);
+  TH1F* DenominatorReco_vsEta_purity  = new TH1F ("DenominatorReco_vsEta_purity","",35,-5,5);
+  TH1F* DenominatorPuppi_vsEta_purity  = new TH1F ("DenominatorPuppi_vsEta_purity","",35,-5,5);
 
   DenominatorReco_vsEta_purity->Sumw2();
   DenominatorPuppi_vsEta_purity->Sumw2();
 
-  TH1F* DenominatorReco_vsPt_central   = new TH1F ("DenominatorReco_vsPt_central","",50,0,500);
-  TH1F* DenominatorPuppi_vsPt_central  = new TH1F ("DenominatorPuppi_vsPt_central","",50,0,500);
+  TH1F* DenominatorReco_vsPt_central   = new TH1F ("DenominatorReco_vsPt_central","",35,jetPtThreshold,500);
+  TH1F* DenominatorPuppi_vsPt_central  = new TH1F ("DenominatorPuppi_vsPt_central","",35,jetPtThreshold,500);
 
   DenominatorReco_vsPt_central->Sumw2();
   DenominatorPuppi_vsPt_central->Sumw2();
 
-  TH1F* DenominatorReco_vsPt_central_purity   = new TH1F ("DenominatorReco_vsPt_central_purity","",50,0,500);
-  TH1F* DenominatorPuppi_vsPt_central_purity  = new TH1F ("DenominatorPuppi_vsPt_central_purity","",50,0,500);
+  TH1F* DenominatorReco_vsPt_central_purity   = new TH1F ("DenominatorReco_vsPt_central_purity","",35,jetPtThreshold,500);
+  TH1F* DenominatorPuppi_vsPt_central_purity  = new TH1F ("DenominatorPuppi_vsPt_central_purity","",35,jetPtThreshold,500);
 
   DenominatorReco_vsPt_central_purity->Sumw2();
   DenominatorPuppi_vsPt_central_purity->Sumw2();
 
-  TH1F* DenominatorReco_vsPt_forward   = new TH1F ("DenominatorReco_vsPt_forward","",50,0,500);
-  TH1F* DenominatorPuppi_vsPt_forward  = new TH1F ("DenominatorPuppi_vsPt_forward","",50,0,500);
+  TH1F* DenominatorReco_vsPt_forward   = new TH1F ("DenominatorReco_vsPt_forward","",35,jetPtThreshold,500);
+  TH1F* DenominatorPuppi_vsPt_forward  = new TH1F ("DenominatorPuppi_vsPt_forward","",35,jetPtThreshold,500);
 
   DenominatorReco_vsPt_forward->Sumw2();
   DenominatorPuppi_vsPt_forward->Sumw2();
 
-  TH1F* DenominatorReco_vsPt_forward_purity   = new TH1F ("DenominatorReco_vsPt_forward_purity","",50,0,500);
-  TH1F* DenominatorPuppi_vsPt_forward_purity  = new TH1F ("DenominatorPuppi_vsPt_forward_purity","",50,0,500);
+  TH1F* DenominatorReco_vsPt_forward_purity   = new TH1F ("DenominatorReco_vsPt_forward_purity","",35,jetPtThreshold,500);
+  TH1F* DenominatorPuppi_vsPt_forward_purity  = new TH1F ("DenominatorPuppi_vsPt_forward_purity","",35,jetPtThreshold,500);
 
   DenominatorReco_vsPt_forward_purity->Sumw2();
   DenominatorPuppi_vsPt_forward_purity->Sumw2();
 
-  TH1F* DenominatorReco_vsPU_central   = new TH1F ("DenominatorReco_vsPU_central","",40,100,180);
-  TH1F* DenominatorPuppi_vsPU_central  = new TH1F ("DenominatorPuppi_vsPU_central","",40,100,180);
+  TH1F* DenominatorReco_vsPU_central   = new TH1F ("DenominatorReco_vsPU_central","",40,PU-40,PU+40);
+  TH1F* DenominatorPuppi_vsPU_central  = new TH1F ("DenominatorPuppi_vsPU_central","",40,PU-40,PU+40);
 
   DenominatorReco_vsPU_central->Sumw2();
   DenominatorPuppi_vsPU_central->Sumw2();
 
-  TH1F* DenominatorReco_vsPU_central_purity   = new TH1F ("DenominatorReco_vsPU_central_purity","",40,100,180);
-  TH1F* DenominatorPuppi_vsPU_central_purity  = new TH1F ("DenominatorPuppi_vsPU_central_purity","",40,100,180);
+  TH1F* DenominatorReco_vsPU_central_purity   = new TH1F ("DenominatorReco_vsPU_central_purity","",40,PU-40,PU+40);
+  TH1F* DenominatorPuppi_vsPU_central_purity  = new TH1F ("DenominatorPuppi_vsPU_central_purity","",40,PU-40,PU+40);
 
   DenominatorReco_vsPU_central_purity->Sumw2();
   DenominatorPuppi_vsPU_central_purity->Sumw2();
 
-  TH1F* DenominatorReco_vsPU_forward   = new TH1F ("DenominatorReco_vsPU_forward","",40,100,180);
-  TH1F* DenominatorPuppi_vsPU_forward  = new TH1F ("DenominatorPuppi_vsPU_forward","",40,100, 180);
+  TH1F* DenominatorReco_vsPU_forward   = new TH1F ("DenominatorReco_vsPU_forward","",40,PU-40,PU+40);
+  TH1F* DenominatorPuppi_vsPU_forward  = new TH1F ("DenominatorPuppi_vsPU_forward","",40,PU-40, PU+40);
 
   DenominatorReco_vsPU_forward->Sumw2();
   DenominatorPuppi_vsPU_forward->Sumw2();
 
-  TH1F* DenominatorReco_vsPU_forward_purity   = new TH1F ("DenominatorReco_vsPU_forward_purity","",40,100,180);
-  TH1F* DenominatorPuppi_vsPU_forward_purity  = new TH1F ("DenominatorPuppi_vsPU_forward_purity","",40,100, 180);
+  TH1F* DenominatorReco_vsPU_forward_purity   = new TH1F ("DenominatorReco_vsPU_forward_purity","",40,PU-40,PU+40);
+  TH1F* DenominatorPuppi_vsPU_forward_purity  = new TH1F ("DenominatorPuppi_vsPU_forward_purity","",40,PU-40, PU+40);
 
   DenominatorReco_vsPU_forward_purity->Sumw2();
   DenominatorPuppi_vsPU_forward_purity->Sumw2();
@@ -235,6 +240,18 @@ int main (int argc, char** argv){
   ResponseReco_highPt_forward->Sumw2();
   ResponsePuppi_highPt_central->Sumw2();
   ResponsePuppi_highPt_forward->Sumw2();
+
+  TH1F* ResponseReco_deta   = new TH1F ("ResponseReco_deta","",50,-0.2,0.2);
+  TH1F* ResponsePuppi_deta  = new TH1F ("ResponsePuppi_deta","",50,-0.2,0.2);
+
+  ResponseReco_deta->Sumw2();
+  ResponsePuppi_deta->Sumw2();
+
+  TH1F* ResponseReco_mjj   = new TH1F ("ResponseReco_mjj","",50,-1,1);
+  TH1F* ResponsePuppi_mjj  = new TH1F ("ResponsePuppi_mjj","",50,-1,1);
+
+  ResponseReco_mjj->Sumw2();
+  ResponsePuppi_mjj->Sumw2();
 
   // set the branch address to be used
   TClonesArray* Muons = new TClonesArray("Muon");
@@ -491,23 +508,31 @@ int main (int argc, char** argv){
     bool puppiMatched_1 = false;
     bool puppiMatched_2 = false;
 
+    Jet* matchedGenJet_1 = 0;
+    Jet* matchedGenJet_2 = 0;
+
+    Jet* matchedGenJet_puppi_1 = 0;
+    Jet* matchedGenJet_puppi_2 = 0;
+
     for(size_t iJet = 0; iJet < cleanedGenJets.size(); iJet++){
       Jet* jet = cleanedGenJets.at(iJet);
 
       if(jet->P4().DeltaR(cleanedJets.at(0)->P4()) < matchingCone and !recoMatched_1){ // positive match with leading jet
 
         recoMatched_1 = true;
+        matchedGenJet_1 = jet;
 
 	NumeratorReco_vsEta->Fill(cleanedJets.at(0)->Eta);
  
         if(cleanedJets.at(0)->PT < ptBinCut and fabs(cleanedJets.at(0)->Eta) < etaBinCut) 
-	  ResponseReco_lowPt_central->Fill((cleanedJets.at(0)->PT-jet->PT)/jet->PT);
+	  ResponseReco_lowPt_central->Fill((cleanedJets.at(0)->PT-jet->PT)/jet->PT);	
         else if(cleanedJets.at(0)->PT < ptBinCut and fabs(cleanedJets.at(0)->Eta) > etaBinCut)
 	  ResponseReco_lowPt_forward->Fill((cleanedJets.at(0)->PT-jet->PT)/jet->PT);       
         else if(cleanedJets.at(0)->PT >= ptBinCut and fabs(cleanedJets.at(0)->Eta) < etaBinCut)
 	  ResponseReco_highPt_central->Fill((cleanedJets.at(0)->PT-jet->PT)/jet->PT);
         else if(cleanedJets.at(0)->PT >= ptBinCut and fabs(cleanedJets.at(0)->Eta) > etaBinCut)
 	  ResponseReco_highPt_forward->Fill((cleanedJets.at(0)->PT-jet->PT)/jet->PT);
+
 
 	if(fabs(cleanedJets.at(0)->Eta) < etaBinCut ){
 	  NumeratorReco_vsPt_central->Fill(cleanedJets.at(0)->PT);
@@ -521,7 +546,7 @@ int main (int argc, char** argv){
       else if(jet->P4().DeltaR(cleanedJets.at(1)->P4()) < matchingCone  and !recoMatched_2){
 
         recoMatched_2 = true;
-
+        matchedGenJet_2 = jet ;
 	NumeratorReco_vsEta->Fill(cleanedJets.at(1)->Eta);
 
         if(cleanedJets.at(1)->PT < ptBinCut and fabs(cleanedJets.at(1)->Eta) < etaBinCut) 
@@ -546,6 +571,7 @@ int main (int argc, char** argv){
       if(jet->P4().DeltaR(cleanedPuppiJets.at(0)->P4()) < matchingCone and !puppiMatched_1 ){ // positive match with leading jet
 
         puppiMatched_1 = true;
+        matchedGenJet_puppi_1 = jet;
 
 	NumeratorPuppi_vsEta->Fill(cleanedPuppiJets.at(0)->Eta);
 
@@ -571,6 +597,7 @@ int main (int argc, char** argv){
       else if(jet->P4().DeltaR(cleanedPuppiJets.at(1)->P4()) < matchingCone and !puppiMatched_2){
 
 	puppiMatched_2 = true ;
+        matchedGenJet_puppi_2 = jet;
 
 	NumeratorPuppi_vsEta->Fill(cleanedPuppiJets.at(1)->Eta);
 
@@ -594,7 +621,19 @@ int main (int argc, char** argv){
       }
     }
   
+    // response for deta and mjj
+    if(matchedGenJet_1!=0 and matchedGenJet_2!=0){
+      ResponseReco_deta->Fill((fabs(cleanedJets.at(0)->Eta-cleanedJets.at(1)->Eta)-fabs(matchedGenJet_1->Eta-matchedGenJet_2->Eta))/fabs(matchedGenJet_1->Eta-matchedGenJet_2->Eta));
+      ResponseReco_mjj->Fill(((cleanedJets.at(0)->P4()+cleanedJets.at(1)->P4()).M()-(matchedGenJet_1->P4()+matchedGenJet_2->P4()).M())/(matchedGenJet_1->P4()+matchedGenJet_2->P4()).M());
+    }
+ 
+    if(matchedGenJet_puppi_1!=0 and matchedGenJet_puppi_2!=0){
 
+      ResponsePuppi_deta->Fill((fabs(cleanedPuppiJets.at(0)->Eta-cleanedPuppiJets.at(1)->Eta)-fabs(matchedGenJet_puppi_1->Eta-matchedGenJet_puppi_2->Eta))/fabs(matchedGenJet_puppi_1->Eta-matchedGenJet_puppi_2->Eta));
+
+      ResponsePuppi_mjj->Fill(((cleanedPuppiJets.at(0)->P4()+cleanedPuppiJets.at(1)->P4()).M()-(matchedGenJet_puppi_1->P4()+matchedGenJet_puppi_2->P4()).M())/(matchedGenJet_puppi_1->P4()+matchedGenJet_puppi_2->P4()).M());
+    }
+    
     // for purity
     bool genMatched_1 = false;
     bool genMatched_2 = false;
@@ -742,6 +781,7 @@ int main (int argc, char** argv){
   
   leadingPuppiJetPt->SetLineWidth(2);
   leadingPuppiJetPt->SetLineColor(kRed);
+  leadingPuppiJetPt->SetLineStyle(7);
   leadingPuppiJetPt->Draw("hist");
   
   gPad->Update();
@@ -809,6 +849,7 @@ int main (int argc, char** argv){
   
   trailingPuppiJetPt->SetLineWidth(2);
   trailingPuppiJetPt->SetLineColor(kRed);
+  trailingPuppiJetPt->SetLineStyle(7);
   trailingPuppiJetPt->Draw("hist");
   
   gPad->Update();
@@ -875,6 +916,7 @@ int main (int argc, char** argv){
   
   leadingPuppiJetEta->SetLineWidth(2);
   leadingPuppiJetEta->SetLineColor(kRed);
+  leadingPuppiJetEta->SetLineStyle(7);
   leadingPuppiJetEta->Draw("hist");
   
   gPad->Update();
@@ -942,6 +984,7 @@ int main (int argc, char** argv){
   
   trailingPuppiJetEta->SetLineWidth(2);
   trailingPuppiJetEta->SetLineColor(kRed);
+  trailingPuppiJetEta->SetLineStyle(7);
   trailingPuppiJetEta->Draw("hist");
   
   gPad->Update();
@@ -1001,7 +1044,7 @@ int main (int argc, char** argv){
   EfficiencyPuppi_vsEta->BayesDivide(NumeratorPuppi_vsEta,DenominatorPuppi_vsEta);
 
 
-  TH2F* frameEfficiency_vsEta = new TH2F("frameEfficiency_vsEta","",50,-5,5,500,
+  TH2F* frameEfficiency_vsEta = new TH2F("frameEfficiency_vsEta","",50,-4,4,500,
 					 1.1*min(EfficiencyReco_vsEta->GetHistogram()->GetMinimum(),EfficiencyPuppi_vsEta->GetHistogram()->GetMinimum()),
 					 1.1*max(EfficiencyReco_vsEta->GetHistogram()->GetMaximum(),EfficiencyPuppi_vsEta->GetHistogram()->GetMaximum()));
   frameEfficiency_vsEta->SetLineWidth(2);
@@ -1032,7 +1075,7 @@ int main (int argc, char** argv){
 
   EfficiencyPuppi_vsEta->SetLineWidth(2);
   EfficiencyPuppi_vsEta->SetLineColor(kRed);
-  EfficiencyPuppi_vsEta->SetMarkerStyle(20);
+  EfficiencyPuppi_vsEta->SetMarkerStyle(24);
   EfficiencyPuppi_vsEta->SetMarkerColor(kRed);
   EfficiencyPuppi_vsEta->GetXaxis()->SetTitle("#eta");
   EfficiencyPuppi_vsEta->GetYaxis()->SetTitle("Efficiency");
@@ -1072,9 +1115,9 @@ int main (int argc, char** argv){
   EfficiencyPuppi_vsPt_central->BayesDivide(NumeratorPuppi_vsPt_central,DenominatorPuppi_vsPt_central);
 
   
-  TH2F* frameEfficiency_vsPt = new TH2F("frameEfficiency_vsPt","",50,0,500,500,
-					0.8*min(EfficiencyReco_vsPt_central->GetHistogram()->GetMinimum(),EfficiencyPuppi_vsPt_central->GetHistogram()->GetMinimum()),
-					1.1*max(EfficiencyReco_vsPt_central->GetHistogram()->GetMaximum(),EfficiencyPuppi_vsPt_central->GetHistogram()->GetMaximum()));
+  TH2F* frameEfficiency_vsPt = new TH2F("frameEfficiency_vsPt","",50,jetPtThreshold,500,500,
+					min(EfficiencyReco_vsPt_central->GetHistogram()->GetMinimum(),EfficiencyPuppi_vsPt_central->GetHistogram()->GetMinimum()),
+					1.05*max(EfficiencyReco_vsPt_central->GetHistogram()->GetMaximum(),EfficiencyPuppi_vsPt_central->GetHistogram()->GetMaximum()));
   frameEfficiency_vsPt->SetLineWidth(2);
   frameEfficiency_vsPt->SetMarkerStyle(21);
   frameEfficiency_vsPt->SetMarkerSize(0.3);
@@ -1103,7 +1146,7 @@ int main (int argc, char** argv){
 
   EfficiencyPuppi_vsPt_central->SetLineWidth(2);
   EfficiencyPuppi_vsPt_central->SetLineColor(kRed);
-  EfficiencyPuppi_vsPt_central->SetMarkerStyle(20);
+  EfficiencyPuppi_vsPt_central->SetMarkerStyle(24);
   EfficiencyPuppi_vsPt_central->SetMarkerColor(kRed);
   EfficiencyPuppi_vsPt_central->GetXaxis()->SetTitle("p_{T} (GeV)");
   EfficiencyPuppi_vsPt_central->GetYaxis()->SetTitle("Efficiency");
@@ -1143,9 +1186,9 @@ int main (int argc, char** argv){
   EfficiencyPuppi_vsPt_forward->BayesDivide(NumeratorPuppi_vsPt_forward,DenominatorPuppi_vsPt_forward);
 
   frameEfficiency_vsPt->Delete();
-  frameEfficiency_vsPt = new TH2F("frameEfficiency_vsPt","",50,0,500,500,
-				  0.8*min(EfficiencyReco_vsPt_forward->GetHistogram()->GetMinimum(),EfficiencyPuppi_vsPt_forward->GetHistogram()->GetMinimum()),
-				  1.1*max(EfficiencyReco_vsPt_forward->GetHistogram()->GetMaximum(),EfficiencyPuppi_vsPt_forward->GetHistogram()->GetMaximum()));
+  frameEfficiency_vsPt = new TH2F("frameEfficiency_vsPt","",35,jetPtThreshold,500,500,
+				  min(EfficiencyReco_vsPt_forward->GetHistogram()->GetMinimum(),EfficiencyPuppi_vsPt_forward->GetHistogram()->GetMinimum()),
+				  1.05*max(EfficiencyReco_vsPt_forward->GetHistogram()->GetMaximum(),EfficiencyPuppi_vsPt_forward->GetHistogram()->GetMaximum()));
 
   frameEfficiency_vsPt->SetLineWidth(2);
   frameEfficiency_vsPt->SetMarkerStyle(21);
@@ -1175,7 +1218,7 @@ int main (int argc, char** argv){
 
   EfficiencyPuppi_vsPt_forward->SetLineWidth(2);
   EfficiencyPuppi_vsPt_forward->SetLineColor(kRed);
-  EfficiencyPuppi_vsPt_forward->SetMarkerStyle(20);
+  EfficiencyPuppi_vsPt_forward->SetMarkerStyle(24);
   EfficiencyPuppi_vsPt_forward->SetMarkerColor(kRed);
   EfficiencyPuppi_vsPt_forward->GetXaxis()->SetTitle("#eta");
   EfficiencyPuppi_vsPt_forward->GetYaxis()->SetTitle("Efficiency");
@@ -1215,8 +1258,8 @@ int main (int argc, char** argv){
   EfficiencyPuppi_vsPU_central->BayesDivide(NumeratorPuppi_vsPU_central,DenominatorPuppi_vsPU_central);
 
 
-  TH2F* frameEfficiency_vsPU = new TH2F("frameEfficiency_vsPU","",50,90,190,500,
-					0.9*min(EfficiencyReco_vsPU_central->GetHistogram()->GetMinimum(),EfficiencyPuppi_vsPU_central->GetHistogram()->GetMinimum()),
+  TH2F* frameEfficiency_vsPU = new TH2F("frameEfficiency_vsPU","",50,PU-40,PU+40,500,
+					0.95*min(EfficiencyReco_vsPU_central->GetHistogram()->GetMinimum(),EfficiencyPuppi_vsPU_central->GetHistogram()->GetMinimum()),
 					1.1*max(EfficiencyReco_vsPU_central->GetHistogram()->GetMaximum(),EfficiencyPuppi_vsPU_central->GetHistogram()->GetMaximum()));
   frameEfficiency_vsPU->SetLineWidth(2);
   frameEfficiency_vsPU->SetMarkerStyle(21);
@@ -1246,7 +1289,7 @@ int main (int argc, char** argv){
 
   EfficiencyPuppi_vsPU_central->SetLineWidth(2);
   EfficiencyPuppi_vsPU_central->SetLineColor(kRed);
-  EfficiencyPuppi_vsPU_central->SetMarkerStyle(20);
+  EfficiencyPuppi_vsPU_central->SetMarkerStyle(24);
   EfficiencyPuppi_vsPU_central->SetMarkerColor(kRed);
   EfficiencyPuppi_vsPU_central->GetXaxis()->SetTitle("N_{PU}");
   EfficiencyPuppi_vsPU_central->GetYaxis()->SetTitle("Efficiency");
@@ -1286,8 +1329,8 @@ int main (int argc, char** argv){
   EfficiencyPuppi_vsPU_forward->BayesDivide(NumeratorPuppi_vsPU_forward,DenominatorPuppi_vsPU_forward);
 
   frameEfficiency_vsPU->Delete();
-  frameEfficiency_vsPU = new TH2F("frameEfficiency_vsPU","",50,90,190,500,
-				  0.9*min(EfficiencyReco_vsPU_forward->GetHistogram()->GetMinimum(),EfficiencyPuppi_vsPU_forward->GetHistogram()->GetMinimum()),
+  frameEfficiency_vsPU = new TH2F("frameEfficiency_vsPU","",50,PU-40,PU+40,500,
+				  0.95*min(EfficiencyReco_vsPU_forward->GetHistogram()->GetMinimum(),EfficiencyPuppi_vsPU_forward->GetHistogram()->GetMinimum()),
 				  1.1*max(EfficiencyReco_vsPU_forward->GetHistogram()->GetMaximum(),EfficiencyPuppi_vsPU_forward->GetHistogram()->GetMaximum()));
 
   frameEfficiency_vsPU->SetLineWidth(2);
@@ -1318,7 +1361,7 @@ int main (int argc, char** argv){
 
   EfficiencyPuppi_vsPU_forward->SetLineWidth(2);
   EfficiencyPuppi_vsPU_forward->SetLineColor(kRed);
-  EfficiencyPuppi_vsPU_forward->SetMarkerStyle(20);
+  EfficiencyPuppi_vsPU_forward->SetMarkerStyle(24);
   EfficiencyPuppi_vsPU_forward->SetMarkerColor(kRed);
   EfficiencyPuppi_vsPU_forward->GetXaxis()->SetTitle("N_{PU}");
   EfficiencyPuppi_vsPU_forward->GetYaxis()->SetTitle("Efficiency");
@@ -1362,7 +1405,7 @@ int main (int argc, char** argv){
   PurityPuppi_vsEta->BayesDivide(NumeratorPuppi_vsEta_purity,DenominatorPuppi_vsEta_purity);
 
 
-  TH2F* framePurity_vsEta = new TH2F("framePurity_vsEta","",50,-5,5,500,
+  TH2F* framePurity_vsEta = new TH2F("framePurity_vsEta","",50,-4,4,500,
 					 1.1*min(PurityReco_vsEta->GetHistogram()->GetMinimum(),PurityPuppi_vsEta->GetHistogram()->GetMinimum()),
 					 1.1*max(PurityReco_vsEta->GetHistogram()->GetMaximum(),PurityPuppi_vsEta->GetHistogram()->GetMaximum()));
   framePurity_vsEta->SetLineWidth(2);
@@ -1393,7 +1436,7 @@ int main (int argc, char** argv){
 
   PurityPuppi_vsEta->SetLineWidth(2);
   PurityPuppi_vsEta->SetLineColor(kRed);
-  PurityPuppi_vsEta->SetMarkerStyle(20);
+  PurityPuppi_vsEta->SetMarkerStyle(24);
   PurityPuppi_vsEta->SetMarkerColor(kRed);
   PurityPuppi_vsEta->GetXaxis()->SetTitle("#eta");
   PurityPuppi_vsEta->GetYaxis()->SetTitle("Purity");
@@ -1433,9 +1476,9 @@ int main (int argc, char** argv){
   PurityPuppi_vsPt_central->BayesDivide(NumeratorPuppi_vsPt_central_purity,DenominatorPuppi_vsPt_central_purity);
 
   
-  TH2F* framePurity_vsPt = new TH2F("framePurity_vsPt","",50,0,500,500,
-					0.8*min(PurityReco_vsPt_central->GetHistogram()->GetMinimum(),PurityPuppi_vsPt_central->GetHistogram()->GetMinimum()),
-					1.1*max(PurityReco_vsPt_central->GetHistogram()->GetMaximum(),PurityPuppi_vsPt_central->GetHistogram()->GetMaximum()));
+  TH2F* framePurity_vsPt = new TH2F("framePurity_vsPt","",50,jetPtThreshold,500,500,
+					min(PurityReco_vsPt_central->GetHistogram()->GetMinimum(),PurityPuppi_vsPt_central->GetHistogram()->GetMinimum()),
+					1.05*max(PurityReco_vsPt_central->GetHistogram()->GetMaximum(),PurityPuppi_vsPt_central->GetHistogram()->GetMaximum()));
   framePurity_vsPt->SetLineWidth(2);
   framePurity_vsPt->SetMarkerStyle(21);
   framePurity_vsPt->SetMarkerSize(0.3);
@@ -1464,7 +1507,7 @@ int main (int argc, char** argv){
 
   PurityPuppi_vsPt_central->SetLineWidth(2);
   PurityPuppi_vsPt_central->SetLineColor(kRed);
-  PurityPuppi_vsPt_central->SetMarkerStyle(20);
+  PurityPuppi_vsPt_central->SetMarkerStyle(24);
   PurityPuppi_vsPt_central->SetMarkerColor(kRed);
   PurityPuppi_vsPt_central->GetXaxis()->SetTitle("p_{T} (GeV)");
   PurityPuppi_vsPt_central->GetYaxis()->SetTitle("Purity");
@@ -1504,9 +1547,9 @@ int main (int argc, char** argv){
   PurityPuppi_vsPt_forward->BayesDivide(NumeratorPuppi_vsPt_forward_purity,DenominatorPuppi_vsPt_forward_purity);
 
   framePurity_vsPt->Delete();
-  framePurity_vsPt = new TH2F("framePurity_vsPt","",50,0,500,500,
-				  0.8*min(PurityReco_vsPt_forward->GetHistogram()->GetMinimum(),PurityPuppi_vsPt_forward->GetHistogram()->GetMinimum()),
-				  1.1*max(PurityReco_vsPt_forward->GetHistogram()->GetMaximum(),PurityPuppi_vsPt_forward->GetHistogram()->GetMaximum()));
+  framePurity_vsPt = new TH2F("framePurity_vsPt","",50,jetPtThreshold,500,500,
+				  min(PurityReco_vsPt_forward->GetHistogram()->GetMinimum(),PurityPuppi_vsPt_forward->GetHistogram()->GetMinimum()),
+				  1.05*max(PurityReco_vsPt_forward->GetHistogram()->GetMaximum(),PurityPuppi_vsPt_forward->GetHistogram()->GetMaximum()));
 
   framePurity_vsPt->SetLineWidth(2);
   framePurity_vsPt->SetMarkerStyle(21);
@@ -1536,7 +1579,7 @@ int main (int argc, char** argv){
 
   PurityPuppi_vsPt_forward->SetLineWidth(2);
   PurityPuppi_vsPt_forward->SetLineColor(kRed);
-  PurityPuppi_vsPt_forward->SetMarkerStyle(20);
+  PurityPuppi_vsPt_forward->SetMarkerStyle(24);
   PurityPuppi_vsPt_forward->SetMarkerColor(kRed);
   PurityPuppi_vsPt_forward->GetXaxis()->SetTitle("#eta");
   PurityPuppi_vsPt_forward->GetYaxis()->SetTitle("Purity");
@@ -1576,8 +1619,8 @@ int main (int argc, char** argv){
   PurityPuppi_vsPU_central->BayesDivide(NumeratorPuppi_vsPU_central_purity,DenominatorPuppi_vsPU_central_purity);
 
 
-  TH2F* framePurity_vsPU = new TH2F("framePurity_vsPU","",50,90,190,500,
-					0.9*min(PurityReco_vsPU_central->GetHistogram()->GetMinimum(),PurityPuppi_vsPU_central->GetHistogram()->GetMinimum()),
+  TH2F* framePurity_vsPU = new TH2F("framePurity_vsPU","",50,PU-40,PU+40,500,
+					0.95*min(PurityReco_vsPU_central->GetHistogram()->GetMinimum(),PurityPuppi_vsPU_central->GetHistogram()->GetMinimum()),
 					1.1*max(PurityReco_vsPU_central->GetHistogram()->GetMaximum(),PurityPuppi_vsPU_central->GetHistogram()->GetMaximum()));
   framePurity_vsPU->SetLineWidth(2);
   framePurity_vsPU->SetMarkerStyle(21);
@@ -1607,7 +1650,7 @@ int main (int argc, char** argv){
 
   PurityPuppi_vsPU_central->SetLineWidth(2);
   PurityPuppi_vsPU_central->SetLineColor(kRed);
-  PurityPuppi_vsPU_central->SetMarkerStyle(20);
+  PurityPuppi_vsPU_central->SetMarkerStyle(24);
   PurityPuppi_vsPU_central->SetMarkerColor(kRed);
   PurityPuppi_vsPU_central->GetXaxis()->SetTitle("N_{PU}");
   PurityPuppi_vsPU_central->GetYaxis()->SetTitle("Purity");
@@ -1647,7 +1690,7 @@ int main (int argc, char** argv){
   PurityPuppi_vsPU_forward->BayesDivide(NumeratorPuppi_vsPU_forward_purity,DenominatorPuppi_vsPU_forward_purity);
 
   framePurity_vsPU->Delete();
-  framePurity_vsPU = new TH2F("framePurity_vsPU","",50,90,190,500,
+  framePurity_vsPU = new TH2F("framePurity_vsPU","",50,PU-40,PU+40,500,
 				  0.9*min(PurityReco_vsPU_forward->GetHistogram()->GetMinimum(),PurityPuppi_vsPU_forward->GetHistogram()->GetMinimum()),
 				  1.1*max(PurityReco_vsPU_forward->GetHistogram()->GetMaximum(),PurityPuppi_vsPU_forward->GetHistogram()->GetMaximum()));
 
@@ -1679,7 +1722,7 @@ int main (int argc, char** argv){
 
   PurityPuppi_vsPU_forward->SetLineWidth(2);
   PurityPuppi_vsPU_forward->SetLineColor(kRed);
-  PurityPuppi_vsPU_forward->SetMarkerStyle(20);
+  PurityPuppi_vsPU_forward->SetMarkerStyle(24);
   PurityPuppi_vsPU_forward->SetMarkerColor(kRed);
   PurityPuppi_vsPU_forward->GetXaxis()->SetTitle("N_{PU}");
   PurityPuppi_vsPU_forward->GetYaxis()->SetTitle("Purity");
@@ -1743,7 +1786,8 @@ int main (int argc, char** argv){
 
   ResponseReco_lowPt_central->GetYaxis()->SetRangeUser(0.001,max(ResponseReco_lowPt_central->GetMaximum(),ResponsePuppi_lowPt_central->GetMaximum())*1.25);
 
-  ResponseReco_lowPt_central->Draw("hist");
+  ResponseReco_lowPt_central->Draw("hist"); 
+  ResponsePuppi_lowPt_central->SetLineStyle(7);  
   ResponsePuppi_lowPt_central->Draw("hist same");
 
   tps1->SetFillStyle(0);
@@ -1811,6 +1855,7 @@ int main (int argc, char** argv){
   ResponseReco_lowPt_forward->GetYaxis()->SetRangeUser(0.001,max(ResponseReco_lowPt_forward->GetMaximum(),ResponsePuppi_lowPt_forward->GetMaximum())*1.25);
 
   ResponseReco_lowPt_forward->Draw("hist");
+  ResponsePuppi_lowPt_forward->SetLineStyle(7);  
   ResponsePuppi_lowPt_forward->Draw("hist same");
 
   tps1->SetFillStyle(0);
@@ -1877,6 +1922,7 @@ int main (int argc, char** argv){
   ResponseReco_highPt_central->GetYaxis()->SetRangeUser(0.001,max(ResponseReco_highPt_central->GetMaximum(),ResponsePuppi_highPt_central->GetMaximum())*1.25);
 
   ResponseReco_highPt_central->Draw("hist");
+  ResponsePuppi_highPt_central->SetLineStyle(7);  
   ResponsePuppi_highPt_central->Draw("hist same");
 
   tps1->SetFillStyle(0);
@@ -1944,6 +1990,7 @@ int main (int argc, char** argv){
   ResponseReco_highPt_forward->GetYaxis()->SetRangeUser(0.001,max(ResponseReco_highPt_forward->GetMaximum(),ResponsePuppi_highPt_forward->GetMaximum())*1.25);
 
   ResponseReco_highPt_forward->Draw("hist");
+  ResponsePuppi_highPt_forward->SetLineStyle(7);  
   ResponsePuppi_highPt_forward->Draw("hist same");
 
   tps1->SetFillStyle(0);
@@ -1974,7 +2021,145 @@ int main (int argc, char** argv){
 
 
   legend->Clear();
+
+  //
+  ResponseReco_deta->SetLineWidth(2);
+  ResponseReco_deta->SetLineColor(kBlue);
+  ResponseReco_deta->GetXaxis()->SetTitle("(#Delta#eta_{jj}^{Reco}-#Delta#eta_{jj}^{Gen})/#Delta#eta_{jj}^{Gen}");
+  ResponseReco_deta->GetYaxis()->SetTitle("Entries");
+  ResponseReco_deta->Draw("hist");
+
+  gPad->Update();
+  tps1 = (TPaveStats*) ResponseReco_deta->FindObject("stats");
+  tps1->SetTextColor(kBlue);
+  tps1->SetLineColor(kBlue);
+  tps1->SetX1NDC(0.72);
+  tps1->SetY1NDC(0.68);
+  tps1->SetX2NDC(0.93);
+  tps1->SetY2NDC(0.89);
+  X1 = tps1->GetX1NDC();
+  Y1 = tps1->GetY1NDC();
+  X2 = tps1->GetX2NDC();
+  Y2 = tps1->GetY2NDC();
   
+  ResponsePuppi_deta->SetLineWidth(2);
+  ResponsePuppi_deta->SetLineColor(kRed);
+  ResponsePuppi_deta->Draw("hist");
+  
+  gPad->Update();
+  tps2 = (TPaveStats*) ResponsePuppi_deta->FindObject("stats");
+  tps2->SetTextColor(kRed);
+  tps2->SetLineColor(kRed);
+  tps2->SetX1NDC(X1);
+  tps2->SetX2NDC(X2);
+  tps2->SetY1NDC(Y1-(Y2-Y1));
+  tps2->SetY2NDC(Y1);
+
+  ResponseReco_deta->GetYaxis()->SetRangeUser(0.001,max(ResponseReco_deta->GetMaximum(),ResponsePuppi_deta->GetMaximum())*1.25);
+
+  ResponseReco_deta->Draw("hist");
+  ResponsePuppi_deta->SetLineStyle(7);
+  ResponsePuppi_deta->Draw("hist same");
+
+  tps1->SetFillStyle(0);
+  tps2->SetFillStyle(0);
+
+  tps1->Draw("same");
+  tps2->Draw("same");
+
+  legend->AddEntry(ResponseReco_deta,"CHS jets","l");
+  legend->AddEntry(ResponsePuppi_deta,"Puppi jets","l");
+
+  tex->Draw("same");
+  tex2->Draw("same");
+  tex3->Draw("same");
+  legend->Draw("same");
+
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_deta.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_deta.png").c_str(),"png");
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_deta.root").c_str(),"root");
+
+  cCanvas->SetLogy();
+
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_deta_log.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_deta_log.png").c_str(),"png");
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_deta_log.root").c_str(),"root");
+  cCanvas->SetLogy(0);
+  gPad->Update();
+
+
+  legend->Clear();
+
+  //
+  ResponseReco_mjj->SetLineWidth(2);
+  ResponseReco_mjj->SetLineColor(kBlue);
+  ResponseReco_mjj->GetXaxis()->SetTitle("(M_{jj}^{Reco}-M_{jj}^{Gen})/M_{jj}^{Gen}");
+  ResponseReco_mjj->GetYaxis()->SetTitle("Entries");
+  ResponseReco_mjj->Draw("hist");
+
+  gPad->Update();
+  tps1 = (TPaveStats*) ResponseReco_mjj->FindObject("stats");
+  tps1->SetTextColor(kBlue);
+  tps1->SetLineColor(kBlue);
+  tps1->SetX1NDC(0.72);
+  tps1->SetY1NDC(0.68);
+  tps1->SetX2NDC(0.93);
+  tps1->SetY2NDC(0.89);
+  X1 = tps1->GetX1NDC();
+  Y1 = tps1->GetY1NDC();
+  X2 = tps1->GetX2NDC();
+  Y2 = tps1->GetY2NDC();
+  
+  ResponsePuppi_mjj->SetLineWidth(2);
+  ResponsePuppi_mjj->SetLineColor(kRed);
+  ResponsePuppi_mjj->Draw("hist");
+  
+  gPad->Update();
+  tps2 = (TPaveStats*) ResponsePuppi_mjj->FindObject("stats");
+  tps2->SetTextColor(kRed);
+  tps2->SetLineColor(kRed);
+  tps2->SetX1NDC(X1);
+  tps2->SetX2NDC(X2);
+  tps2->SetY1NDC(Y1-(Y2-Y1));
+  tps2->SetY2NDC(Y1);
+
+  ResponseReco_mjj->GetYaxis()->SetRangeUser(0.001,max(ResponseReco_mjj->GetMaximum(),ResponsePuppi_mjj->GetMaximum())*1.25);
+
+  ResponseReco_mjj->Draw("hist");
+  ResponsePuppi_mjj->SetLineStyle(7);
+  ResponsePuppi_mjj->Draw("hist same");
+
+  tps1->SetFillStyle(0);
+  tps2->SetFillStyle(0);
+
+  tps1->Draw("same");
+  tps2->Draw("same");
+
+  legend->AddEntry(ResponseReco_mjj,"CHS jets","l");
+  legend->AddEntry(ResponsePuppi_mjj,"Puppi jets","l");
+
+  tex->Draw("same");
+  tex2->Draw("same");
+  tex3->Draw("same");
+  legend->Draw("same");
+
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_mjj.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_mjj.png").c_str(),"png");
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_mjj.root").c_str(),"root");
+
+  cCanvas->SetLogy();
+
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_mjj_log.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_mjj_log.png").c_str(),"png");
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_mjj_log.root").c_str(),"root");
+  cCanvas->SetLogy(0);
+  gPad->Update();
+
+
+  legend->Clear();
+
+
+
   return 0;
     
 }

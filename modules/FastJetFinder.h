@@ -59,6 +59,7 @@ private:
   Int_t  fAreaAlgorithm;
   Bool_t fComputeRho;
   Bool_t fComputeRhoGrid;
+  Bool_t fComputeRhoGridParticles;
 
   // -- ghost based areas --
   Double_t fGhostEtaMax;

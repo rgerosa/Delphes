@@ -22,7 +22,7 @@
 typedef std::pair<TH1F*,TH1F*> histoPair ;
 typedef std::pair<std::string, histoPair > mapElement;
 
-float deltaPhi (float a, float b){
+float DeltaPhi (float a, float b){
   if(fabs(a-b) > TMath::Pi()) return 2*TMath::Pi()-fabs(a-b);
   else return fabs(a-b);
 
@@ -597,7 +597,7 @@ int main (int argc, char** argv){
       float minDr = 9999 ;
       int ijetMatched = -1;
       for(int j = 0; j < GenJets_1->GetEntries(); j++){
-        float dR = TMath::Sqrt(pow(fabs(dynamic_cast<Jet*>(Jets_1->At(i))->Eta+dynamic_cast<Jet*>(GenJets_1->At(j))->Eta),2)+pow(deltaPhi(dynamic_cast<Jet*>(Jets_1->At(i))->Phi,dynamic_cast<Jet*>(GenJets_1->At(j))->Phi),2));
+        float dR = TMath::Sqrt(pow(fabs(dynamic_cast<Jet*>(Jets_1->At(i))->Eta+dynamic_cast<Jet*>(GenJets_1->At(j))->Eta),2)+pow(DeltaPhi(dynamic_cast<Jet*>(Jets_1->At(i))->Phi,dynamic_cast<Jet*>(GenJets_1->At(j))->Phi),2));
         if(dR < 0.3 and dR < minDr){
           minDr = dR ;      
           ijetMatched = j;
@@ -653,7 +653,7 @@ int main (int argc, char** argv){
       float minDr = 9999 ;
       int ijetMatched = -1;
       for(int j = 0; j < GenJets_2->GetEntries(); j++){
-        float dR = TMath::Sqrt(pow(fabs(dynamic_cast<Jet*>(Jets_2->At(i))->Eta+dynamic_cast<Jet*>(GenJets_2->At(j))->Eta),2)+pow(deltaPhi(dynamic_cast<Jet*>(Jets_2->At(i))->Phi,dynamic_cast<Jet*>(GenJets_2->At(j))->Phi),2));
+        float dR = TMath::Sqrt(pow(fabs(dynamic_cast<Jet*>(Jets_2->At(i))->Eta+dynamic_cast<Jet*>(GenJets_2->At(j))->Eta),2)+pow(DeltaPhi(dynamic_cast<Jet*>(Jets_2->At(i))->Phi,dynamic_cast<Jet*>(GenJets_2->At(j))->Phi),2));
         if(dR < 0.3 and dR < minDr){
           minDr = dR ;      
           ijetMatched = j;
@@ -726,7 +726,7 @@ int main (int argc, char** argv){
       float minDr = 9999 ;
       int ijetMatched = -1;
       for(int j = 0; j < GenJets_1->GetEntries(); j++){
-        float dR = TMath::Sqrt(pow(fabs(jetVector.Eta()-dynamic_cast<Jet*>(GenJets_1->At(j))->Eta),2)+pow(deltaPhi(jetVector.Phi(),dynamic_cast<Jet*>(GenJets_1->At(j))->Phi),2));
+        float dR = TMath::Sqrt(pow(fabs(jetVector.Eta()-dynamic_cast<Jet*>(GenJets_1->At(j))->Eta),2)+pow(DeltaPhi(jetVector.Phi(),dynamic_cast<Jet*>(GenJets_1->At(j))->Phi),2));
         if(dR < 0.3 and dR < minDr){
           minDr = dR ;      
           ijetMatched = j;
@@ -798,7 +798,7 @@ int main (int argc, char** argv){
       float minDr = 9999 ;
       int ijetMatched = -1;
       for(int j = 0; j < GenJets_2->GetEntries(); j++){
-        float dR = TMath::Sqrt(pow(fabs(jetVector.Eta()-dynamic_cast<Jet*>(GenJets_2->At(j))->Eta),2)+pow(deltaPhi(jetVector.Phi(),dynamic_cast<Jet*>(GenJets_2->At(j))->Phi),2));
+        float dR = TMath::Sqrt(pow(fabs(jetVector.Eta()-dynamic_cast<Jet*>(GenJets_2->At(j))->Eta),2)+pow(DeltaPhi(jetVector.Phi(),dynamic_cast<Jet*>(GenJets_2->At(j))->Phi),2));
         if(dR < 0.3 and dR < minDr){
           minDr = dR ;      
           ijetMatched = j;
