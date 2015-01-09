@@ -1164,9 +1164,11 @@ int main (int argc, char *argv[]){
 	
       // sorting leptons in pt
       sort(leptonvec.begin(),leptonvec.end(),leptonDescendingPt());
-	
 
-      for(unsigned int i =0; i<leptonvec.size(); i++){
+      unsigned int nLeptonvec = leptonvec.size();
+      if( (unsigned) nlep < nLeptonvec ) nLeptonvec = nlep;	
+
+      for(unsigned int i =0; i<nLeptonvec; i++){
 	pt_tmp[i] = leptonvec.at(i).lpt;
 	eta_tmp[i] = leptonvec.at(i).leta;
 	phi_tmp[i] = leptonvec.at(i).lphi;
