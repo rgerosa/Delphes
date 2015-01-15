@@ -31,6 +31,7 @@
 #pragma link C++ class Event+;
 #pragma link C++ class LHCOEvent+;
 #pragma link C++ class LHEFEvent+;
+#pragma link C++ class LHEFrwgt+;
 #pragma link C++ class HepMCEvent+;
 #pragma link C++ class GenParticle+;
 #pragma link C++ class LHEParticle+;

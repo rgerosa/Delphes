@@ -967,8 +967,16 @@ struct WeightInfo : public TagBase {
     getattr("muf", muf);
     getattr("pdf", pdf);
     getattr("pdf2", pdf2);
-    if ( isrwgt )
+    if ( isrwgt ) {
       getattr("id", name);
+      int opnum; float opval;
+      std::istringstream f(tag.contents);
+      std::string line;    
+      while (std::getline(f, line)) {
+	sscanf(line.c_str(), "set param_card anoinputs %d %e", &opnum, &opval);
+	operators.push_back(std::make_pair(opnum, opval));	
+      }
+    }
     else
       getattr("name",  name);
   }
@@ -1028,6 +1036,9 @@ struct WeightInfo : public TagBase {
    * different from pdf.
    */
   long pdf2;
+
+  std::vector< std::pair<int, double> > operators;
+
 
 };
 
@@ -1952,11 +1963,12 @@ public:
 	double w = 0.0;
 	int i = 0;
 	std::istringstream iss(tag.contents);
-	while ( iss >> w )
+	while ( iss >> w ) {
 	  if ( ++i < int(weights.size()) )
-	    weights[i].first = w;
+	    weights[i].first = w;	
 	  else
 	    weights.push_back(std::make_pair(w, (WeightInfo*)(0)));
+	}
       }
       if ( tag.name == "weight" ) {
 	namedweights.push_back(Weight(tag));
@@ -2464,6 +2476,7 @@ private:
 
     bool readingHeader = false;
     bool readingInit = false;
+    bool readingWgts = false;
 
     // Make sure we are reading a LHEF file:
     getline();
@@ -2504,6 +2517,15 @@ private:
 	// We are in the process of reading the header block. Dump the
 	// line to haderBlock.
 	headerBlock += currentLine + "\n";
+	if ( currentFind("</initrwgt>") ) {
+	  readingWgts = false;
+	  weightBlock += currentLine + "\n";
+	} else if ( readingWgts ) {
+	  weightBlock += currentLine + "\n";
+	} else if ( currentFind("<initrwgt>") ) {
+	  readingWgts = true;
+	  weightBlock = currentLine + "\n";
+	}
       }
       else if ( readingInit ) {
 	// Here we found a comment line. Dump it to initComments.
@@ -2517,13 +2539,17 @@ private:
     if ( !currentFind("</init>") )
       	throw std::runtime_error("Found incomplete init tag in "
 				 "Les Houches file.");
+    initComments += weightBlock;
     initComments += currentLine + "\n";
+
     std::vector<XMLTag*> tags = XMLTag::findXMLTags(initComments);
-    for ( int i = 0, N = tags.size(); i < N; ++i )
+    
+    for ( int i = 0, N = tags.size(); i < N; ++i ) {
       if ( tags[i]->name == "init" ) {
-	heprup = HEPRUP(*tags[i], version);
-	break;
+      	heprup = HEPRUP(*tags[i], version);
+      	break;
       }
+    }
     XMLTag::deleteAll(tags);
  
   }
@@ -2634,6 +2660,7 @@ public:
    * All lines from the header block.
    */
   std::string headerBlock;
+  std::string weightBlock;
 
   /**
    * The standard init information.
