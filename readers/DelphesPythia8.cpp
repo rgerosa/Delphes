@@ -106,6 +106,7 @@ int main(int argc, char *argv[]){
 
   // parsing input parameters
   ExRootTreeWriter *treeWriter = 0;
+  ExRootTreeWriter *wgtTreeWriter = 0;
   try{
 
     inputFile  = argv[2]; // input file name for LHE
@@ -119,6 +120,7 @@ int main(int argc, char *argv[]){
 
     //--- create output tree ---
     treeWriter = new ExRootTreeWriter(outputFile, "Delphes");
+    wgtTreeWriter = new ExRootTreeWriter(outputFile, "Weights");
 
     // Mjj cut set to zero as default, starting event and number of events
     std::string sSeed = "0";
@@ -138,6 +140,8 @@ int main(int argc, char *argv[]){
     ExRootTreeWriter *treeHepMC = new ExRootTreeWriter();
     ExRootTreeBranch *branchEventHEPMC = treeHepMC->NewBranch("Event",HepMCEvent::Class());
     ExRootTreeBranch *branchEventLHE   = treeWriter->NewBranch("LHEFEvent", LHEFEvent::Class());
+
+    ExRootTreeBranch *branchLHEFrwgt   = wgtTreeWriter->NewBranch("LHEFrwgt", LHEFrwgt::Class());
 
 
     //----- Delphes init ----- --> Card reader       
@@ -205,13 +209,48 @@ int main(int argc, char *argv[]){
     std::ifstream InputLHE (inputFile.c_str(), ios::in); // read the input LHE file                                                                                        
     LHEF::Reader Reader (InputLHE) ;
 
+    LHEFrwgt* lheWgt = 0;
+    std::istringstream headerBlock(Reader.headerBlock);
+    std::string line;
+    bool readingAnoinputs = false;
+    bool foundAnoinputs = false;
+    while (std::getline(headerBlock, line)) {
+      if (readingAnoinputs) {
+	int opnum; float opval;
+	if (sscanf(line.c_str(), "%d %e", &opnum, &opval)) {
+	  lheWgt->opNum.push_back(opnum);
+	  lheWgt->opVal.push_back(opval);
+	  foundAnoinputs = true;
+	} else
+	  break;
+      } else if (line.find("Block anoinputs") != std::string::npos) {
+	lheWgt = static_cast<LHEFrwgt *>(branchLHEFrwgt->NewEntry());
+	readingAnoinputs = true;
+      }      
+    }    
+    wgtTreeWriter->Fill();
+    lheWgt->opNum.clear();
+    lheWgt->opVal.clear();
+
+    if (foundAnoinputs) {
+      for (uint iwgt = 0; iwgt < Reader.heprup.weightinfo.size(); iwgt++) {
+	for (uint ip = 0; ip < Reader.heprup.weightinfo[iwgt].operators.size(); ip++) {
+	  lheWgt->opNum.push_back(Reader.heprup.weightinfo[iwgt].operators[ip].first);
+	  lheWgt->opVal.push_back(Reader.heprup.weightinfo[iwgt].operators[ip].second);
+	}
+	wgtTreeWriter->Fill();
+	lheWgt->opNum.clear();
+	lheWgt->opVal.clear();	
+      }
+    }
+
     while (Reader.readEvent ()){
      if( startCounter < startEvent ) {
        startCounter++;
        continue;
      }
      if(eventCounter >= nEvent && nEvent != -1) break;                  
-      if(LHEEventPreselection(Reader,Mjj_cut,skimFullyHadronic,factory,branchEventLHE,LHEparticlesArray)){  // take only interesting events
+     if(LHEEventPreselection(Reader,Mjj_cut,skimFullyHadronic,factory,branchEventLHE,LHEparticlesArray)){  // take only interesting events
 	  if(!pythia->next()){
 	    //--- If failure because reached end of file then exit event loop
 	    if (pythia->info.atEndOfFile()){
@@ -257,6 +296,8 @@ int main(int argc, char *argv[]){
         
     modularDelphes->FinishTask();
     treeWriter->Write();
+    if (foundAnoinputs)
+      wgtTreeWriter->Write();
     
     std::cout << std::endl <<  "** Exiting..." << std::endl;
 
@@ -268,6 +309,7 @@ int main(int argc, char *argv[]){
   
   catch(runtime_error &e){
     if(treeWriter) delete treeWriter;
+    if(wgtTreeWriter) delete wgtTreeWriter;
     if(outputFile) delete outputFile;
     std::cerr << "** ERROR: " << e.what() << std::endl;
     return 1;
@@ -278,7 +320,7 @@ int main(int argc, char *argv[]){
 
 // *****************************************************************************************************
 bool LHEEventPreselection(const LHEF::Reader & reader, const float & Mjj_cut, const int & SkimFullyHadronic,  DelphesFactory *factory, 
-                          ExRootTreeBranch* branch, TObjArray* LHEparticlesArray){
+                          ExRootTreeBranch* branch, TObjArray* LHEparticlesArray) { //, ExRootTreeBranch* wgtbranch /*= NULL*/){
 
   if ( reader.outsideBlock.length ()) std::cout << reader.outsideBlock; 
 
@@ -337,6 +379,12 @@ bool LHEEventPreselection(const LHEF::Reader & reader, const float & Mjj_cut, co
   lheEvt->ScalePDF  = reader.hepeup.SCALUP ;
   lheEvt->AlphaQED  = reader.hepeup.AQEDUP ;
   lheEvt->AlphaQCD  = reader.hepeup.AQCDUP ;
+
+  vector<double> weights_(reader.hepeup.weights.size());
+  for (uint wgt_idx=0; wgt_idx<weights_.size(); wgt_idx++) {
+    weights_[wgt_idx] = reader.hepeup.weights[wgt_idx].first;
+  }
+  lheEvt->lheWeights = weights_;
   
 
   for (size_t iPart = 0 ; iPart < reader.hepeup.IDUP.size (); ++iPart){

@@ -51,6 +51,18 @@ class LHCOEvent: public Event{
 
 //---------------------------------------------------------------------------
 
+class LHEFrwgt : public TObject {
+  
+ public:
+  
+  std::vector<int> opNum;
+  std::vector<double> opVal;
+  ClassDef(LHEFrwgt, 1)
+
+};
+
+//---------------------------------------------------------------------------
+
 class LHEFEvent: public Event {
   
   public:
@@ -60,8 +72,8 @@ class LHEFEvent: public Event {
   Float_t ScalePDF; // scale in GeV used in the calculation of the PDFs in the event | hepup.SCALUP
   Float_t AlphaQED; // value of the QED coupling used in the event | hepup.AQEDUP
   Float_t AlphaQCD; // value of the QCD coupling used in the event | hepup.AQCDUP
-
-  ClassDef(LHEFEvent, 2)
+  std::vector<Double_t> lheWeights;
+  ClassDef(LHEFEvent, 3)
 };
 
 //---------------------------------------------------------------------------
