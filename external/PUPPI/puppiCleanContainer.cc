@@ -292,11 +292,10 @@ float puppiCleanContainer::var_within_R(const int & pPupId, const vector<fastjet
     if(pDPhi > 2.*3.14159265-pDPhi) pDPhi = 2.*3.14159265-pDPhi;
     double pDR = sqrt(pDEta*pDEta+pDPhi*pDPhi);
 
-    if(pDR < 0.001) continue;
-    if(pDR < 0.01)  continue;//pDR = 0.01;
+    if(pDR < 0.0001) continue;
     if(pDR == 0)    continue;
 
-    if(pPupId == 0) var += (near_particles[iPart].pt()/pDR/pDR);
+    if(pPupId == 0) var += (near_particles[iPart].pt()/(pDR*pDR));
     if(pPupId == 1) var += near_particles[iPart].pt();
     if(pPupId == 2) var += (1./pDR)*(1./pDR);
     if(pPupId == 3) var += (1./pDR)*(1./pDR);

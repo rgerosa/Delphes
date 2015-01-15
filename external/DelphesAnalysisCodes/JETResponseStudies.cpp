@@ -7,22 +7,23 @@
 #include "TCanvas.h"
 #include "TTree.h"
 #include "TChain.h"
-#include "TClonesArray.h"
 #include "TH1F.h"
+#include "TH2F.h"
 #include "TROOT.h"
 #include "TStyle.h"
 #include "TLatex.h"
 #include "TLegend.h"
 #include "TPaveStats.h"
 #include "TLorentzVector.h"
-#include "TH2F.h"
 #include "TGraphAsymmErrors.h"
+#include "TClonesArray.h"
 
 #include "classes/DelphesClasses.h"
 
-#define etaBinCut    2.5
-#define matchingCone 0.3
-#define ptBinCut     120
+#define etaBinCut_1   2.5
+#define etaBinCut_2   3.0
+#define matchingCone  0.3
+#define ptBinCut      120
 #define leptonIsoThreshold 0.5
 
 using namespace std;
@@ -76,7 +77,7 @@ int main (int argc, char** argv){
     PU = atof(argv[5]);
 
 
-  // histogram to fill on the met
+  // histogram to fill : basic jet
   TH1F* leadingJetPt  = new TH1F ("leadingJetPt","",35,0,500);
   TH1F* leadingJetEta = new TH1F ("leadingJetEta","",35,-5,5);
 
@@ -101,6 +102,8 @@ int main (int argc, char** argv){
   trailingPuppiJetPt->Sumw2();
   trailingPuppiJetEta->Sumw2();
 
+  // histogram to fill : numerator efficiency
+
   TH1F* NumeratorReco_vsEta  = new TH1F ("NumeratorReco_vsEta","",35,-5,5);
   TH1F* NumeratorPuppi_vsEta  = new TH1F ("NumeratorPuppi_vsEta","",35,-5,5);
 
@@ -113,29 +116,41 @@ int main (int argc, char** argv){
   NumeratorReco_vsEta_purity->Sumw2();
   NumeratorPuppi_vsEta_purity->Sumw2();
 
-  TH1F* NumeratorReco_vsPt_central   = new TH1F ("NumeratorReco_vsPt_central","",35,jetPtThreshold,500);
-  TH1F* NumeratorPuppi_vsPt_central  = new TH1F ("NumeratorPuppi_vsPt_central","",35,jetPtThreshold,500);
+  TH1F* NumeratorReco_vsPt_central   = new TH1F ("NumeratorReco_vsPt_central","",30,jetPtThreshold,500);
+  TH1F* NumeratorPuppi_vsPt_central  = new TH1F ("NumeratorPuppi_vsPt_central","",30,jetPtThreshold,500);
 
   NumeratorReco_vsPt_central->Sumw2();
   NumeratorPuppi_vsPt_central->Sumw2();
 
-  TH1F* NumeratorReco_vsPt_central_purity   = new TH1F ("NumeratorReco_vsPt_central_purity","",35,jetPtThreshold,500);
-  TH1F* NumeratorPuppi_vsPt_central_purity  = new TH1F ("NumeratorPuppi_vsPt_central_purity","",35,jetPtThreshold,500);
+  TH1F* NumeratorReco_vsPt_central_purity   = new TH1F ("NumeratorReco_vsPt_central_purity","",30,jetPtThreshold,500);
+  TH1F* NumeratorPuppi_vsPt_central_purity  = new TH1F ("NumeratorPuppi_vsPt_central_purity","",30,jetPtThreshold,500);
 
   NumeratorReco_vsPt_central_purity->Sumw2();
   NumeratorPuppi_vsPt_central_purity->Sumw2();
 
-  TH1F* NumeratorReco_vsPt_forward   = new TH1F ("NumeratorReco_vsPt_forward","",35,jetPtThreshold,500);
-  TH1F* NumeratorPuppi_vsPt_forward  = new TH1F ("NumeratorPuppi_vsPt_forward","",35,jetPtThreshold,500);
+  TH1F* NumeratorReco_vsPt_forward_1   = new TH1F ("NumeratorReco_vsPt_forward_1","",30,jetPtThreshold,500);
+  TH1F* NumeratorPuppi_vsPt_forward_1  = new TH1F ("NumeratorPuppi_vsPt_forward_1","",30,jetPtThreshold,500);
 
-  NumeratorReco_vsPt_forward->Sumw2();
-  NumeratorPuppi_vsPt_forward->Sumw2();
+  NumeratorReco_vsPt_forward_1->Sumw2();
+  NumeratorPuppi_vsPt_forward_1->Sumw2();
 
-  TH1F* NumeratorReco_vsPt_forward_purity   = new TH1F ("NumeratorReco_vsPt_forward_purity","",35,jetPtThreshold,500);
-  TH1F* NumeratorPuppi_vsPt_forward_purity  = new TH1F ("NumeratorPuppi_vsPt_forward_purity","",35,jetPtThreshold,500);
+  TH1F* NumeratorReco_vsPt_forward_2   = new TH1F ("NumeratorReco_vsPt_forward_2","",30,jetPtThreshold,500);
+  TH1F* NumeratorPuppi_vsPt_forward_2  = new TH1F ("NumeratorPuppi_vsPt_forward_2","",30,jetPtThreshold,500);
 
-  NumeratorReco_vsPt_forward_purity->Sumw2();
-  NumeratorPuppi_vsPt_forward_purity->Sumw2();
+  NumeratorReco_vsPt_forward_2->Sumw2();
+  NumeratorPuppi_vsPt_forward_2->Sumw2();
+
+  TH1F* NumeratorReco_vsPt_forward_purity_1   = new TH1F ("NumeratorReco_vsPt_forward_purity_1","",30,jetPtThreshold,500);
+  TH1F* NumeratorPuppi_vsPt_forward_purity_1  = new TH1F ("NumeratorPuppi_vsPt_forward_purity_1","",30,jetPtThreshold,500);
+
+  NumeratorReco_vsPt_forward_purity_1->Sumw2();
+  NumeratorPuppi_vsPt_forward_purity_1->Sumw2();
+
+  TH1F* NumeratorReco_vsPt_forward_purity_2   = new TH1F ("NumeratorReco_vsPt_forward_purity_2","",30,jetPtThreshold,500);
+  TH1F* NumeratorPuppi_vsPt_forward_purity_2  = new TH1F ("NumeratorPuppi_vsPt_forward_purity_2","",30,jetPtThreshold,500);
+
+  NumeratorReco_vsPt_forward_purity_2->Sumw2();
+  NumeratorPuppi_vsPt_forward_purity_2->Sumw2();
 
   TH1F* NumeratorReco_vsPU_central   = new TH1F ("NumeratorReco_vsPU_central","",40,PU-40,PU+40);
   TH1F* NumeratorPuppi_vsPU_central  = new TH1F ("NumeratorPuppi_vsPU_central","",40,PU-40,PU+40);
@@ -149,17 +164,31 @@ int main (int argc, char** argv){
   NumeratorReco_vsPU_central_purity->Sumw2();
   NumeratorPuppi_vsPU_central_purity->Sumw2();
 
-  TH1F* NumeratorReco_vsPU_forward   = new TH1F ("NumeratorReco_vsPU_forward","",40,PU-40,PU+40);
-  TH1F* NumeratorPuppi_vsPU_forward  = new TH1F ("NumeratorPuppi_vsPU_forward","",40,PU-40,PU+40);
+  TH1F* NumeratorReco_vsPU_forward_1   = new TH1F ("NumeratorReco_vsPU_forward_1","",40,PU-40,PU+40);
+  TH1F* NumeratorPuppi_vsPU_forward_1  = new TH1F ("NumeratorPuppi_vsPU_forward_1","",40,PU-40,PU+40);
 
-  NumeratorReco_vsPU_forward->Sumw2();
-  NumeratorPuppi_vsPU_forward->Sumw2();
+  NumeratorReco_vsPU_forward_1->Sumw2();
+  NumeratorPuppi_vsPU_forward_1->Sumw2();
 
-  TH1F* NumeratorReco_vsPU_forward_purity   = new TH1F ("NumeratorReco_vsPU_forward_purity","",40,PU-40,PU+40);
-  TH1F* NumeratorPuppi_vsPU_forward_purity  = new TH1F ("NumeratorPuppi_vsPU_forward_purity","",40,PU-40,PU+40);
+  TH1F* NumeratorReco_vsPU_forward_2   = new TH1F ("NumeratorReco_vsPU_forward_2","",40,PU-40,PU+40);
+  TH1F* NumeratorPuppi_vsPU_forward_2  = new TH1F ("NumeratorPuppi_vsPU_forward_2","",40,PU-40,PU+40);
 
-  NumeratorReco_vsPU_forward_purity->Sumw2();
-  NumeratorPuppi_vsPU_forward_purity->Sumw2();
+  NumeratorReco_vsPU_forward_2->Sumw2();
+  NumeratorPuppi_vsPU_forward_2->Sumw2();
+
+  TH1F* NumeratorReco_vsPU_forward_purity_1   = new TH1F ("NumeratorReco_vsPU_forward_purity_1","",40,PU-40,PU+40);
+  TH1F* NumeratorPuppi_vsPU_forward_purity_1  = new TH1F ("NumeratorPuppi_vsPU_forward_purity_1","",40,PU-40,PU+40);
+
+  NumeratorReco_vsPU_forward_purity_1->Sumw2();
+  NumeratorPuppi_vsPU_forward_purity_1->Sumw2();
+
+  TH1F* NumeratorReco_vsPU_forward_purity_2   = new TH1F ("NumeratorReco_vsPU_forward_purity_2","",40,PU-40,PU+40);
+  TH1F* NumeratorPuppi_vsPU_forward_purity_2  = new TH1F ("NumeratorPuppi_vsPU_forward_purity_2","",40,PU-40,PU+40);
+
+  NumeratorReco_vsPU_forward_purity_2->Sumw2();
+  NumeratorPuppi_vsPU_forward_purity_2->Sumw2();
+
+  // efficiency denominator
 
   TH1F* DenominatorReco_vsEta  = new TH1F ("DenominatorReco_vsEta","",35,-5,5);
   TH1F* DenominatorPuppi_vsEta  = new TH1F ("DenominatorPuppi_vsEta","",35,-5,5);
@@ -173,29 +202,43 @@ int main (int argc, char** argv){
   DenominatorReco_vsEta_purity->Sumw2();
   DenominatorPuppi_vsEta_purity->Sumw2();
 
-  TH1F* DenominatorReco_vsPt_central   = new TH1F ("DenominatorReco_vsPt_central","",35,jetPtThreshold,500);
-  TH1F* DenominatorPuppi_vsPt_central  = new TH1F ("DenominatorPuppi_vsPt_central","",35,jetPtThreshold,500);
+  TH1F* DenominatorReco_vsPt_central   = new TH1F ("DenominatorReco_vsPt_central","",30,jetPtThreshold,500);
+  TH1F* DenominatorPuppi_vsPt_central  = new TH1F ("DenominatorPuppi_vsPt_central","",30,jetPtThreshold,500);
 
   DenominatorReco_vsPt_central->Sumw2();
   DenominatorPuppi_vsPt_central->Sumw2();
 
-  TH1F* DenominatorReco_vsPt_central_purity   = new TH1F ("DenominatorReco_vsPt_central_purity","",35,jetPtThreshold,500);
-  TH1F* DenominatorPuppi_vsPt_central_purity  = new TH1F ("DenominatorPuppi_vsPt_central_purity","",35,jetPtThreshold,500);
+
+  TH1F* DenominatorReco_vsPt_central_purity   = new TH1F ("DenominatorReco_vsPt_central_purity","",30,jetPtThreshold,500);
+  TH1F* DenominatorPuppi_vsPt_central_purity  = new TH1F ("DenominatorPuppi_vsPt_central_purity","",30,jetPtThreshold,500);
 
   DenominatorReco_vsPt_central_purity->Sumw2();
   DenominatorPuppi_vsPt_central_purity->Sumw2();
 
-  TH1F* DenominatorReco_vsPt_forward   = new TH1F ("DenominatorReco_vsPt_forward","",35,jetPtThreshold,500);
-  TH1F* DenominatorPuppi_vsPt_forward  = new TH1F ("DenominatorPuppi_vsPt_forward","",35,jetPtThreshold,500);
+  TH1F* DenominatorReco_vsPt_forward_1   = new TH1F ("DenominatorReco_vsPt_forward_1","",30,jetPtThreshold,500);
+  TH1F* DenominatorPuppi_vsPt_forward_1  = new TH1F ("DenominatorPuppi_vsPt_forward_1","",30,jetPtThreshold,500);
 
-  DenominatorReco_vsPt_forward->Sumw2();
-  DenominatorPuppi_vsPt_forward->Sumw2();
+  DenominatorReco_vsPt_forward_1->Sumw2();
+  DenominatorPuppi_vsPt_forward_1->Sumw2();
 
-  TH1F* DenominatorReco_vsPt_forward_purity   = new TH1F ("DenominatorReco_vsPt_forward_purity","",35,jetPtThreshold,500);
-  TH1F* DenominatorPuppi_vsPt_forward_purity  = new TH1F ("DenominatorPuppi_vsPt_forward_purity","",35,jetPtThreshold,500);
+  TH1F* DenominatorReco_vsPt_forward_2   = new TH1F ("DenominatorReco_vsPt_forward_2","",30,jetPtThreshold,500);
+  TH1F* DenominatorPuppi_vsPt_forward_2  = new TH1F ("DenominatorPuppi_vsPt_forward_2","",30,jetPtThreshold,500);
 
-  DenominatorReco_vsPt_forward_purity->Sumw2();
-  DenominatorPuppi_vsPt_forward_purity->Sumw2();
+  DenominatorReco_vsPt_forward_2->Sumw2();
+  DenominatorPuppi_vsPt_forward_2->Sumw2();
+
+  TH1F* DenominatorReco_vsPt_forward_purity_1   = new TH1F ("DenominatorReco_vsPt_forward_purity_1","",30,jetPtThreshold,500);
+  TH1F* DenominatorPuppi_vsPt_forward_purity_1  = new TH1F ("DenominatorPuppi_vsPt_forward_purity_1","",30,jetPtThreshold,500);
+
+  DenominatorReco_vsPt_forward_purity_1->Sumw2();
+  DenominatorPuppi_vsPt_forward_purity_1->Sumw2();
+
+  TH1F* DenominatorReco_vsPt_forward_purity_2   = new TH1F ("DenominatorReco_vsPt_forward_purity_2","",30,jetPtThreshold,500);
+  TH1F* DenominatorPuppi_vsPt_forward_purity_2  = new TH1F ("DenominatorPuppi_vsPt_forward_purity_2","",30,jetPtThreshold,500);
+
+  DenominatorReco_vsPt_forward_purity_2->Sumw2();
+  DenominatorPuppi_vsPt_forward_purity_2->Sumw2();
+
 
   TH1F* DenominatorReco_vsPU_central   = new TH1F ("DenominatorReco_vsPU_central","",40,PU-40,PU+40);
   TH1F* DenominatorPuppi_vsPU_central  = new TH1F ("DenominatorPuppi_vsPU_central","",40,PU-40,PU+40);
@@ -209,37 +252,59 @@ int main (int argc, char** argv){
   DenominatorReco_vsPU_central_purity->Sumw2();
   DenominatorPuppi_vsPU_central_purity->Sumw2();
 
-  TH1F* DenominatorReco_vsPU_forward   = new TH1F ("DenominatorReco_vsPU_forward","",40,PU-40,PU+40);
-  TH1F* DenominatorPuppi_vsPU_forward  = new TH1F ("DenominatorPuppi_vsPU_forward","",40,PU-40, PU+40);
+  TH1F* DenominatorReco_vsPU_forward_1   = new TH1F ("DenominatorReco_vsPU_forward_1","",40,PU-40,PU+40);
+  TH1F* DenominatorPuppi_vsPU_forward_1  = new TH1F ("DenominatorPuppi_vsPU_forward_1","",40,PU-40, PU+40);
 
-  DenominatorReco_vsPU_forward->Sumw2();
-  DenominatorPuppi_vsPU_forward->Sumw2();
+  DenominatorReco_vsPU_forward_1->Sumw2();
+  DenominatorPuppi_vsPU_forward_1->Sumw2();
 
-  TH1F* DenominatorReco_vsPU_forward_purity   = new TH1F ("DenominatorReco_vsPU_forward_purity","",40,PU-40,PU+40);
-  TH1F* DenominatorPuppi_vsPU_forward_purity  = new TH1F ("DenominatorPuppi_vsPU_forward_purity","",40,PU-40, PU+40);
+  TH1F* DenominatorReco_vsPU_forward_2   = new TH1F ("DenominatorReco_vsPU_forward_2","",40,PU-40,PU+40);
+  TH1F* DenominatorPuppi_vsPU_forward_2  = new TH1F ("DenominatorPuppi_vsPU_forward_2","",40,PU-40, PU+40);
 
-  DenominatorReco_vsPU_forward_purity->Sumw2();
-  DenominatorPuppi_vsPU_forward_purity->Sumw2();
+  DenominatorReco_vsPU_forward_2->Sumw2();
+  DenominatorPuppi_vsPU_forward_2->Sumw2();
 
-  TH1F* ResponseReco_lowPt_central   = new TH1F ("ResponseReco_lowPt_central","",50,-1,1);
-  TH1F* ResponseReco_lowPt_forward   = new TH1F ("ResponseReco_lowPt_forward","",50,-1,1);
-  TH1F* ResponsePuppi_lowPt_central  = new TH1F ("ResponsePuppi_lowPt_central","",50,-1,1);
-  TH1F* ResponsePuppi_lowPt_forward  = new TH1F ("ResponsePuppi_lowPt_forward","",50,-1,1);
+  TH1F* DenominatorReco_vsPU_forward_purity_1   = new TH1F ("DenominatorReco_vsPU_forward_purity_1","",40,PU-40,PU+40);
+  TH1F* DenominatorPuppi_vsPU_forward_purity_1  = new TH1F ("DenominatorPuppi_vsPU_forward_purity_1","",40,PU-40, PU+40);
+
+  DenominatorReco_vsPU_forward_purity_1->Sumw2();
+  DenominatorPuppi_vsPU_forward_purity_1->Sumw2();
+
+  TH1F* DenominatorReco_vsPU_forward_purity_2   = new TH1F ("DenominatorReco_vsPU_forward_purity_2","",40,PU-40,PU+40);
+  TH1F* DenominatorPuppi_vsPU_forward_purity_2  = new TH1F ("DenominatorPuppi_vsPU_forward_purity_2","",40,PU-40, PU+40);
+
+  DenominatorReco_vsPU_forward_purity_2->Sumw2();
+  DenominatorPuppi_vsPU_forward_purity_2->Sumw2();
+
+  // response
+
+  TH1F* ResponseReco_lowPt_central     = new TH1F ("ResponseReco_lowPt_central","",50,-0.6,0.6);
+  TH1F* ResponseReco_lowPt_forward_1   = new TH1F ("ResponseReco_lowPt_forward_1","",50,-0.6,0.6);
+  TH1F* ResponseReco_lowPt_forward_2   = new TH1F ("ResponseReco_lowPt_forward_2","",50,-0.6,0.6);
+  TH1F* ResponsePuppi_lowPt_central    = new TH1F ("ResponsePuppi_lowPt_central","",50,-0.6,0.6);
+  TH1F* ResponsePuppi_lowPt_forward_1  = new TH1F ("ResponsePuppi_lowPt_forward_1","",50,-0.6,0.6);
+  TH1F* ResponsePuppi_lowPt_forward_2  = new TH1F ("ResponsePuppi_lowPt_forward_2","",50,-0.6,0.6);
 
   ResponseReco_lowPt_central->Sumw2();
-  ResponseReco_lowPt_forward->Sumw2();
+  ResponseReco_lowPt_forward_1->Sumw2();
+  ResponseReco_lowPt_forward_2->Sumw2();
   ResponsePuppi_lowPt_central->Sumw2();
-  ResponsePuppi_lowPt_forward->Sumw2();
+  ResponsePuppi_lowPt_forward_1->Sumw2();
+  ResponsePuppi_lowPt_forward_2->Sumw2();
 
-  TH1F* ResponseReco_highPt_central   = new TH1F ("ResponseReco_highPt_central","",50,-1,1);
-  TH1F* ResponseReco_highPt_forward   = new TH1F ("ResponseReco_highPt_forward","",50,-1,1);
-  TH1F* ResponsePuppi_highPt_central  = new TH1F ("ResponsePuppi_highPt_central","",50,-1,1);
-  TH1F* ResponsePuppi_highPt_forward  = new TH1F ("ResponsePuppi_highPt_forward","",50,-1,1);
+  TH1F* ResponseReco_highPt_central     = new TH1F ("ResponseReco_highPt_central","",50,-0.6,0.6);
+  TH1F* ResponseReco_highPt_forward_1   = new TH1F ("ResponseReco_highPt_forward_1","",50,-0.6,0.6);
+  TH1F* ResponseReco_highPt_forward_2   = new TH1F ("ResponseReco_highPt_forward_2","",50,-0.6,0.6);
+  TH1F* ResponsePuppi_highPt_central    = new TH1F ("ResponsePuppi_highPt_central","",50,-0.6,0.6);
+  TH1F* ResponsePuppi_highPt_forward_1  = new TH1F ("ResponsePuppi_highPt_forward_1","",50,-0.6,0.6);
+  TH1F* ResponsePuppi_highPt_forward_2  = new TH1F ("ResponsePuppi_highPt_forward_2","",50,-0.6,0.6);
 
   ResponseReco_highPt_central->Sumw2();
-  ResponseReco_highPt_forward->Sumw2();
+  ResponseReco_highPt_forward_1->Sumw2();
+  ResponseReco_highPt_forward_2->Sumw2();
   ResponsePuppi_highPt_central->Sumw2();
-  ResponsePuppi_highPt_forward->Sumw2();
+  ResponsePuppi_highPt_forward_1->Sumw2();
+  ResponsePuppi_highPt_forward_2->Sumw2();
 
   TH1F* ResponseReco_deta   = new TH1F ("ResponseReco_deta","",50,-0.2,0.2);
   TH1F* ResponsePuppi_deta  = new TH1F ("ResponsePuppi_deta","",50,-0.2,0.2);
@@ -247,8 +312,8 @@ int main (int argc, char** argv){
   ResponseReco_deta->Sumw2();
   ResponsePuppi_deta->Sumw2();
 
-  TH1F* ResponseReco_mjj   = new TH1F ("ResponseReco_mjj","",50,-1,1);
-  TH1F* ResponsePuppi_mjj  = new TH1F ("ResponsePuppi_mjj","",50,-1,1);
+  TH1F* ResponseReco_mjj   = new TH1F ("ResponseReco_mjj","",50,-0.6,0.6);
+  TH1F* ResponsePuppi_mjj  = new TH1F ("ResponsePuppi_mjj","",50,-0.6,0.6);
 
   ResponseReco_mjj->Sumw2();
   ResponsePuppi_mjj->Sumw2();
@@ -439,69 +504,102 @@ int main (int argc, char** argv){
     DenominatorPuppi_vsEta_purity->Fill(cleanedGenJets.at(1)->Eta);
 
     // leading    
-    if(fabs(cleanedJets.at(0)->Eta) < etaBinCut ){       
+    if(fabs(cleanedJets.at(0)->Eta) < etaBinCut_1){       
       DenominatorReco_vsPt_central->Fill(cleanedJets.at(0)->PT);
       DenominatorReco_vsPU_central->Fill(npu->HT);
     }
-    else {
-      DenominatorReco_vsPt_forward->Fill(cleanedJets.at(0)->PT);
-      DenominatorReco_vsPU_forward->Fill(npu->HT);
+    else if(fabs(cleanedJets.at(0)->Eta) >= etaBinCut_1 and fabs(cleanedJets.at(0)->Eta) < etaBinCut_2){
+      DenominatorReco_vsPt_forward_1->Fill(cleanedJets.at(0)->PT);
+      DenominatorReco_vsPU_forward_1->Fill(npu->HT);
     }
-      
-    if(fabs(cleanedPuppiJets.at(0)->Eta) < etaBinCut){       
+    else if(fabs(cleanedJets.at(0)->Eta) >= etaBinCut_2){
+      DenominatorReco_vsPt_forward_2->Fill(cleanedJets.at(0)->PT);
+      DenominatorReco_vsPU_forward_2->Fill(npu->HT);
+    }
+
+    ////////  
+    if(fabs(cleanedPuppiJets.at(0)->Eta) < etaBinCut_1){       
       DenominatorPuppi_vsPt_central->Fill(cleanedPuppiJets.at(0)->PT);
       DenominatorPuppi_vsPU_central->Fill(npu->HT);
     }
-    else{
-      DenominatorPuppi_vsPt_forward->Fill(cleanedPuppiJets.at(0)->PT);
-      DenominatorPuppi_vsPU_forward->Fill(npu->HT);
+    else if(fabs(cleanedPuppiJets.at(0)->Eta) >= etaBinCut_1 and fabs(cleanedPuppiJets.at(0)->Eta) < etaBinCut_2){
+      DenominatorPuppi_vsPt_forward_1->Fill(cleanedPuppiJets.at(0)->PT);
+      DenominatorPuppi_vsPU_forward_1->Fill(npu->HT);
+    }
+    else if(fabs(cleanedPuppiJets.at(0)->Eta) >= etaBinCut_2){
+      DenominatorPuppi_vsPt_forward_2->Fill(cleanedPuppiJets.at(0)->PT);
+      DenominatorPuppi_vsPU_forward_2->Fill(npu->HT);
     }
 
-    if(fabs(cleanedJets.at(1)->Eta) < etaBinCut ) {      
+    /////
+    if(fabs(cleanedJets.at(1)->Eta) < etaBinCut_1) {      
       DenominatorReco_vsPt_central->Fill(cleanedJets.at(1)->PT);
       DenominatorReco_vsPU_central->Fill(npu->HT);
     }
-    else {
-      DenominatorReco_vsPt_forward->Fill(cleanedJets.at(1)->PT);
-      DenominatorReco_vsPU_forward->Fill(npu->HT);
+    else if(fabs(cleanedJets.at(1)->Eta) >= etaBinCut_1 and fabs(cleanedJets.at(1)->Eta) < etaBinCut_2){
+      DenominatorReco_vsPt_forward_1->Fill(cleanedJets.at(1)->PT);
+      DenominatorReco_vsPU_forward_1->Fill(npu->HT);
     }
-    
-    if(fabs(cleanedPuppiJets.at(1)->Eta) < etaBinCut ) {
+    else if(fabs(cleanedJets.at(1)->Eta) >= etaBinCut_2){
+      DenominatorReco_vsPt_forward_2->Fill(cleanedJets.at(1)->PT);
+      DenominatorReco_vsPU_forward_2->Fill(npu->HT);
+    }
+
+    /////
+    if(fabs(cleanedPuppiJets.at(1)->Eta) < etaBinCut_1 ) {
       DenominatorPuppi_vsPt_central->Fill(cleanedPuppiJets.at(1)->PT);
       DenominatorPuppi_vsPU_central->Fill(npu->HT);
     }
-    else {
-      DenominatorPuppi_vsPt_forward->Fill(cleanedPuppiJets.at(1)->PT);
-      DenominatorPuppi_vsPU_forward->Fill(npu->HT);
+    else if(fabs(cleanedPuppiJets.at(1)->Eta) >= etaBinCut_1 and fabs(cleanedPuppiJets.at(1)->Eta) < etaBinCut_2){
+      DenominatorPuppi_vsPt_forward_1->Fill(cleanedPuppiJets.at(1)->PT);
+      DenominatorPuppi_vsPU_forward_1->Fill(npu->HT);
+    }
+    else if(fabs(cleanedPuppiJets.at(1)->Eta) >= etaBinCut_2){
+      DenominatorPuppi_vsPt_forward_2->Fill(cleanedPuppiJets.at(1)->PT);
+      DenominatorPuppi_vsPU_forward_2->Fill(npu->HT);
     }
 
     // leading    
-    if(fabs(cleanedGenJets.at(0)->Eta) < etaBinCut ){       
+    if(fabs(cleanedGenJets.at(0)->Eta) < etaBinCut_1 ){       
       DenominatorReco_vsPt_central_purity->Fill(cleanedGenJets.at(0)->PT);
       DenominatorPuppi_vsPt_central_purity->Fill(cleanedGenJets.at(0)->PT);
       DenominatorPuppi_vsPU_central_purity->Fill(npu->HT);
       DenominatorReco_vsPU_central_purity->Fill(npu->HT);
     }
-    else {
-      DenominatorReco_vsPt_forward_purity->Fill(cleanedGenJets.at(0)->PT);
-      DenominatorPuppi_vsPt_forward_purity->Fill(cleanedGenJets.at(0)->PT);
-      DenominatorPuppi_vsPU_forward_purity->Fill(npu->HT);
-      DenominatorReco_vsPU_forward_purity->Fill(npu->HT);
+    else if(fabs(cleanedGenJets.at(0)->Eta) >= etaBinCut_1 and fabs(cleanedGenJets.at(0)->Eta) < etaBinCut_2){
+      DenominatorReco_vsPt_forward_purity_1->Fill(cleanedGenJets.at(0)->PT);
+      DenominatorPuppi_vsPt_forward_purity_1->Fill(cleanedGenJets.at(0)->PT);
+      DenominatorPuppi_vsPU_forward_purity_1->Fill(npu->HT);
+      DenominatorReco_vsPU_forward_purity_1->Fill(npu->HT);
+    }
+    else if(fabs(cleanedGenJets.at(0)->Eta) >= etaBinCut_2){
+      DenominatorReco_vsPt_forward_purity_2->Fill(cleanedGenJets.at(0)->PT);
+      DenominatorPuppi_vsPt_forward_purity_2->Fill(cleanedGenJets.at(0)->PT);
+      DenominatorPuppi_vsPU_forward_purity_2->Fill(npu->HT);
+      DenominatorReco_vsPU_forward_purity_2->Fill(npu->HT);
     }
     
-    if(fabs(cleanedGenJets.at(1)->Eta) < etaBinCut ) {      
+    // trailing
+    if(fabs(cleanedGenJets.at(1)->Eta) < etaBinCut_1 ){       
       DenominatorReco_vsPt_central_purity->Fill(cleanedGenJets.at(1)->PT);
       DenominatorPuppi_vsPt_central_purity->Fill(cleanedGenJets.at(1)->PT);
       DenominatorPuppi_vsPU_central_purity->Fill(npu->HT);
       DenominatorReco_vsPU_central_purity->Fill(npu->HT);
     }
-    else {
-      DenominatorReco_vsPt_forward_purity->Fill(cleanedGenJets.at(1)->PT);
-      DenominatorPuppi_vsPt_forward_purity->Fill(cleanedGenJets.at(1)->PT);
-      DenominatorPuppi_vsPU_forward_purity->Fill(npu->HT);
-      DenominatorReco_vsPU_forward_purity->Fill(npu->HT);
+    else if(fabs(cleanedGenJets.at(1)->Eta) >= etaBinCut_1 and fabs(cleanedGenJets.at(1)->Eta) < etaBinCut_2){
+      DenominatorReco_vsPt_forward_purity_1->Fill(cleanedGenJets.at(1)->PT);
+      DenominatorPuppi_vsPt_forward_purity_1->Fill(cleanedGenJets.at(1)->PT);
+      DenominatorPuppi_vsPU_forward_purity_1->Fill(npu->HT);
+      DenominatorReco_vsPU_forward_purity_1->Fill(npu->HT);
+    }
+    else if(fabs(cleanedGenJets.at(1)->Eta) >= etaBinCut_2){
+      DenominatorReco_vsPt_forward_purity_2->Fill(cleanedGenJets.at(1)->PT);
+      DenominatorPuppi_vsPt_forward_purity_2->Fill(cleanedGenJets.at(1)->PT);
+      DenominatorPuppi_vsPU_forward_purity_2->Fill(npu->HT);
+      DenominatorReco_vsPU_forward_purity_2->Fill(npu->HT);
     }
 
+    // event loop
     bool recoMatched_1  = false;
     bool recoMatched_2  = false;
 
@@ -524,49 +622,79 @@ int main (int argc, char** argv){
 
 	NumeratorReco_vsEta->Fill(cleanedJets.at(0)->Eta);
  
-        if(cleanedJets.at(0)->PT < ptBinCut and fabs(cleanedJets.at(0)->Eta) < etaBinCut) 
+        if(cleanedJets.at(0)->PT < ptBinCut and fabs(cleanedJets.at(0)->Eta) < etaBinCut_1) {
 	  ResponseReco_lowPt_central->Fill((cleanedJets.at(0)->PT-jet->PT)/jet->PT);	
-        else if(cleanedJets.at(0)->PT < ptBinCut and fabs(cleanedJets.at(0)->Eta) > etaBinCut)
-	  ResponseReco_lowPt_forward->Fill((cleanedJets.at(0)->PT-jet->PT)/jet->PT);       
-        else if(cleanedJets.at(0)->PT >= ptBinCut and fabs(cleanedJets.at(0)->Eta) < etaBinCut)
+	}
+        else if(cleanedJets.at(0)->PT < ptBinCut and fabs(cleanedJets.at(0)->Eta) >= etaBinCut_1 and fabs(cleanedJets.at(0)->Eta) < etaBinCut_2){
+	  ResponseReco_lowPt_forward_1->Fill((cleanedJets.at(0)->PT-jet->PT)/jet->PT);       
+	}
+	else if(cleanedJets.at(0)->PT < ptBinCut and fabs(cleanedJets.at(0)->Eta) >= etaBinCut_2){
+	  ResponseReco_lowPt_forward_2->Fill((cleanedJets.at(0)->PT-jet->PT)/jet->PT);       
+	}
+        else if(cleanedJets.at(0)->PT >= ptBinCut and fabs(cleanedJets.at(0)->Eta) < etaBinCut_1){
 	  ResponseReco_highPt_central->Fill((cleanedJets.at(0)->PT-jet->PT)/jet->PT);
-        else if(cleanedJets.at(0)->PT >= ptBinCut and fabs(cleanedJets.at(0)->Eta) > etaBinCut)
-	  ResponseReco_highPt_forward->Fill((cleanedJets.at(0)->PT-jet->PT)/jet->PT);
+	}
+        else if(cleanedJets.at(0)->PT >= ptBinCut and fabs(cleanedJets.at(0)->Eta) >= etaBinCut_1 and fabs(cleanedJets.at(0)->Eta) < etaBinCut_2){
+	  ResponseReco_highPt_forward_1->Fill((cleanedJets.at(0)->PT-jet->PT)/jet->PT);
+	}
+        else if(cleanedJets.at(0)->PT >= ptBinCut and fabs(cleanedJets.at(0)->Eta) >= etaBinCut_2){
+	  ResponseReco_highPt_forward_2->Fill((cleanedJets.at(0)->PT-jet->PT)/jet->PT);
+	}
 
 
-	if(fabs(cleanedJets.at(0)->Eta) < etaBinCut ){
+	if(fabs(cleanedJets.at(0)->Eta) < etaBinCut_1 ){
 	  NumeratorReco_vsPt_central->Fill(cleanedJets.at(0)->PT);
 	  NumeratorReco_vsPU_central->Fill(npu->HT);
 	}
-	else {
-	  NumeratorReco_vsPt_forward->Fill(cleanedJets.at(0)->PT);
-	  NumeratorReco_vsPU_forward->Fill(npu->HT);
+	else if(fabs(cleanedJets.at(0)->Eta) >= etaBinCut_1 and fabs(cleanedJets.at(0)->Eta) < etaBinCut_2){
+	  NumeratorReco_vsPt_forward_1->Fill(cleanedJets.at(0)->PT);
+	  NumeratorReco_vsPU_forward_1->Fill(npu->HT);
 	}
-      }
+	else if(fabs(cleanedJets.at(0)->Eta) >= etaBinCut_2){
+	  NumeratorReco_vsPt_forward_2->Fill(cleanedJets.at(0)->PT);
+	  NumeratorReco_vsPU_forward_2->Fill(npu->HT);
+	}
+      } 
+	  
       else if(jet->P4().DeltaR(cleanedJets.at(1)->P4()) < matchingCone  and !recoMatched_2){
 
         recoMatched_2 = true;
         matchedGenJet_2 = jet ;
 	NumeratorReco_vsEta->Fill(cleanedJets.at(1)->Eta);
 
-        if(cleanedJets.at(1)->PT < ptBinCut and fabs(cleanedJets.at(1)->Eta) < etaBinCut) 
-	  ResponseReco_lowPt_central->Fill((cleanedJets.at(1)->PT-jet->PT)/jet->PT);
-        else if(cleanedJets.at(1)->PT < ptBinCut and fabs(cleanedJets.at(1)->Eta) > etaBinCut)
-	  ResponseReco_lowPt_forward->Fill((cleanedJets.at(1)->PT-jet->PT)/jet->PT);       
-        else if(cleanedJets.at(1)->PT >= ptBinCut and fabs(cleanedJets.at(1)->Eta) < etaBinCut)
+        if(cleanedJets.at(1)->PT < ptBinCut and fabs(cleanedJets.at(1)->Eta) < etaBinCut_1) {
+	  ResponseReco_lowPt_central->Fill((cleanedJets.at(1)->PT-jet->PT)/jet->PT);	
+	}
+        else if(cleanedJets.at(1)->PT < ptBinCut and fabs(cleanedJets.at(1)->Eta) >= etaBinCut_1 and fabs(cleanedJets.at(1)->Eta) < etaBinCut_2){
+	  ResponseReco_lowPt_forward_1->Fill((cleanedJets.at(1)->PT-jet->PT)/jet->PT);       
+	}
+	else if(cleanedJets.at(1)->PT < ptBinCut and fabs(cleanedJets.at(1)->Eta) >= etaBinCut_2){
+	  ResponseReco_lowPt_forward_2->Fill((cleanedJets.at(1)->PT-jet->PT)/jet->PT);       
+	}
+        else if(cleanedJets.at(1)->PT >= ptBinCut and fabs(cleanedJets.at(1)->Eta) < etaBinCut_1){
 	  ResponseReco_highPt_central->Fill((cleanedJets.at(1)->PT-jet->PT)/jet->PT);
-        else if(cleanedJets.at(1)->PT >= ptBinCut and fabs(cleanedJets.at(1)->Eta) > etaBinCut)
-	  ResponseReco_highPt_forward->Fill((cleanedJets.at(1)->PT-jet->PT)/jet->PT);
+	}
+        else if(cleanedJets.at(1)->PT >= ptBinCut and fabs(cleanedJets.at(1)->Eta) >= etaBinCut_1 and fabs(cleanedJets.at(1)->Eta) < etaBinCut_2){
+	  ResponseReco_highPt_forward_1->Fill((cleanedJets.at(1)->PT-jet->PT)/jet->PT);
+	}
+        else if(cleanedJets.at(1)->PT >= ptBinCut and fabs(cleanedJets.at(1)->Eta) >= etaBinCut_2){
+	  ResponseReco_highPt_forward_2->Fill((cleanedJets.at(1)->PT-jet->PT)/jet->PT);
+	}
 
-	if(fabs(cleanedJets.at(1)->Eta) < etaBinCut ){
+
+	if(fabs(cleanedJets.at(1)->Eta) < etaBinCut_1 ){
 	  NumeratorReco_vsPt_central->Fill(cleanedJets.at(1)->PT);
 	  NumeratorReco_vsPU_central->Fill(npu->HT);
 	}
-	else {
-	  NumeratorReco_vsPt_forward->Fill(cleanedJets.at(1)->PT);
-	  NumeratorReco_vsPU_forward->Fill(npu->HT);
+	else if(fabs(cleanedJets.at(1)->Eta) >= etaBinCut_1 and fabs(cleanedJets.at(1)->Eta) < etaBinCut_2){
+	  NumeratorReco_vsPt_forward_1->Fill(cleanedJets.at(1)->PT);
+	  NumeratorReco_vsPU_forward_1->Fill(npu->HT);
 	}
-      }
+	else if(fabs(cleanedJets.at(1)->Eta) >= etaBinCut_2){
+	  NumeratorReco_vsPt_forward_2->Fill(cleanedJets.at(1)->PT);
+	  NumeratorReco_vsPU_forward_2->Fill(npu->HT);
+	}
+      }	  
 
       if(jet->P4().DeltaR(cleanedPuppiJets.at(0)->P4()) < matchingCone and !puppiMatched_1 ){ // positive match with leading jet
 
@@ -575,23 +703,38 @@ int main (int argc, char** argv){
 
 	NumeratorPuppi_vsEta->Fill(cleanedPuppiJets.at(0)->Eta);
 
-        if(cleanedPuppiJets.at(0)->PT < ptBinCut and fabs(cleanedPuppiJets.at(0)->Eta) < etaBinCut) 
-	  ResponsePuppi_lowPt_central->Fill((cleanedPuppiJets.at(0)->PT-jet->PT)/jet->PT);
-        else if(cleanedPuppiJets.at(0)->PT < ptBinCut and fabs(cleanedPuppiJets.at(0)->Eta) > etaBinCut)
-	  ResponsePuppi_lowPt_forward->Fill((cleanedPuppiJets.at(0)->PT-jet->PT)/jet->PT);       
-        else if(cleanedPuppiJets.at(0)->PT >= ptBinCut and fabs(cleanedPuppiJets.at(0)->Eta) < etaBinCut)
+        if(cleanedPuppiJets.at(0)->PT < ptBinCut and fabs(cleanedPuppiJets.at(0)->Eta) < etaBinCut_1) {
+	  ResponsePuppi_lowPt_central->Fill((cleanedPuppiJets.at(0)->PT-jet->PT)/jet->PT);	
+	}
+        else if(cleanedPuppiJets.at(0)->PT < ptBinCut and fabs(cleanedPuppiJets.at(0)->Eta) >= etaBinCut_1 and fabs(cleanedPuppiJets.at(0)->Eta) < etaBinCut_2){
+	  ResponsePuppi_lowPt_forward_1->Fill((cleanedPuppiJets.at(0)->PT-jet->PT)/jet->PT);       
+	}
+	else if(cleanedPuppiJets.at(0)->PT < ptBinCut and fabs(cleanedPuppiJets.at(0)->Eta) >= etaBinCut_2){
+	  ResponsePuppi_lowPt_forward_2->Fill((cleanedPuppiJets.at(0)->PT-jet->PT)/jet->PT);       
+	}
+        else if(cleanedPuppiJets.at(0)->PT >= ptBinCut and fabs(cleanedPuppiJets.at(0)->Eta) < etaBinCut_1){
 	  ResponsePuppi_highPt_central->Fill((cleanedPuppiJets.at(0)->PT-jet->PT)/jet->PT);
-        else if(cleanedPuppiJets.at(0)->PT >= ptBinCut and fabs(cleanedPuppiJets.at(0)->Eta) > etaBinCut)
-	  ResponsePuppi_highPt_forward->Fill((cleanedPuppiJets.at(0)->PT-jet->PT)/jet->PT);
+	}
+        else if(cleanedPuppiJets.at(0)->PT >= ptBinCut and fabs(cleanedPuppiJets.at(0)->Eta) >= etaBinCut_1 and fabs(cleanedPuppiJets.at(0)->Eta) < etaBinCut_2){
+	  ResponsePuppi_highPt_forward_1->Fill((cleanedPuppiJets.at(0)->PT-jet->PT)/jet->PT);
+	}
+        else if(cleanedPuppiJets.at(0)->PT >= ptBinCut and fabs(cleanedPuppiJets.at(0)->Eta) >= etaBinCut_2){
+	  ResponsePuppi_highPt_forward_2->Fill((cleanedPuppiJets.at(0)->PT-jet->PT)/jet->PT);
+	}
 
-	if(fabs(cleanedPuppiJets.at(0)->Eta) < etaBinCut ){
+
+	if(fabs(cleanedPuppiJets.at(0)->Eta) < etaBinCut_1 ){
 	  NumeratorPuppi_vsPt_central->Fill(cleanedPuppiJets.at(0)->PT);
 	  NumeratorPuppi_vsPU_central->Fill(npu->HT);
 	}
-	else{
-	  NumeratorPuppi_vsPt_forward->Fill(cleanedPuppiJets.at(0)->PT);
-	  NumeratorPuppi_vsPU_forward->Fill(npu->HT);
-	}         
+	else if(fabs(cleanedPuppiJets.at(0)->Eta) >= etaBinCut_1 and fabs(cleanedPuppiJets.at(0)->Eta) < etaBinCut_2){
+	  NumeratorPuppi_vsPt_forward_1->Fill(cleanedPuppiJets.at(0)->PT);
+	  NumeratorPuppi_vsPU_forward_1->Fill(npu->HT);
+	}
+	else if(fabs(cleanedPuppiJets.at(0)->Eta) >= etaBinCut_2){
+	  NumeratorPuppi_vsPt_forward_2->Fill(cleanedPuppiJets.at(0)->PT);
+	  NumeratorPuppi_vsPU_forward_2->Fill(npu->HT);
+	}
       }
 
       else if(jet->P4().DeltaR(cleanedPuppiJets.at(1)->P4()) < matchingCone and !puppiMatched_2){
@@ -601,26 +744,42 @@ int main (int argc, char** argv){
 
 	NumeratorPuppi_vsEta->Fill(cleanedPuppiJets.at(1)->Eta);
 
-        if(cleanedPuppiJets.at(1)->PT < ptBinCut and fabs(cleanedPuppiJets.at(1)->Eta) < etaBinCut) 
-	  ResponsePuppi_lowPt_central->Fill((cleanedPuppiJets.at(1)->PT-jet->PT)/jet->PT);
-        else if(cleanedPuppiJets.at(1)->PT < ptBinCut and fabs(cleanedPuppiJets.at(1)->Eta) > etaBinCut)
-	  ResponsePuppi_lowPt_forward->Fill((cleanedPuppiJets.at(1)->PT-jet->PT)/jet->PT);       
-        else if(cleanedPuppiJets.at(1)->PT >= ptBinCut and fabs(cleanedPuppiJets.at(1)->Eta) < etaBinCut)
+        if(cleanedPuppiJets.at(1)->PT < ptBinCut and fabs(cleanedPuppiJets.at(1)->Eta) < etaBinCut_1) {
+	  ResponsePuppi_lowPt_central->Fill((cleanedPuppiJets.at(1)->PT-jet->PT)/jet->PT);	
+	}
+        else if(cleanedPuppiJets.at(1)->PT < ptBinCut and fabs(cleanedPuppiJets.at(1)->Eta) >= etaBinCut_1 and fabs(cleanedPuppiJets.at(1)->Eta) < etaBinCut_2){
+	  ResponsePuppi_lowPt_forward_1->Fill((cleanedPuppiJets.at(1)->PT-jet->PT)/jet->PT);       
+	}
+	else if(cleanedPuppiJets.at(1)->PT < ptBinCut and fabs(cleanedPuppiJets.at(1)->Eta) >= etaBinCut_2){
+	  ResponsePuppi_lowPt_forward_2->Fill((cleanedPuppiJets.at(1)->PT-jet->PT)/jet->PT);       
+	}
+        else if(cleanedPuppiJets.at(1)->PT >= ptBinCut and fabs(cleanedPuppiJets.at(1)->Eta) < etaBinCut_1){
 	  ResponsePuppi_highPt_central->Fill((cleanedPuppiJets.at(1)->PT-jet->PT)/jet->PT);
-        else if(cleanedPuppiJets.at(1)->PT >= ptBinCut and fabs(cleanedPuppiJets.at(1)->Eta) > etaBinCut)
-	  ResponsePuppi_highPt_forward->Fill((cleanedPuppiJets.at(1)->PT-jet->PT)/jet->PT);
+	}
+        else if(cleanedPuppiJets.at(1)->PT >= ptBinCut and fabs(cleanedPuppiJets.at(1)->Eta) >= etaBinCut_1 and fabs(cleanedPuppiJets.at(1)->Eta) < etaBinCut_2){
+	  ResponsePuppi_highPt_forward_1->Fill((cleanedPuppiJets.at(1)->PT-jet->PT)/jet->PT);
+	}
+        else if(cleanedPuppiJets.at(1)->PT >= ptBinCut and fabs(cleanedPuppiJets.at(1)->Eta) >= etaBinCut_2){
+	  ResponsePuppi_highPt_forward_2->Fill((cleanedPuppiJets.at(1)->PT-jet->PT)/jet->PT);
+	}
 
-	if(fabs(cleanedPuppiJets.at(1)->Eta) < etaBinCut ){
+
+	if(fabs(cleanedPuppiJets.at(1)->Eta) < etaBinCut_1 ){
 	  NumeratorPuppi_vsPt_central->Fill(cleanedPuppiJets.at(1)->PT);
 	  NumeratorPuppi_vsPU_central->Fill(npu->HT);
 	}
-	else{
-	  NumeratorPuppi_vsPt_forward->Fill(cleanedPuppiJets.at(1)->PT);
-	  NumeratorPuppi_vsPU_forward->Fill(npu->HT);
-	}         
+	else if(fabs(cleanedPuppiJets.at(1)->Eta) >= etaBinCut_1 and fabs(cleanedPuppiJets.at(1)->Eta) < etaBinCut_2){
+	  NumeratorPuppi_vsPt_forward_1->Fill(cleanedPuppiJets.at(1)->PT);
+	  NumeratorPuppi_vsPU_forward_1->Fill(npu->HT);
+	}
+	else if(fabs(cleanedPuppiJets.at(1)->Eta) >= etaBinCut_2){
+	  NumeratorPuppi_vsPt_forward_2->Fill(cleanedPuppiJets.at(1)->PT);
+	  NumeratorPuppi_vsPU_forward_2->Fill(npu->HT);
+	}
+
       }
     }
-  
+	  
     // response for deta and mjj
     if(matchedGenJet_1!=0 and matchedGenJet_2!=0){
       ResponseReco_deta->Fill((fabs(cleanedJets.at(0)->Eta-cleanedJets.at(1)->Eta)-fabs(matchedGenJet_1->Eta-matchedGenJet_2->Eta))/fabs(matchedGenJet_1->Eta-matchedGenJet_2->Eta));
@@ -648,13 +807,17 @@ int main (int argc, char** argv){
 
 	NumeratorReco_vsEta_purity->Fill(cleanedGenJets.at(0)->Eta);
  
-	if(fabs(cleanedGenJets.at(0)->Eta) < etaBinCut ){
+	if(fabs(cleanedGenJets.at(0)->Eta) < etaBinCut_1 ){
   	  NumeratorReco_vsPt_central_purity->Fill(cleanedGenJets.at(0)->PT);
 	  NumeratorReco_vsPU_central_purity->Fill(npu->HT);
 	}
-	else {
-	  NumeratorReco_vsPt_forward_purity->Fill(cleanedGenJets.at(0)->PT);
-	  NumeratorReco_vsPU_forward_purity->Fill(npu->HT);
+	else if(fabs(cleanedGenJets.at(0)->Eta) >= etaBinCut_1 and fabs(cleanedGenJets.at(0)->Eta) < etaBinCut_2  ){
+	  NumeratorReco_vsPt_forward_purity_1->Fill(cleanedGenJets.at(0)->PT);
+	  NumeratorReco_vsPU_forward_purity_1->Fill(npu->HT);
+	}
+        else if(fabs(cleanedGenJets.at(0)->Eta) >= etaBinCut_2  ){
+	  NumeratorReco_vsPt_forward_purity_2->Fill(cleanedGenJets.at(0)->PT);
+	  NumeratorReco_vsPU_forward_purity_2->Fill(npu->HT);
 	}
       }
       else if(jet->P4().DeltaR(cleanedGenJets.at(1)->P4()) < matchingCone  and !genMatched_2){
@@ -663,13 +826,17 @@ int main (int argc, char** argv){
 
 	NumeratorReco_vsEta_purity->Fill(cleanedGenJets.at(1)->Eta);
 
-	if(fabs(cleanedGenJets.at(1)->Eta) < etaBinCut ){
+	if(fabs(cleanedGenJets.at(1)->Eta) < etaBinCut_1 ){
 	  NumeratorReco_vsPt_central_purity->Fill(cleanedGenJets.at(1)->PT);
 	  NumeratorReco_vsPU_central_purity->Fill(npu->HT);
 	}
-	else {
-	  NumeratorReco_vsPt_forward_purity->Fill(cleanedGenJets.at(1)->PT);
-	  NumeratorReco_vsPU_forward_purity->Fill(npu->HT);
+	else if(fabs(cleanedGenJets.at(1)->Eta) >= etaBinCut_1 and fabs(cleanedGenJets.at(1)->Eta) < etaBinCut_2  ){
+	  NumeratorReco_vsPt_forward_purity_1->Fill(cleanedGenJets.at(1)->PT);
+	  NumeratorReco_vsPU_forward_purity_1->Fill(npu->HT);
+	}
+        else if(fabs(cleanedGenJets.at(1)->Eta) >= etaBinCut_2  ){
+	  NumeratorReco_vsPt_forward_purity_2->Fill(cleanedGenJets.at(1)->PT);
+	  NumeratorReco_vsPU_forward_purity_2->Fill(npu->HT);
 	}
       }
     }
@@ -688,14 +855,19 @@ int main (int argc, char** argv){
 
 	NumeratorPuppi_vsEta_purity->Fill(cleanedGenJets.at(0)->Eta);
 
-	if(fabs(cleanedGenJets.at(0)->Eta) < etaBinCut ){
-	  NumeratorPuppi_vsPt_central_purity->Fill(cleanedGenJets.at(0)->PT);
+	if(fabs(cleanedGenJets.at(0)->Eta) < etaBinCut_1 ){
+  	  NumeratorPuppi_vsPt_central_purity->Fill(cleanedGenJets.at(0)->PT);
 	  NumeratorPuppi_vsPU_central_purity->Fill(npu->HT);
 	}
-	else{
-	  NumeratorPuppi_vsPt_forward_purity->Fill(cleanedGenJets.at(0)->PT);
-	  NumeratorPuppi_vsPU_forward_purity->Fill(npu->HT);
-	}         
+	else if(fabs(cleanedGenJets.at(0)->Eta) >= etaBinCut_1 and fabs(cleanedGenJets.at(0)->Eta) < etaBinCut_2  ){
+	  NumeratorPuppi_vsPt_forward_purity_1->Fill(cleanedGenJets.at(0)->PT);
+	  NumeratorPuppi_vsPU_forward_purity_1->Fill(npu->HT);
+	}
+        else if(fabs(cleanedGenJets.at(0)->Eta) >= etaBinCut_2  ){
+	  NumeratorPuppi_vsPt_forward_purity_2->Fill(cleanedGenJets.at(0)->PT);
+	  NumeratorPuppi_vsPU_forward_purity_2->Fill(npu->HT);
+	}
+
       }
 
       else if(jet->P4().DeltaR(cleanedGenJets.at(1)->P4()) < matchingCone and !genMatched_2){
@@ -704,15 +876,19 @@ int main (int argc, char** argv){
 
 	NumeratorPuppi_vsEta_purity->Fill(cleanedGenJets.at(1)->Eta);
 
-
-	if(fabs(cleanedGenJets.at(1)->Eta) < etaBinCut ){
+	if(fabs(cleanedGenJets.at(1)->Eta) < etaBinCut_1 ){
 	  NumeratorPuppi_vsPt_central_purity->Fill(cleanedGenJets.at(1)->PT);
 	  NumeratorPuppi_vsPU_central_purity->Fill(npu->HT);
 	}
-	else{
-	  NumeratorPuppi_vsPt_forward_purity->Fill(cleanedGenJets.at(1)->PT);
-	  NumeratorPuppi_vsPU_forward_purity->Fill(npu->HT);
-	}         
+	else if(fabs(cleanedGenJets.at(1)->Eta) >= etaBinCut_1 and fabs(cleanedGenJets.at(1)->Eta) < etaBinCut_2  ){
+	  NumeratorPuppi_vsPt_forward_purity_1->Fill(cleanedGenJets.at(1)->PT);
+	  NumeratorPuppi_vsPU_forward_purity_1->Fill(npu->HT);
+	}
+        else if(fabs(cleanedGenJets.at(1)->Eta) >= etaBinCut_2  ){
+	  NumeratorPuppi_vsPt_forward_purity_2->Fill(cleanedGenJets.at(1)->PT);
+	  NumeratorPuppi_vsPU_forward_purity_2->Fill(npu->HT);
+	}
+
       }
     }
   }
@@ -759,7 +935,6 @@ int main (int argc, char** argv){
   legend->SetTextFont(42);
 
   // leading jet pt
-
   leadingJetPt->SetLineWidth(2);
   leadingJetPt->SetLineColor(kBlue);
   leadingJetPt->GetXaxis()->SetTitle("p_{T} (GeV)");
@@ -1044,14 +1219,11 @@ int main (int argc, char** argv){
   EfficiencyPuppi_vsEta->BayesDivide(NumeratorPuppi_vsEta,DenominatorPuppi_vsEta);
 
 
-  TH2F* frameEfficiency_vsEta = new TH2F("frameEfficiency_vsEta","",50,-4,4,500,
-					 1.1*min(EfficiencyReco_vsEta->GetHistogram()->GetMinimum(),EfficiencyPuppi_vsEta->GetHistogram()->GetMinimum()),
+  TH2F* frameEfficiency_vsEta = new TH2F("frameEfficiency_vsEta","",50,-5,5,500,0.6,
 					 1.1*max(EfficiencyReco_vsEta->GetHistogram()->GetMaximum(),EfficiencyPuppi_vsEta->GetHistogram()->GetMaximum()));
   frameEfficiency_vsEta->SetLineWidth(2);
   frameEfficiency_vsEta->SetMarkerStyle(21);
   frameEfficiency_vsEta->SetMarkerSize(0.3);
-  //  frameEfficiency_vsEta->GetXaxis()->SetNdivisions(505);
-  //  frameEfficiency_vsEta->GetYaxis()->SetNdivisions(505);
   frameEfficiency_vsEta->GetXaxis()->SetTitle("#eta");
   frameEfficiency_vsEta->GetXaxis()->SetLabelOffset(0.012);
   frameEfficiency_vsEta->GetXaxis()->SetLabelSize(0.038);
@@ -1115,14 +1287,12 @@ int main (int argc, char** argv){
   EfficiencyPuppi_vsPt_central->BayesDivide(NumeratorPuppi_vsPt_central,DenominatorPuppi_vsPt_central);
 
   
-  TH2F* frameEfficiency_vsPt = new TH2F("frameEfficiency_vsPt","",50,jetPtThreshold,500,500,
+  TH2F* frameEfficiency_vsPt = new TH2F("frameEfficiency_vsPt","",30,jetPtThreshold,500,500,
 					min(EfficiencyReco_vsPt_central->GetHistogram()->GetMinimum(),EfficiencyPuppi_vsPt_central->GetHistogram()->GetMinimum()),
 					1.05*max(EfficiencyReco_vsPt_central->GetHistogram()->GetMaximum(),EfficiencyPuppi_vsPt_central->GetHistogram()->GetMaximum()));
   frameEfficiency_vsPt->SetLineWidth(2);
   frameEfficiency_vsPt->SetMarkerStyle(21);
   frameEfficiency_vsPt->SetMarkerSize(0.3);
-  //  frameEfficiency_vsPt->GetXaxis()->SetNdivisions(505);
-  //  frameEfficiency_vsPt->GetYaxis()->SetNdivisions(505);
   frameEfficiency_vsPt->GetXaxis()->SetTitle("p_{T} (GeV)");
   frameEfficiency_vsPt->GetXaxis()->SetLabelOffset(0.012);
   frameEfficiency_vsPt->GetXaxis()->SetLabelSize(0.038);
@@ -1176,25 +1346,23 @@ int main (int argc, char** argv){
   legend->Clear();
 
   // efficiency vs pt
-  TGraphAsymmErrors* EfficiencyReco_vsPt_forward = new TGraphAsymmErrors();
-  EfficiencyReco_vsPt_forward->SetName("EfficiencyReco_vsPt_forward");
+  TGraphAsymmErrors* EfficiencyReco_vsPt_forward_1 = new TGraphAsymmErrors();
+  EfficiencyReco_vsPt_forward_1->SetName("EfficiencyReco_vsPt_forward_1");
 
-  TGraphAsymmErrors* EfficiencyPuppi_vsPt_forward = new TGraphAsymmErrors();
-  EfficiencyPuppi_vsPt_forward->SetName("EfficiencyPuppi_vsPt_forward");
+  TGraphAsymmErrors* EfficiencyPuppi_vsPt_forward_1 = new TGraphAsymmErrors();
+  EfficiencyPuppi_vsPt_forward_1->SetName("EfficiencyPuppi_vsPt_forward_1");
 
-  EfficiencyReco_vsPt_forward->BayesDivide(NumeratorReco_vsPt_forward,DenominatorReco_vsPt_forward);
-  EfficiencyPuppi_vsPt_forward->BayesDivide(NumeratorPuppi_vsPt_forward,DenominatorPuppi_vsPt_forward);
+  EfficiencyReco_vsPt_forward_1->BayesDivide(NumeratorReco_vsPt_forward_1,DenominatorReco_vsPt_forward_1);
+  EfficiencyPuppi_vsPt_forward_1->BayesDivide(NumeratorPuppi_vsPt_forward_1,DenominatorPuppi_vsPt_forward_1);
 
   frameEfficiency_vsPt->Delete();
-  frameEfficiency_vsPt = new TH2F("frameEfficiency_vsPt","",35,jetPtThreshold,500,500,
-				  min(EfficiencyReco_vsPt_forward->GetHistogram()->GetMinimum(),EfficiencyPuppi_vsPt_forward->GetHistogram()->GetMinimum()),
-				  1.05*max(EfficiencyReco_vsPt_forward->GetHistogram()->GetMaximum(),EfficiencyPuppi_vsPt_forward->GetHistogram()->GetMaximum()));
+  frameEfficiency_vsPt = new TH2F("frameEfficiency_vsPt","",30,jetPtThreshold,500,500,
+				  min(EfficiencyReco_vsPt_forward_1->GetHistogram()->GetMinimum(),EfficiencyPuppi_vsPt_forward_1->GetHistogram()->GetMinimum()),
+				  1.05*max(EfficiencyReco_vsPt_forward_1->GetHistogram()->GetMaximum(),EfficiencyPuppi_vsPt_forward_1->GetHistogram()->GetMaximum()));
 
   frameEfficiency_vsPt->SetLineWidth(2);
   frameEfficiency_vsPt->SetMarkerStyle(21);
   frameEfficiency_vsPt->SetMarkerSize(0.3);
-  //  frameEfficiency_vsPt->GetXaxis()->SetNdivisions(505);
-  //  frameEfficiency_vsPt->GetYaxis()->SetNdivisions(505);
   frameEfficiency_vsPt->GetXaxis()->SetTitle("p_{T} (GeV)");
   frameEfficiency_vsPt->GetXaxis()->SetLabelOffset(0.012);
   frameEfficiency_vsPt->GetXaxis()->SetLabelSize(0.038);
@@ -1208,39 +1376,109 @@ int main (int argc, char** argv){
   frameEfficiency_vsPt->SetStats(0);
   frameEfficiency_vsPt->Draw();
 
-  EfficiencyReco_vsPt_forward->SetLineWidth(2);
-  EfficiencyReco_vsPt_forward->SetLineColor(kBlue);
-  EfficiencyReco_vsPt_forward->SetMarkerStyle(20);
-  EfficiencyReco_vsPt_forward->SetMarkerColor(kBlue);
-  EfficiencyReco_vsPt_forward->GetXaxis()->SetTitle("p_{T} (GeV)");
-  EfficiencyReco_vsPt_forward->GetYaxis()->SetTitle("Efficiency");
-  EfficiencyReco_vsPt_forward->Draw("p");
+  EfficiencyReco_vsPt_forward_1->SetLineWidth(2);
+  EfficiencyReco_vsPt_forward_1->SetLineColor(kBlue);
+  EfficiencyReco_vsPt_forward_1->SetMarkerStyle(20);
+  EfficiencyReco_vsPt_forward_1->SetMarkerColor(kBlue);
+  EfficiencyReco_vsPt_forward_1->GetXaxis()->SetTitle("p_{T} (GeV)");
+  EfficiencyReco_vsPt_forward_1->GetYaxis()->SetTitle("Efficiency");
+  EfficiencyReco_vsPt_forward_1->Draw("p");
 
-  EfficiencyPuppi_vsPt_forward->SetLineWidth(2);
-  EfficiencyPuppi_vsPt_forward->SetLineColor(kRed);
-  EfficiencyPuppi_vsPt_forward->SetMarkerStyle(24);
-  EfficiencyPuppi_vsPt_forward->SetMarkerColor(kRed);
-  EfficiencyPuppi_vsPt_forward->GetXaxis()->SetTitle("#eta");
-  EfficiencyPuppi_vsPt_forward->GetYaxis()->SetTitle("Efficiency");
-  EfficiencyPuppi_vsPt_forward->Draw("psame");
+  EfficiencyPuppi_vsPt_forward_1->SetLineWidth(2);
+  EfficiencyPuppi_vsPt_forward_1->SetLineColor(kRed);
+  EfficiencyPuppi_vsPt_forward_1->SetMarkerStyle(24);
+  EfficiencyPuppi_vsPt_forward_1->SetMarkerColor(kRed);
+  EfficiencyPuppi_vsPt_forward_1->GetXaxis()->SetTitle("#eta");
+  EfficiencyPuppi_vsPt_forward_1->GetYaxis()->SetTitle("Efficiency");
+  EfficiencyPuppi_vsPt_forward_1->Draw("psame");
 
-  legend->AddEntry(EfficiencyReco_vsPt_forward,"CHS jets","l");
-  legend->AddEntry(EfficiencyPuppi_vsPt_forward,"Puppi jets","l");
+  legend->AddEntry(EfficiencyReco_vsPt_forward_1,"CHS jets","l");
+  legend->AddEntry(EfficiencyPuppi_vsPt_forward_1,"Puppi jets","l");
 
   tex->Draw("same");
   tex2->Draw("same");
   tex3->Draw("same");
   legend->Draw("same");
 
-  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPt_forward.pdf").c_str(),"pdf");
-  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPt_forward.png").c_str(),"png");
-  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPt_forward.root").c_str(),"root");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPt_forward_1.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPt_forward_1.png").c_str(),"png");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPt_forward_1.root").c_str(),"root");
 
   cCanvas->SetLogy();
 
-  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPt_forward_log.pdf").c_str(),"pdf");
-  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPt_forward_log.png").c_str(),"png");
-  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPt_forward_log.root").c_str(),"root");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPt_forward_1_log.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPt_forward_1_log.png").c_str(),"png");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPt_forward_1_log.root").c_str(),"root");
+  cCanvas->SetLogy(0);
+  gPad->Update();
+
+
+  legend->Clear();
+
+  // efficiency vs pt
+  TGraphAsymmErrors* EfficiencyReco_vsPt_forward_2 = new TGraphAsymmErrors();
+  EfficiencyReco_vsPt_forward_2->SetName("EfficiencyReco_vsPt_forward_2");
+
+  TGraphAsymmErrors* EfficiencyPuppi_vsPt_forward_2 = new TGraphAsymmErrors();
+  EfficiencyPuppi_vsPt_forward_2->SetName("EfficiencyPuppi_vsPt_forward_2");
+
+  EfficiencyReco_vsPt_forward_2->BayesDivide(NumeratorReco_vsPt_forward_2,DenominatorReco_vsPt_forward_2);
+  EfficiencyPuppi_vsPt_forward_2->BayesDivide(NumeratorPuppi_vsPt_forward_2,DenominatorPuppi_vsPt_forward_2);
+
+  frameEfficiency_vsPt->Delete();
+  frameEfficiency_vsPt = new TH2F("frameEfficiency_vsPt","",30,jetPtThreshold,500,500,
+				  min(EfficiencyReco_vsPt_forward_2->GetHistogram()->GetMinimum(),EfficiencyPuppi_vsPt_forward_2->GetHistogram()->GetMinimum()),
+				  1.05*max(EfficiencyReco_vsPt_forward_2->GetHistogram()->GetMaximum(),EfficiencyPuppi_vsPt_forward_2->GetHistogram()->GetMaximum()));
+
+  frameEfficiency_vsPt->SetLineWidth(2);
+  frameEfficiency_vsPt->SetMarkerStyle(21);
+  frameEfficiency_vsPt->SetMarkerSize(0.3);
+  frameEfficiency_vsPt->GetXaxis()->SetTitle("p_{T} (GeV)");
+  frameEfficiency_vsPt->GetXaxis()->SetLabelOffset(0.012);
+  frameEfficiency_vsPt->GetXaxis()->SetLabelSize(0.038);
+  frameEfficiency_vsPt->GetXaxis()->SetTitleSize(0.05);
+  frameEfficiency_vsPt->GetXaxis()->SetTitleOffset(1.10);
+  frameEfficiency_vsPt->GetYaxis()->SetTitle("efficiency");
+  frameEfficiency_vsPt->GetYaxis()->SetLabelOffset(0.012);
+  frameEfficiency_vsPt->GetYaxis()->SetLabelSize(0.038);
+  frameEfficiency_vsPt->GetYaxis()->SetTitleSize(0.05);
+  frameEfficiency_vsPt->GetYaxis()->SetTitleOffset(1.18);
+  frameEfficiency_vsPt->SetStats(0);
+  frameEfficiency_vsPt->Draw();
+
+  EfficiencyReco_vsPt_forward_2->SetLineWidth(2);
+  EfficiencyReco_vsPt_forward_2->SetLineColor(kBlue);
+  EfficiencyReco_vsPt_forward_2->SetMarkerStyle(20);
+  EfficiencyReco_vsPt_forward_2->SetMarkerColor(kBlue);
+  EfficiencyReco_vsPt_forward_2->GetXaxis()->SetTitle("p_{T} (GeV)");
+  EfficiencyReco_vsPt_forward_2->GetYaxis()->SetTitle("Efficiency");
+  EfficiencyReco_vsPt_forward_2->Draw("p");
+
+  EfficiencyPuppi_vsPt_forward_2->SetLineWidth(2);
+  EfficiencyPuppi_vsPt_forward_2->SetLineColor(kRed);
+  EfficiencyPuppi_vsPt_forward_2->SetMarkerStyle(24);
+  EfficiencyPuppi_vsPt_forward_2->SetMarkerColor(kRed);
+  EfficiencyPuppi_vsPt_forward_2->GetXaxis()->SetTitle("#eta");
+  EfficiencyPuppi_vsPt_forward_2->GetYaxis()->SetTitle("Efficiency");
+  EfficiencyPuppi_vsPt_forward_2->Draw("psame");
+
+  legend->AddEntry(EfficiencyReco_vsPt_forward_2,"CHS jets","l");
+  legend->AddEntry(EfficiencyPuppi_vsPt_forward_2,"Puppi jets","l");
+
+  tex->Draw("same");
+  tex2->Draw("same");
+  tex3->Draw("same");
+  legend->Draw("same");
+
+  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPt_forward_2.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPt_forward_2.png").c_str(),"png");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPt_forward_2.root").c_str(),"root");
+
+  cCanvas->SetLogy();
+
+  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPt_forward_2_log.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPt_forward_2_log.png").c_str(),"png");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPt_forward_2_log.root").c_str(),"root");
   cCanvas->SetLogy(0);
   gPad->Update();
 
@@ -1258,14 +1496,11 @@ int main (int argc, char** argv){
   EfficiencyPuppi_vsPU_central->BayesDivide(NumeratorPuppi_vsPU_central,DenominatorPuppi_vsPU_central);
 
 
-  TH2F* frameEfficiency_vsPU = new TH2F("frameEfficiency_vsPU","",50,PU-40,PU+40,500,
-					0.95*min(EfficiencyReco_vsPU_central->GetHistogram()->GetMinimum(),EfficiencyPuppi_vsPU_central->GetHistogram()->GetMinimum()),
+  TH2F* frameEfficiency_vsPU = new TH2F("frameEfficiency_vsPU","",50,PU-40,PU+40,500,0.7,
 					1.1*max(EfficiencyReco_vsPU_central->GetHistogram()->GetMaximum(),EfficiencyPuppi_vsPU_central->GetHistogram()->GetMaximum()));
   frameEfficiency_vsPU->SetLineWidth(2);
   frameEfficiency_vsPU->SetMarkerStyle(21);
   frameEfficiency_vsPU->SetMarkerSize(0.3);
-  //  frameEfficiency_vsPU->GetXaxis()->SetNdivisions(505);
-  //  frameEfficiency_vsPU->GetYaxis()->SetNdivisions(505);
   frameEfficiency_vsPU->GetXaxis()->SetTitle("N_{PU}");
   frameEfficiency_vsPU->GetXaxis()->SetLabelOffset(0.012);
   frameEfficiency_vsPU->GetXaxis()->SetLabelSize(0.038);
@@ -1319,25 +1554,22 @@ int main (int argc, char** argv){
   legend->Clear();
 
   // efficiency vs pt
-  TGraphAsymmErrors* EfficiencyReco_vsPU_forward = new TGraphAsymmErrors();
-  EfficiencyReco_vsPU_forward->SetName("EfficiencyReco_vsPU_forward");
+  TGraphAsymmErrors* EfficiencyReco_vsPU_forward_1 = new TGraphAsymmErrors();
+  EfficiencyReco_vsPU_forward_1->SetName("EfficiencyReco_vsPU_forward_1");
 
-  TGraphAsymmErrors* EfficiencyPuppi_vsPU_forward = new TGraphAsymmErrors();
-  EfficiencyPuppi_vsPU_forward->SetName("EfficiencyPuppi_vsPU_forward");
+  TGraphAsymmErrors* EfficiencyPuppi_vsPU_forward_1 = new TGraphAsymmErrors();
+  EfficiencyPuppi_vsPU_forward_1->SetName("EfficiencyPuppi_vsPU_forward_1");
 
-  EfficiencyReco_vsPU_forward->BayesDivide(NumeratorReco_vsPU_forward,DenominatorReco_vsPU_forward);
-  EfficiencyPuppi_vsPU_forward->BayesDivide(NumeratorPuppi_vsPU_forward,DenominatorPuppi_vsPU_forward);
+  EfficiencyReco_vsPU_forward_1->BayesDivide(NumeratorReco_vsPU_forward_1,DenominatorReco_vsPU_forward_1);
+  EfficiencyPuppi_vsPU_forward_1->BayesDivide(NumeratorPuppi_vsPU_forward_1,DenominatorPuppi_vsPU_forward_1);
 
   frameEfficiency_vsPU->Delete();
-  frameEfficiency_vsPU = new TH2F("frameEfficiency_vsPU","",50,PU-40,PU+40,500,
-				  0.95*min(EfficiencyReco_vsPU_forward->GetHistogram()->GetMinimum(),EfficiencyPuppi_vsPU_forward->GetHistogram()->GetMinimum()),
-				  1.1*max(EfficiencyReco_vsPU_forward->GetHistogram()->GetMaximum(),EfficiencyPuppi_vsPU_forward->GetHistogram()->GetMaximum()));
+  frameEfficiency_vsPU = new TH2F("frameEfficiency_vsPU","",50,PU-40,PU+40,500,0.7,
+				  1.1*max(EfficiencyReco_vsPU_forward_1->GetHistogram()->GetMaximum(),EfficiencyPuppi_vsPU_forward_1->GetHistogram()->GetMaximum()));
 
   frameEfficiency_vsPU->SetLineWidth(2);
   frameEfficiency_vsPU->SetMarkerStyle(21);
   frameEfficiency_vsPU->SetMarkerSize(0.3);
-  //  frameEfficiency_vsPU->GetXaxis()->SetNdivisions(505);
-  //  frameEfficiency_vsPU->GetYaxis()->SetNdivisions(505);
   frameEfficiency_vsPU->GetXaxis()->SetTitle("N_{PU}");
   frameEfficiency_vsPU->GetXaxis()->SetLabelOffset(0.012);
   frameEfficiency_vsPU->GetXaxis()->SetLabelSize(0.038);
@@ -1351,39 +1583,108 @@ int main (int argc, char** argv){
   frameEfficiency_vsPU->SetStats(0);
   frameEfficiency_vsPU->Draw();
 
-  EfficiencyReco_vsPU_forward->SetLineWidth(2);
-  EfficiencyReco_vsPU_forward->SetLineColor(kBlue);
-  EfficiencyReco_vsPU_forward->SetMarkerStyle(20);
-  EfficiencyReco_vsPU_forward->SetMarkerColor(kBlue);
-  EfficiencyReco_vsPU_forward->GetXaxis()->SetTitle("N_{PU}");
-  EfficiencyReco_vsPU_forward->GetYaxis()->SetTitle("Efficiency");
-  EfficiencyReco_vsPU_forward->Draw("p");
+  EfficiencyReco_vsPU_forward_1->SetLineWidth(2);
+  EfficiencyReco_vsPU_forward_1->SetLineColor(kBlue);
+  EfficiencyReco_vsPU_forward_1->SetMarkerStyle(20);
+  EfficiencyReco_vsPU_forward_1->SetMarkerColor(kBlue);
+  EfficiencyReco_vsPU_forward_1->GetXaxis()->SetTitle("N_{PU}");
+  EfficiencyReco_vsPU_forward_1->GetYaxis()->SetTitle("Efficiency");
+  EfficiencyReco_vsPU_forward_1->Draw("p");
 
-  EfficiencyPuppi_vsPU_forward->SetLineWidth(2);
-  EfficiencyPuppi_vsPU_forward->SetLineColor(kRed);
-  EfficiencyPuppi_vsPU_forward->SetMarkerStyle(24);
-  EfficiencyPuppi_vsPU_forward->SetMarkerColor(kRed);
-  EfficiencyPuppi_vsPU_forward->GetXaxis()->SetTitle("N_{PU}");
-  EfficiencyPuppi_vsPU_forward->GetYaxis()->SetTitle("Efficiency");
-  EfficiencyPuppi_vsPU_forward->Draw("psame");
+  EfficiencyPuppi_vsPU_forward_1->SetLineWidth(2);
+  EfficiencyPuppi_vsPU_forward_1->SetLineColor(kRed);
+  EfficiencyPuppi_vsPU_forward_1->SetMarkerStyle(24);
+  EfficiencyPuppi_vsPU_forward_1->SetMarkerColor(kRed);
+  EfficiencyPuppi_vsPU_forward_1->GetXaxis()->SetTitle("N_{PU}");
+  EfficiencyPuppi_vsPU_forward_1->GetYaxis()->SetTitle("Efficiency");
+  EfficiencyPuppi_vsPU_forward_1->Draw("psame");
 
-  legend->AddEntry(EfficiencyReco_vsPU_forward,"CHS jets","l");
-  legend->AddEntry(EfficiencyPuppi_vsPU_forward,"Puppi jets","l");
+  legend->AddEntry(EfficiencyReco_vsPU_forward_1,"CHS jets","l");
+  legend->AddEntry(EfficiencyPuppi_vsPU_forward_1,"Puppi jets","l");
 
   tex->Draw("same");
   tex2->Draw("same");
   tex3->Draw("same");
   legend->Draw("same");
 
-  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPU_forward.pdf").c_str(),"pdf");
-  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPU_forward.png").c_str(),"png");
-  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPU_forward.root").c_str(),"root");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPU_forward_1.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPU_forward_1.png").c_str(),"png");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPU_forward_1.root").c_str(),"root");
 
   cCanvas->SetLogy();
 
-  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPU_forward_log.pdf").c_str(),"pdf");
-  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPU_forward_log.png").c_str(),"png");
-  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPU_forward_log.root").c_str(),"root");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPU_forward_1_log.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPU_forward_1_log.png").c_str(),"png");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPU_forward_1_log.root").c_str(),"root");
+  cCanvas->SetLogy(0);
+  gPad->Update();
+
+
+  legend->Clear();
+
+  // efficiency vs pt
+  TGraphAsymmErrors* EfficiencyReco_vsPU_forward_2 = new TGraphAsymmErrors();
+  EfficiencyReco_vsPU_forward_2->SetName("EfficiencyReco_vsPU_forward_2");
+
+  TGraphAsymmErrors* EfficiencyPuppi_vsPU_forward_2 = new TGraphAsymmErrors();
+  EfficiencyPuppi_vsPU_forward_2->SetName("EfficiencyPuppi_vsPU_forward_2");
+
+  EfficiencyReco_vsPU_forward_2->BayesDivide(NumeratorReco_vsPU_forward_2,DenominatorReco_vsPU_forward_2);
+  EfficiencyPuppi_vsPU_forward_2->BayesDivide(NumeratorPuppi_vsPU_forward_2,DenominatorPuppi_vsPU_forward_2);
+
+  frameEfficiency_vsPU->Delete();
+  frameEfficiency_vsPU = new TH2F("frameEfficiency_vsPU","",50,PU-40,PU+40,500,0.7,
+				  1.1*max(EfficiencyReco_vsPU_forward_2->GetHistogram()->GetMaximum(),EfficiencyPuppi_vsPU_forward_2->GetHistogram()->GetMaximum()));
+
+  frameEfficiency_vsPU->SetLineWidth(2);
+  frameEfficiency_vsPU->SetMarkerStyle(21);
+  frameEfficiency_vsPU->SetMarkerSize(0.3);
+  frameEfficiency_vsPU->GetXaxis()->SetTitle("N_{PU}");
+  frameEfficiency_vsPU->GetXaxis()->SetLabelOffset(0.012);
+  frameEfficiency_vsPU->GetXaxis()->SetLabelSize(0.038);
+  frameEfficiency_vsPU->GetXaxis()->SetTitleSize(0.05);
+  frameEfficiency_vsPU->GetXaxis()->SetTitleOffset(1.10);
+  frameEfficiency_vsPU->GetYaxis()->SetTitle("efficiency");
+  frameEfficiency_vsPU->GetYaxis()->SetLabelOffset(0.012);
+  frameEfficiency_vsPU->GetYaxis()->SetLabelSize(0.038);
+  frameEfficiency_vsPU->GetYaxis()->SetTitleSize(0.05);
+  frameEfficiency_vsPU->GetYaxis()->SetTitleOffset(1.18);
+  frameEfficiency_vsPU->SetStats(0);
+  frameEfficiency_vsPU->Draw();
+
+  EfficiencyReco_vsPU_forward_2->SetLineWidth(2);
+  EfficiencyReco_vsPU_forward_2->SetLineColor(kBlue);
+  EfficiencyReco_vsPU_forward_2->SetMarkerStyle(20);
+  EfficiencyReco_vsPU_forward_2->SetMarkerColor(kBlue);
+  EfficiencyReco_vsPU_forward_2->GetXaxis()->SetTitle("N_{PU}");
+  EfficiencyReco_vsPU_forward_2->GetYaxis()->SetTitle("Efficiency");
+  EfficiencyReco_vsPU_forward_2->Draw("p");
+
+  EfficiencyPuppi_vsPU_forward_2->SetLineWidth(2);
+  EfficiencyPuppi_vsPU_forward_2->SetLineColor(kRed);
+  EfficiencyPuppi_vsPU_forward_2->SetMarkerStyle(24);
+  EfficiencyPuppi_vsPU_forward_2->SetMarkerColor(kRed);
+  EfficiencyPuppi_vsPU_forward_2->GetXaxis()->SetTitle("N_{PU}");
+  EfficiencyPuppi_vsPU_forward_2->GetYaxis()->SetTitle("Efficiency");
+  EfficiencyPuppi_vsPU_forward_2->Draw("psame");
+
+  legend->AddEntry(EfficiencyReco_vsPU_forward_2,"CHS jets","l");
+  legend->AddEntry(EfficiencyPuppi_vsPU_forward_2,"Puppi jets","l");
+
+  tex->Draw("same");
+  tex2->Draw("same");
+  tex3->Draw("same");
+  legend->Draw("same");
+
+  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPU_forward_2.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPU_forward_2.png").c_str(),"png");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPU_forward_2.root").c_str(),"root");
+
+  cCanvas->SetLogy();
+
+  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPU_forward_2_log.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPU_forward_2_log.png").c_str(),"png");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Purity_vsPU_forward_2_log.root").c_str(),"root");
   cCanvas->SetLogy(0);
   gPad->Update();
 
@@ -1405,14 +1706,11 @@ int main (int argc, char** argv){
   PurityPuppi_vsEta->BayesDivide(NumeratorPuppi_vsEta_purity,DenominatorPuppi_vsEta_purity);
 
 
-  TH2F* framePurity_vsEta = new TH2F("framePurity_vsEta","",50,-4,4,500,
-					 1.1*min(PurityReco_vsEta->GetHistogram()->GetMinimum(),PurityPuppi_vsEta->GetHistogram()->GetMinimum()),
+  TH2F* framePurity_vsEta = new TH2F("framePurity_vsEta","",50,-4.5,4.5,500,0.6,
 					 1.1*max(PurityReco_vsEta->GetHistogram()->GetMaximum(),PurityPuppi_vsEta->GetHistogram()->GetMaximum()));
   framePurity_vsEta->SetLineWidth(2);
   framePurity_vsEta->SetMarkerStyle(21);
   framePurity_vsEta->SetMarkerSize(0.3);
-  //  framePurity_vsEta->GetXaxis()->SetNdivisions(505);
-  //  framePurity_vsEta->GetYaxis()->SetNdivisions(505);
   framePurity_vsEta->GetXaxis()->SetTitle("#eta");
   framePurity_vsEta->GetXaxis()->SetLabelOffset(0.012);
   framePurity_vsEta->GetXaxis()->SetLabelSize(0.038);
@@ -1482,8 +1780,6 @@ int main (int argc, char** argv){
   framePurity_vsPt->SetLineWidth(2);
   framePurity_vsPt->SetMarkerStyle(21);
   framePurity_vsPt->SetMarkerSize(0.3);
-  //  framePurity_vsPt->GetXaxis()->SetNdivisions(505);
-  //  framePurity_vsPt->GetYaxis()->SetNdivisions(505);
   framePurity_vsPt->GetXaxis()->SetTitle("p_{T} (GeV)");
   framePurity_vsPt->GetXaxis()->SetLabelOffset(0.012);
   framePurity_vsPt->GetXaxis()->SetLabelSize(0.038);
@@ -1537,25 +1833,23 @@ int main (int argc, char** argv){
   legend->Clear();
 
   // efficiency vs pt
-  TGraphAsymmErrors* PurityReco_vsPt_forward = new TGraphAsymmErrors();
-  PurityReco_vsPt_forward->SetName("PurityReco_vsPt_forward");
+  TGraphAsymmErrors* PurityReco_vsPt_forward_1 = new TGraphAsymmErrors();
+  PurityReco_vsPt_forward_1->SetName("PurityReco_vsPt_forward_1");
 
-  TGraphAsymmErrors* PurityPuppi_vsPt_forward = new TGraphAsymmErrors();
-  PurityPuppi_vsPt_forward->SetName("PurityPuppi_vsPt_forward");
+  TGraphAsymmErrors* PurityPuppi_vsPt_forward_1 = new TGraphAsymmErrors();
+  PurityPuppi_vsPt_forward_1->SetName("PurityPuppi_vsPt_forward_1");
 
-  PurityReco_vsPt_forward->BayesDivide(NumeratorReco_vsPt_forward_purity,DenominatorReco_vsPt_forward_purity);
-  PurityPuppi_vsPt_forward->BayesDivide(NumeratorPuppi_vsPt_forward_purity,DenominatorPuppi_vsPt_forward_purity);
+  PurityReco_vsPt_forward_1->BayesDivide(NumeratorReco_vsPt_forward_purity_1,DenominatorReco_vsPt_forward_purity_1);
+  PurityPuppi_vsPt_forward_1->BayesDivide(NumeratorPuppi_vsPt_forward_purity_1,DenominatorPuppi_vsPt_forward_purity_1);
 
   framePurity_vsPt->Delete();
   framePurity_vsPt = new TH2F("framePurity_vsPt","",50,jetPtThreshold,500,500,
-				  min(PurityReco_vsPt_forward->GetHistogram()->GetMinimum(),PurityPuppi_vsPt_forward->GetHistogram()->GetMinimum()),
-				  1.05*max(PurityReco_vsPt_forward->GetHistogram()->GetMaximum(),PurityPuppi_vsPt_forward->GetHistogram()->GetMaximum()));
+				  min(PurityReco_vsPt_forward_1->GetHistogram()->GetMinimum(),PurityPuppi_vsPt_forward_1->GetHistogram()->GetMinimum()),
+				  1.05*max(PurityReco_vsPt_forward_1->GetHistogram()->GetMaximum(),PurityPuppi_vsPt_forward_1->GetHistogram()->GetMaximum()));
 
   framePurity_vsPt->SetLineWidth(2);
   framePurity_vsPt->SetMarkerStyle(21);
   framePurity_vsPt->SetMarkerSize(0.3);
-  //  framePurity_vsPt->GetXaxis()->SetNdivisions(505);
-  //  framePurity_vsPt->GetYaxis()->SetNdivisions(505);
   framePurity_vsPt->GetXaxis()->SetTitle("p_{T} (GeV)");
   framePurity_vsPt->GetXaxis()->SetLabelOffset(0.012);
   framePurity_vsPt->GetXaxis()->SetLabelSize(0.038);
@@ -1569,39 +1863,109 @@ int main (int argc, char** argv){
   framePurity_vsPt->SetStats(0);
   framePurity_vsPt->Draw();
 
-  PurityReco_vsPt_forward->SetLineWidth(2);
-  PurityReco_vsPt_forward->SetLineColor(kBlue);
-  PurityReco_vsPt_forward->SetMarkerStyle(20);
-  PurityReco_vsPt_forward->SetMarkerColor(kBlue);
-  PurityReco_vsPt_forward->GetXaxis()->SetTitle("p_{T} (GeV)");
-  PurityReco_vsPt_forward->GetYaxis()->SetTitle("Purity");
-  PurityReco_vsPt_forward->Draw("p");
+  PurityReco_vsPt_forward_1->SetLineWidth(2);
+  PurityReco_vsPt_forward_1->SetLineColor(kBlue);
+  PurityReco_vsPt_forward_1->SetMarkerStyle(20);
+  PurityReco_vsPt_forward_1->SetMarkerColor(kBlue);
+  PurityReco_vsPt_forward_1->GetXaxis()->SetTitle("p_{T} (GeV)");
+  PurityReco_vsPt_forward_1->GetYaxis()->SetTitle("Purity");
+  PurityReco_vsPt_forward_1->Draw("p");
 
-  PurityPuppi_vsPt_forward->SetLineWidth(2);
-  PurityPuppi_vsPt_forward->SetLineColor(kRed);
-  PurityPuppi_vsPt_forward->SetMarkerStyle(24);
-  PurityPuppi_vsPt_forward->SetMarkerColor(kRed);
-  PurityPuppi_vsPt_forward->GetXaxis()->SetTitle("#eta");
-  PurityPuppi_vsPt_forward->GetYaxis()->SetTitle("Purity");
-  PurityPuppi_vsPt_forward->Draw("psame");
+  PurityPuppi_vsPt_forward_1->SetLineWidth(2);
+  PurityPuppi_vsPt_forward_1->SetLineColor(kRed);
+  PurityPuppi_vsPt_forward_1->SetMarkerStyle(24);
+  PurityPuppi_vsPt_forward_1->SetMarkerColor(kRed);
+  PurityPuppi_vsPt_forward_1->GetXaxis()->SetTitle("#eta");
+  PurityPuppi_vsPt_forward_1->GetYaxis()->SetTitle("Purity");
+  PurityPuppi_vsPt_forward_1->Draw("psame");
 
-  legend->AddEntry(PurityReco_vsPt_forward,"CHS jets","l");
-  legend->AddEntry(PurityPuppi_vsPt_forward,"Puppi jets","l");
+  legend->AddEntry(PurityReco_vsPt_forward_1,"CHS jets","l");
+  legend->AddEntry(PurityPuppi_vsPt_forward_1,"Puppi jets","l");
 
   tex->Draw("same");
   tex2->Draw("same");
   tex3->Draw("same");
   legend->Draw("same");
 
-  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPt_forward.pdf").c_str(),"pdf");
-  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPt_forward.png").c_str(),"png");
-  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPt_forward.root").c_str(),"root");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPt_forward_1.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPt_forward_1.png").c_str(),"png");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPt_forward_1.root").c_str(),"root");
 
   cCanvas->SetLogy();
 
-  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPt_forward_log.pdf").c_str(),"pdf");
-  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPt_forward_log.png").c_str(),"png");
-  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPt_forward_log.root").c_str(),"root");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPt_forward_1_log.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPt_forward_1_log.png").c_str(),"png");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPt_forward_1_log.root").c_str(),"root");
+  cCanvas->SetLogy(0);
+  gPad->Update();
+
+
+  legend->Clear();
+
+  // efficiency vs pt
+  TGraphAsymmErrors* PurityReco_vsPt_forward_2 = new TGraphAsymmErrors();
+  PurityReco_vsPt_forward_2->SetName("PurityReco_vsPt_forward_2");
+
+  TGraphAsymmErrors* PurityPuppi_vsPt_forward_2 = new TGraphAsymmErrors();
+  PurityPuppi_vsPt_forward_2->SetName("PurityPuppi_vsPt_forward_2");
+
+  PurityReco_vsPt_forward_2->BayesDivide(NumeratorReco_vsPt_forward_purity_2,DenominatorReco_vsPt_forward_purity_2);
+  PurityPuppi_vsPt_forward_2->BayesDivide(NumeratorPuppi_vsPt_forward_purity_2,DenominatorPuppi_vsPt_forward_purity_2);
+
+  framePurity_vsPt->Delete();
+  framePurity_vsPt = new TH2F("framePurity_vsPt","",50,jetPtThreshold,500,500,
+				  min(PurityReco_vsPt_forward_2->GetHistogram()->GetMinimum(),PurityPuppi_vsPt_forward_2->GetHistogram()->GetMinimum()),
+				  1.05*max(PurityReco_vsPt_forward_2->GetHistogram()->GetMaximum(),PurityPuppi_vsPt_forward_2->GetHistogram()->GetMaximum()));
+
+  framePurity_vsPt->SetLineWidth(2);
+  framePurity_vsPt->SetMarkerStyle(21);
+  framePurity_vsPt->SetMarkerSize(0.3);
+  framePurity_vsPt->GetXaxis()->SetTitle("p_{T} (GeV)");
+  framePurity_vsPt->GetXaxis()->SetLabelOffset(0.012);
+  framePurity_vsPt->GetXaxis()->SetLabelSize(0.038);
+  framePurity_vsPt->GetXaxis()->SetTitleSize(0.05);
+  framePurity_vsPt->GetXaxis()->SetTitleOffset(1.10);
+  framePurity_vsPt->GetYaxis()->SetTitle("purity");
+  framePurity_vsPt->GetYaxis()->SetLabelOffset(0.012);
+  framePurity_vsPt->GetYaxis()->SetLabelSize(0.038);
+  framePurity_vsPt->GetYaxis()->SetTitleSize(0.05);
+  framePurity_vsPt->GetYaxis()->SetTitleOffset(1.18);
+  framePurity_vsPt->SetStats(0);
+  framePurity_vsPt->Draw();
+
+  PurityReco_vsPt_forward_2->SetLineWidth(2);
+  PurityReco_vsPt_forward_2->SetLineColor(kBlue);
+  PurityReco_vsPt_forward_2->SetMarkerStyle(20);
+  PurityReco_vsPt_forward_2->SetMarkerColor(kBlue);
+  PurityReco_vsPt_forward_2->GetXaxis()->SetTitle("p_{T} (GeV)");
+  PurityReco_vsPt_forward_2->GetYaxis()->SetTitle("Purity");
+  PurityReco_vsPt_forward_2->Draw("p");
+
+  PurityPuppi_vsPt_forward_2->SetLineWidth(2);
+  PurityPuppi_vsPt_forward_2->SetLineColor(kRed);
+  PurityPuppi_vsPt_forward_2->SetMarkerStyle(24);
+  PurityPuppi_vsPt_forward_2->SetMarkerColor(kRed);
+  PurityPuppi_vsPt_forward_2->GetXaxis()->SetTitle("#eta");
+  PurityPuppi_vsPt_forward_2->GetYaxis()->SetTitle("Purity");
+  PurityPuppi_vsPt_forward_2->Draw("psame");
+
+  legend->AddEntry(PurityReco_vsPt_forward_2,"CHS jets","l");
+  legend->AddEntry(PurityPuppi_vsPt_forward_2,"Puppi jets","l");
+
+  tex->Draw("same");
+  tex2->Draw("same");
+  tex3->Draw("same");
+  legend->Draw("same");
+
+  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPt_forward_2.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPt_forward_2.png").c_str(),"png");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPt_forward_2.root").c_str(),"root");
+
+  cCanvas->SetLogy();
+
+  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPt_forward_2_log.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPt_forward_2_log.png").c_str(),"png");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPt_forward_2_log.root").c_str(),"root");
   cCanvas->SetLogy(0);
   gPad->Update();
 
@@ -1619,14 +1983,11 @@ int main (int argc, char** argv){
   PurityPuppi_vsPU_central->BayesDivide(NumeratorPuppi_vsPU_central_purity,DenominatorPuppi_vsPU_central_purity);
 
 
-  TH2F* framePurity_vsPU = new TH2F("framePurity_vsPU","",50,PU-40,PU+40,500,
-					0.95*min(PurityReco_vsPU_central->GetHistogram()->GetMinimum(),PurityPuppi_vsPU_central->GetHistogram()->GetMinimum()),
+  TH2F* framePurity_vsPU = new TH2F("framePurity_vsPU","",50,PU-40,PU+40,500,0.7,
 					1.1*max(PurityReco_vsPU_central->GetHistogram()->GetMaximum(),PurityPuppi_vsPU_central->GetHistogram()->GetMaximum()));
   framePurity_vsPU->SetLineWidth(2);
   framePurity_vsPU->SetMarkerStyle(21);
   framePurity_vsPU->SetMarkerSize(0.3);
-  //  framePurity_vsPU->GetXaxis()->SetNdivisions(505);
-  //  framePurity_vsPU->GetYaxis()->SetNdivisions(505);
   framePurity_vsPU->GetXaxis()->SetTitle("N_{PU}");
   framePurity_vsPU->GetXaxis()->SetLabelOffset(0.012);
   framePurity_vsPU->GetXaxis()->SetLabelSize(0.038);
@@ -1680,25 +2041,22 @@ int main (int argc, char** argv){
   legend->Clear();
 
   // efficiency vs pt
-  TGraphAsymmErrors* PurityReco_vsPU_forward = new TGraphAsymmErrors();
-  PurityReco_vsPU_forward->SetName("PurityReco_vsPU_forward");
+  TGraphAsymmErrors* PurityReco_vsPU_forward_1 = new TGraphAsymmErrors();
+  PurityReco_vsPU_forward_1->SetName("PurityReco_vsPU_forward_1");
 
-  TGraphAsymmErrors* PurityPuppi_vsPU_forward = new TGraphAsymmErrors();
-  PurityPuppi_vsPU_forward->SetName("PurityPuppi_vsPU_forward");
+  TGraphAsymmErrors* PurityPuppi_vsPU_forward_1 = new TGraphAsymmErrors();
+  PurityPuppi_vsPU_forward_1->SetName("PurityPuppi_vsPU_forward_1");
 
-  PurityReco_vsPU_forward->BayesDivide(NumeratorReco_vsPU_forward_purity,DenominatorReco_vsPU_forward_purity);
-  PurityPuppi_vsPU_forward->BayesDivide(NumeratorPuppi_vsPU_forward_purity,DenominatorPuppi_vsPU_forward_purity);
+  PurityReco_vsPU_forward_1->BayesDivide(NumeratorReco_vsPU_forward_purity_1,DenominatorReco_vsPU_forward_purity_1);
+  PurityPuppi_vsPU_forward_1->BayesDivide(NumeratorPuppi_vsPU_forward_purity_1,DenominatorPuppi_vsPU_forward_purity_1);
 
   framePurity_vsPU->Delete();
-  framePurity_vsPU = new TH2F("framePurity_vsPU","",50,PU-40,PU+40,500,
-				  0.9*min(PurityReco_vsPU_forward->GetHistogram()->GetMinimum(),PurityPuppi_vsPU_forward->GetHistogram()->GetMinimum()),
-				  1.1*max(PurityReco_vsPU_forward->GetHistogram()->GetMaximum(),PurityPuppi_vsPU_forward->GetHistogram()->GetMaximum()));
+  framePurity_vsPU = new TH2F("framePurity_vsPU","",50,PU-40,PU+40,500,0.7,
+				  1.1*max(PurityReco_vsPU_forward_1->GetHistogram()->GetMaximum(),PurityPuppi_vsPU_forward_1->GetHistogram()->GetMaximum()));
 
   framePurity_vsPU->SetLineWidth(2);
   framePurity_vsPU->SetMarkerStyle(21);
   framePurity_vsPU->SetMarkerSize(0.3);
-  //  framePurity_vsPU->GetXaxis()->SetNdivisions(505);
-  //  framePurity_vsPU->GetYaxis()->SetNdivisions(505);
   framePurity_vsPU->GetXaxis()->SetTitle("N_{PU}");
   framePurity_vsPU->GetXaxis()->SetLabelOffset(0.012);
   framePurity_vsPU->GetXaxis()->SetLabelSize(0.038);
@@ -1712,39 +2070,108 @@ int main (int argc, char** argv){
   framePurity_vsPU->SetStats(0);
   framePurity_vsPU->Draw();
 
-  PurityReco_vsPU_forward->SetLineWidth(2);
-  PurityReco_vsPU_forward->SetLineColor(kBlue);
-  PurityReco_vsPU_forward->SetMarkerStyle(20);
-  PurityReco_vsPU_forward->SetMarkerColor(kBlue);
-  PurityReco_vsPU_forward->GetXaxis()->SetTitle("N_{PU}");
-  PurityReco_vsPU_forward->GetYaxis()->SetTitle("Purity");
-  PurityReco_vsPU_forward->Draw("p");
+  PurityReco_vsPU_forward_1->SetLineWidth(2);
+  PurityReco_vsPU_forward_1->SetLineColor(kBlue);
+  PurityReco_vsPU_forward_1->SetMarkerStyle(20);
+  PurityReco_vsPU_forward_1->SetMarkerColor(kBlue);
+  PurityReco_vsPU_forward_1->GetXaxis()->SetTitle("N_{PU}");
+  PurityReco_vsPU_forward_1->GetYaxis()->SetTitle("Purity");
+  PurityReco_vsPU_forward_1->Draw("p");
 
-  PurityPuppi_vsPU_forward->SetLineWidth(2);
-  PurityPuppi_vsPU_forward->SetLineColor(kRed);
-  PurityPuppi_vsPU_forward->SetMarkerStyle(24);
-  PurityPuppi_vsPU_forward->SetMarkerColor(kRed);
-  PurityPuppi_vsPU_forward->GetXaxis()->SetTitle("N_{PU}");
-  PurityPuppi_vsPU_forward->GetYaxis()->SetTitle("Purity");
-  PurityPuppi_vsPU_forward->Draw("psame");
+  PurityPuppi_vsPU_forward_1->SetLineWidth(2);
+  PurityPuppi_vsPU_forward_1->SetLineColor(kRed);
+  PurityPuppi_vsPU_forward_1->SetMarkerStyle(24);
+  PurityPuppi_vsPU_forward_1->SetMarkerColor(kRed);
+  PurityPuppi_vsPU_forward_1->GetXaxis()->SetTitle("N_{PU}");
+  PurityPuppi_vsPU_forward_1->GetYaxis()->SetTitle("Purity");
+  PurityPuppi_vsPU_forward_1->Draw("psame");
 
-  legend->AddEntry(PurityReco_vsPU_forward,"CHS jets","l");
-  legend->AddEntry(PurityPuppi_vsPU_forward,"Puppi jets","l");
+  legend->AddEntry(PurityReco_vsPU_forward_1,"CHS jets","l");
+  legend->AddEntry(PurityPuppi_vsPU_forward_1,"Puppi jets","l");
 
   tex->Draw("same");
   tex2->Draw("same");
   tex3->Draw("same");
   legend->Draw("same");
 
-  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPU_forward.pdf").c_str(),"pdf");
-  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPU_forward.png").c_str(),"png");
-  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPU_forward.root").c_str(),"root");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPU_forward_1.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPU_forward_1.png").c_str(),"png");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPU_forward_1.root").c_str(),"root");
 
   cCanvas->SetLogy();
 
-  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPU_forward_log.pdf").c_str(),"pdf");
-  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPU_forward_log.png").c_str(),"png");
-  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPU_forward_log.root").c_str(),"root");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPU_forward_1_log.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPU_forward_1_log.png").c_str(),"png");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPU_forward_1_log.root").c_str(),"root");
+  cCanvas->SetLogy(0);
+  gPad->Update();
+
+
+  legend->Clear();
+
+  // efficiency vs pt
+  TGraphAsymmErrors* PurityReco_vsPU_forward_2 = new TGraphAsymmErrors();
+  PurityReco_vsPU_forward_2->SetName("PurityReco_vsPU_forward_2");
+
+  TGraphAsymmErrors* PurityPuppi_vsPU_forward_2 = new TGraphAsymmErrors();
+  PurityPuppi_vsPU_forward_2->SetName("PurityPuppi_vsPU_forward_2");
+
+  PurityReco_vsPU_forward_2->BayesDivide(NumeratorReco_vsPU_forward_purity_2,DenominatorReco_vsPU_forward_purity_2);
+  PurityPuppi_vsPU_forward_2->BayesDivide(NumeratorPuppi_vsPU_forward_purity_2,DenominatorPuppi_vsPU_forward_purity_2);
+
+  framePurity_vsPU->Delete();
+  framePurity_vsPU = new TH2F("framePurity_vsPU","",50,PU-40,PU+40,500,0.7,
+				  1.1*max(PurityReco_vsPU_forward_2->GetHistogram()->GetMaximum(),PurityPuppi_vsPU_forward_2->GetHistogram()->GetMaximum()));
+
+  framePurity_vsPU->SetLineWidth(2);
+  framePurity_vsPU->SetMarkerStyle(21);
+  framePurity_vsPU->SetMarkerSize(0.3);
+  framePurity_vsPU->GetXaxis()->SetTitle("N_{PU}");
+  framePurity_vsPU->GetXaxis()->SetLabelOffset(0.012);
+  framePurity_vsPU->GetXaxis()->SetLabelSize(0.038);
+  framePurity_vsPU->GetXaxis()->SetTitleSize(0.05);
+  framePurity_vsPU->GetXaxis()->SetTitleOffset(1.10);
+  framePurity_vsPU->GetYaxis()->SetTitle("purity");
+  framePurity_vsPU->GetYaxis()->SetLabelOffset(0.012);
+  framePurity_vsPU->GetYaxis()->SetLabelSize(0.038);
+  framePurity_vsPU->GetYaxis()->SetTitleSize(0.05);
+  framePurity_vsPU->GetYaxis()->SetTitleOffset(1.18);
+  framePurity_vsPU->SetStats(0);
+  framePurity_vsPU->Draw();
+
+  PurityReco_vsPU_forward_2->SetLineWidth(2);
+  PurityReco_vsPU_forward_2->SetLineColor(kBlue);
+  PurityReco_vsPU_forward_2->SetMarkerStyle(20);
+  PurityReco_vsPU_forward_2->SetMarkerColor(kBlue);
+  PurityReco_vsPU_forward_2->GetXaxis()->SetTitle("N_{PU}");
+  PurityReco_vsPU_forward_2->GetYaxis()->SetTitle("Purity");
+  PurityReco_vsPU_forward_2->Draw("p");
+
+  PurityPuppi_vsPU_forward_2->SetLineWidth(2);
+  PurityPuppi_vsPU_forward_2->SetLineColor(kRed);
+  PurityPuppi_vsPU_forward_2->SetMarkerStyle(24);
+  PurityPuppi_vsPU_forward_2->SetMarkerColor(kRed);
+  PurityPuppi_vsPU_forward_2->GetXaxis()->SetTitle("N_{PU}");
+  PurityPuppi_vsPU_forward_2->GetYaxis()->SetTitle("Purity");
+  PurityPuppi_vsPU_forward_2->Draw("psame");
+
+  legend->AddEntry(PurityReco_vsPU_forward_2,"CHS jets","l");
+  legend->AddEntry(PurityPuppi_vsPU_forward_2,"Puppi jets","l");
+
+  tex->Draw("same");
+  tex2->Draw("same");
+  tex3->Draw("same");
+  legend->Draw("same");
+
+  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPU_forward_2.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPU_forward_2.png").c_str(),"png");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPU_forward_2.root").c_str(),"root");
+
+  cCanvas->SetLogy();
+
+  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPU_forward_2_log.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPU_forward_2_log.png").c_str(),"png");
+  cCanvas->SaveAs(string(outputFileDirectory+"/Efficiency_vsPU_forward_2_log.root").c_str(),"root");
   cCanvas->SetLogy(0);
   gPad->Update();
 
@@ -1819,15 +2246,15 @@ int main (int argc, char** argv){
 
   legend->Clear();
 
-  //
-  ResponseReco_lowPt_forward->SetLineWidth(2);
-  ResponseReco_lowPt_forward->SetLineColor(kBlue);
-  ResponseReco_lowPt_forward->GetXaxis()->SetTitle("(p_{T}^{Reco}-p_{T}^{Gen})/p_{T}^{Gen}");
-  ResponseReco_lowPt_forward->GetYaxis()->SetTitle("Entries");
-  ResponseReco_lowPt_forward->Draw("hist");
+  // ------------------
+  ResponseReco_lowPt_forward_1->SetLineWidth(2);
+  ResponseReco_lowPt_forward_1->SetLineColor(kBlue);
+  ResponseReco_lowPt_forward_1->GetXaxis()->SetTitle("(p_{T}^{Reco}-p_{T}^{Gen})/p_{T}^{Gen}");
+  ResponseReco_lowPt_forward_1->GetYaxis()->SetTitle("Entries");
+  ResponseReco_lowPt_forward_1->Draw("hist");
 
   gPad->Update();
-  tps1 = (TPaveStats*) ResponseReco_lowPt_forward->FindObject("stats");
+  tps1 = (TPaveStats*) ResponseReco_lowPt_forward_1->FindObject("stats");
   tps1->SetTextColor(kBlue);
   tps1->SetLineColor(kBlue);
   tps1->SetX1NDC(0.72);
@@ -1839,12 +2266,12 @@ int main (int argc, char** argv){
   X2 = tps1->GetX2NDC();
   Y2 = tps1->GetY2NDC();
   
-  ResponsePuppi_lowPt_forward->SetLineWidth(2);
-  ResponsePuppi_lowPt_forward->SetLineColor(kRed);
-  ResponsePuppi_lowPt_forward->Draw("hist");
+  ResponsePuppi_lowPt_forward_1->SetLineWidth(2);
+  ResponsePuppi_lowPt_forward_1->SetLineColor(kRed);
+  ResponsePuppi_lowPt_forward_1->Draw("hist");
   
   gPad->Update();
-  tps2 = (TPaveStats*) ResponsePuppi_lowPt_forward->FindObject("stats");
+  tps2 = (TPaveStats*) ResponsePuppi_lowPt_forward_1->FindObject("stats");
   tps2->SetTextColor(kRed);
   tps2->SetLineColor(kRed);
   tps2->SetX1NDC(X1);
@@ -1852,11 +2279,11 @@ int main (int argc, char** argv){
   tps2->SetY1NDC(Y1-(Y2-Y1));
   tps2->SetY2NDC(Y1);
 
-  ResponseReco_lowPt_forward->GetYaxis()->SetRangeUser(0.001,max(ResponseReco_lowPt_forward->GetMaximum(),ResponsePuppi_lowPt_forward->GetMaximum())*1.25);
+  ResponseReco_lowPt_forward_1->GetYaxis()->SetRangeUser(0.001,max(ResponseReco_lowPt_forward_1->GetMaximum(),ResponsePuppi_lowPt_forward_1->GetMaximum())*1.25);
 
-  ResponseReco_lowPt_forward->Draw("hist");
-  ResponsePuppi_lowPt_forward->SetLineStyle(7);  
-  ResponsePuppi_lowPt_forward->Draw("hist same");
+  ResponseReco_lowPt_forward_1->Draw("hist");
+  ResponsePuppi_lowPt_forward_1->SetLineStyle(7);  
+  ResponsePuppi_lowPt_forward_1->Draw("hist same");
 
   tps1->SetFillStyle(0);
   tps2->SetFillStyle(0);
@@ -1864,29 +2291,97 @@ int main (int argc, char** argv){
   tps1->Draw("same");
   tps2->Draw("same");
 
-  legend->AddEntry(ResponseReco_lowPt_forward,"CHS jets","l");
-  legend->AddEntry(ResponsePuppi_lowPt_forward,"Puppi jets","l");
+  legend->AddEntry(ResponseReco_lowPt_forward_1,"CHS jets","l");
+  legend->AddEntry(ResponsePuppi_lowPt_forward_1,"Puppi jets","l");
 
   tex->Draw("same");
   tex2->Draw("same");
   tex3->Draw("same");
   legend->Draw("same");
 
-  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_lowPt_forward.pdf").c_str(),"pdf");
-  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_lowPt_forward.png").c_str(),"png");
-  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_lowPt_forward.root").c_str(),"root");
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_lowPt_forward_1.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_lowPt_forward_1.png").c_str(),"png");
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_lowPt_forward_1.root").c_str(),"root");
 
   cCanvas->SetLogy();
 
-  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_lowPt_forward_log.pdf").c_str(),"pdf");
-  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_lowPt_forward_log.png").c_str(),"png");
-  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_lowPt_forward_log.root").c_str(),"root");
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_lowPt_forward_1_log.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_lowPt_forward_1_log.png").c_str(),"png");
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_lowPt_forward_1_log.root").c_str(),"root");
   cCanvas->SetLogy(0);
   gPad->Update();
 
   legend->Clear();
 
-  //
+  // ------------------
+  ResponseReco_lowPt_forward_2->SetLineWidth(2);
+  ResponseReco_lowPt_forward_2->SetLineColor(kBlue);
+  ResponseReco_lowPt_forward_2->GetXaxis()->SetTitle("(p_{T}^{Reco}-p_{T}^{Gen})/p_{T}^{Gen}");
+  ResponseReco_lowPt_forward_2->GetYaxis()->SetTitle("Entries");
+  ResponseReco_lowPt_forward_2->Draw("hist");
+
+  gPad->Update();
+  tps1 = (TPaveStats*) ResponseReco_lowPt_forward_2->FindObject("stats");
+  tps1->SetTextColor(kBlue);
+  tps1->SetLineColor(kBlue);
+  tps1->SetX1NDC(0.72);
+  tps1->SetY1NDC(0.68);
+  tps1->SetX2NDC(0.93);
+  tps1->SetY2NDC(0.89);
+  X1 = tps1->GetX1NDC();
+  Y1 = tps1->GetY1NDC();
+  X2 = tps1->GetX2NDC();
+  Y2 = tps1->GetY2NDC();
+  
+  ResponsePuppi_lowPt_forward_2->SetLineWidth(2);
+  ResponsePuppi_lowPt_forward_2->SetLineColor(kRed);
+  ResponsePuppi_lowPt_forward_2->Draw("hist");
+  
+  gPad->Update();
+  tps2 = (TPaveStats*) ResponsePuppi_lowPt_forward_2->FindObject("stats");
+  tps2->SetTextColor(kRed);
+  tps2->SetLineColor(kRed);
+  tps2->SetX1NDC(X1);
+  tps2->SetX2NDC(X2);
+  tps2->SetY1NDC(Y1-(Y2-Y1));
+  tps2->SetY2NDC(Y1);
+
+  ResponseReco_lowPt_forward_2->GetYaxis()->SetRangeUser(0.001,max(ResponseReco_lowPt_forward_2->GetMaximum(),ResponsePuppi_lowPt_forward_2->GetMaximum())*1.25);
+
+  ResponseReco_lowPt_forward_2->Draw("hist");
+  ResponsePuppi_lowPt_forward_2->SetLineStyle(7);  
+  ResponsePuppi_lowPt_forward_2->Draw("hist same");
+
+  tps1->SetFillStyle(0);
+  tps2->SetFillStyle(0);
+
+  tps1->Draw("same");
+  tps2->Draw("same");
+
+  legend->AddEntry(ResponseReco_lowPt_forward_2,"CHS jets","l");
+  legend->AddEntry(ResponsePuppi_lowPt_forward_2,"Puppi jets","l");
+
+  tex->Draw("same");
+  tex2->Draw("same");
+  tex3->Draw("same");
+  legend->Draw("same");
+
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_lowPt_forward_2.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_lowPt_forward_2.png").c_str(),"png");
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_lowPt_forward_2.root").c_str(),"root");
+
+  cCanvas->SetLogy();
+
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_lowPt_forward_2_log.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_lowPt_forward_2_log.png").c_str(),"png");
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_lowPt_forward_2_log.root").c_str(),"root");
+  cCanvas->SetLogy(0);
+  gPad->Update();
+
+  legend->Clear();
+
+
+  // ----------------
   ResponseReco_highPt_central->SetLineWidth(2);
   ResponseReco_highPt_central->SetLineColor(kBlue);
   ResponseReco_highPt_central->GetXaxis()->SetTitle("(p_{T}^{Reco}-p_{T}^{Gen})/p_{T}^{Gen}");
@@ -1955,14 +2450,14 @@ int main (int argc, char** argv){
   legend->Clear();
 
   //
-  ResponseReco_highPt_forward->SetLineWidth(2);
-  ResponseReco_highPt_forward->SetLineColor(kBlue);
-  ResponseReco_highPt_forward->GetXaxis()->SetTitle("(p_{T}^{Reco}-p_{T}^{Gen})/p_{T}^{Gen}");
-  ResponseReco_highPt_forward->GetYaxis()->SetTitle("Entries");
-  ResponseReco_highPt_forward->Draw("hist");
+  ResponseReco_highPt_forward_1->SetLineWidth(2);
+  ResponseReco_highPt_forward_1->SetLineColor(kBlue);
+  ResponseReco_highPt_forward_1->GetXaxis()->SetTitle("(p_{T}^{Reco}-p_{T}^{Gen})/p_{T}^{Gen}");
+  ResponseReco_highPt_forward_1->GetYaxis()->SetTitle("Entries");
+  ResponseReco_highPt_forward_1->Draw("hist");
 
   gPad->Update();
-  tps1 = (TPaveStats*) ResponseReco_highPt_forward->FindObject("stats");
+  tps1 = (TPaveStats*) ResponseReco_highPt_forward_1->FindObject("stats");
   tps1->SetTextColor(kBlue);
   tps1->SetLineColor(kBlue);
   tps1->SetX1NDC(0.72);
@@ -1974,12 +2469,12 @@ int main (int argc, char** argv){
   X2 = tps1->GetX2NDC();
   Y2 = tps1->GetY2NDC();
   
-  ResponsePuppi_highPt_forward->SetLineWidth(2);
-  ResponsePuppi_highPt_forward->SetLineColor(kRed);
-  ResponsePuppi_highPt_forward->Draw("hist");
+  ResponsePuppi_highPt_forward_1->SetLineWidth(2);
+  ResponsePuppi_highPt_forward_1->SetLineColor(kRed);
+  ResponsePuppi_highPt_forward_1->Draw("hist");
   
   gPad->Update();
-  tps2 = (TPaveStats*) ResponsePuppi_highPt_forward->FindObject("stats");
+  tps2 = (TPaveStats*) ResponsePuppi_highPt_forward_1->FindObject("stats");
   tps2->SetTextColor(kRed);
   tps2->SetLineColor(kRed);
   tps2->SetX1NDC(X1);
@@ -1987,11 +2482,11 @@ int main (int argc, char** argv){
   tps2->SetY1NDC(Y1-(Y2-Y1));
   tps2->SetY2NDC(Y1);
 
-  ResponseReco_highPt_forward->GetYaxis()->SetRangeUser(0.001,max(ResponseReco_highPt_forward->GetMaximum(),ResponsePuppi_highPt_forward->GetMaximum())*1.25);
+  ResponseReco_highPt_forward_1->GetYaxis()->SetRangeUser(0.001,max(ResponseReco_highPt_forward_1->GetMaximum(),ResponsePuppi_highPt_forward_1->GetMaximum())*1.25);
 
-  ResponseReco_highPt_forward->Draw("hist");
-  ResponsePuppi_highPt_forward->SetLineStyle(7);  
-  ResponsePuppi_highPt_forward->Draw("hist same");
+  ResponseReco_highPt_forward_1->Draw("hist");
+  ResponsePuppi_highPt_forward_1->SetLineStyle(7);  
+  ResponsePuppi_highPt_forward_1->Draw("hist same");
 
   tps1->SetFillStyle(0);
   tps2->SetFillStyle(0);
@@ -1999,23 +2494,92 @@ int main (int argc, char** argv){
   tps1->Draw("same");
   tps2->Draw("same");
 
-  legend->AddEntry(ResponseReco_highPt_forward,"CHS jets","l");
-  legend->AddEntry(ResponsePuppi_highPt_forward,"Puppi jets","l");
+  legend->AddEntry(ResponseReco_highPt_forward_1,"CHS jets","l");
+  legend->AddEntry(ResponsePuppi_highPt_forward_1,"Puppi jets","l");
 
   tex->Draw("same");
   tex2->Draw("same");
   tex3->Draw("same");
   legend->Draw("same");
 
-  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_highPt_forward.pdf").c_str(),"pdf");
-  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_highPt_forward.png").c_str(),"png");
-  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_highPt_forward.root").c_str(),"root");
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_highPt_forward_1.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_highPt_forward_1.png").c_str(),"png");
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_highPt_forward_1.root").c_str(),"root");
 
   cCanvas->SetLogy();
 
-  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_highPt_forward_log.pdf").c_str(),"pdf");
-  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_highPt_forward_log.png").c_str(),"png");
-  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_highPt_forward_log.root").c_str(),"root");
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_highPt_forward_1_log.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_highPt_forward_1_log.png").c_str(),"png");
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_highPt_forward_1_log.root").c_str(),"root");
+  cCanvas->SetLogy(0);
+  gPad->Update();
+
+
+  legend->Clear();
+
+
+  //
+  ResponseReco_highPt_forward_2->SetLineWidth(2);
+  ResponseReco_highPt_forward_2->SetLineColor(kBlue);
+  ResponseReco_highPt_forward_2->GetXaxis()->SetTitle("(p_{T}^{Reco}-p_{T}^{Gen})/p_{T}^{Gen}");
+  ResponseReco_highPt_forward_2->GetYaxis()->SetTitle("Entries");
+  ResponseReco_highPt_forward_2->Draw("hist");
+
+  gPad->Update();
+  tps1 = (TPaveStats*) ResponseReco_highPt_forward_2->FindObject("stats");
+  tps1->SetTextColor(kBlue);
+  tps1->SetLineColor(kBlue);
+  tps1->SetX1NDC(0.72);
+  tps1->SetY1NDC(0.68);
+  tps1->SetX2NDC(0.93);
+  tps1->SetY2NDC(0.89);
+  X1 = tps1->GetX1NDC();
+  Y1 = tps1->GetY1NDC();
+  X2 = tps1->GetX2NDC();
+  Y2 = tps1->GetY2NDC();
+  
+  ResponsePuppi_highPt_forward_2->SetLineWidth(2);
+  ResponsePuppi_highPt_forward_2->SetLineColor(kRed);
+  ResponsePuppi_highPt_forward_2->Draw("hist");
+  
+  gPad->Update();
+  tps2 = (TPaveStats*) ResponsePuppi_highPt_forward_2->FindObject("stats");
+  tps2->SetTextColor(kRed);
+  tps2->SetLineColor(kRed);
+  tps2->SetX1NDC(X1);
+  tps2->SetX2NDC(X2);
+  tps2->SetY1NDC(Y1-(Y2-Y1));
+  tps2->SetY2NDC(Y1);
+
+  ResponseReco_highPt_forward_2->GetYaxis()->SetRangeUser(0.001,max(ResponseReco_highPt_forward_2->GetMaximum(),ResponsePuppi_highPt_forward_2->GetMaximum())*1.25);
+
+  ResponseReco_highPt_forward_2->Draw("hist");
+  ResponsePuppi_highPt_forward_2->SetLineStyle(7);  
+  ResponsePuppi_highPt_forward_2->Draw("hist same");
+
+  tps1->SetFillStyle(0);
+  tps2->SetFillStyle(0);
+
+  tps1->Draw("same");
+  tps2->Draw("same");
+
+  legend->AddEntry(ResponseReco_highPt_forward_2,"CHS jets","l");
+  legend->AddEntry(ResponsePuppi_highPt_forward_2,"Puppi jets","l");
+
+  tex->Draw("same");
+  tex2->Draw("same");
+  tex3->Draw("same");
+  legend->Draw("same");
+
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_highPt_forward_2.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_highPt_forward_2.png").c_str(),"png");
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_highPt_forward_2.root").c_str(),"root");
+
+  cCanvas->SetLogy();
+
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_highPt_forward_2_log.pdf").c_str(),"pdf");
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_highPt_forward_2_log.png").c_str(),"png");
+  cCanvas->SaveAs(string(outputFileDirectory+"/ResponseReco_highPt_forward_2_log.root").c_str(),"root");
   cCanvas->SetLogy(0);
   gPad->Update();
 
@@ -2157,8 +2721,6 @@ int main (int argc, char** argv){
 
 
   legend->Clear();
-
-
 
   return 0;
     
