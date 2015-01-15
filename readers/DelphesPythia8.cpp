@@ -42,23 +42,23 @@ void SignalHandler(int sig){
 bool LHEEventPreselection(const LHEF::Reader & reader, 
                           const float & Mjj_cut, 
                           const int & SkimFullyHadronic, 
-                          DelphesFactory *factory, 
-                          ExRootTreeBranch* branch,
-                          TObjArray* LHEparticlesArray);
+                          DelphesFactory *factory = 0, 
+                          ExRootTreeBranch* branch = 0,
+                          TObjArray* LHEparticlesArray = 0);
 
 //********************************************************************
 //*** Input Converter for Delphes (frpm Pythia8 to delphes particles)
 //********************************************************************
 
 void ConvertInput(Long64_t eventCounter, 
-                  Pythia8::Pythia* pythia,
-		  ExRootTreeBranch *branch, 
-                  DelphesFactory *factory,
-		  TObjArray *allParticleOutputArray, 
-                  TObjArray *stableParticleOutputArray, 
-                  TObjArray *partonOutputArray,
-		  TStopwatch *readStopWatch, 
-                  TStopwatch *procStopWatch);
+                  Pythia8::Pythia* pythia  = 0,
+		  ExRootTreeBranch *branch = 0, 
+                  DelphesFactory *factory  = 0,
+		  TObjArray *allParticleOutputArray = 0, 
+                  TObjArray *stableParticleOutputArray = 0, 
+                  TObjArray *partonOutputArray = 0,
+		  TStopwatch *readStopWatch = 0, 
+                  TStopwatch *procStopWatch = 0 );
 
 //*******************************************************************************************************************
 // main code : ./DelphesPythia8 <delphes_card> <lhe file> <output root file> <mjj cut> <filter fully hadronic FS> <starting event> <total event>
@@ -101,46 +101,51 @@ int main(int argc, char *argv[]){
   TApplication app(appargv[0], &appargc,appargv); // open a TApplication process
 
   // Initialize objects
-  std::string inputFile;
+  string inputFile;
   TFile *outputFile = 0;
 
   // parsing input parameters
-  ExRootTreeWriter *treeWriter = 0;
+  ExRootTreeWriter *treeWriter    = 0;
   ExRootTreeWriter *wgtTreeWriter = 0;
+
   try{
 
     inputFile  = argv[2]; // input file name for LHE
     outputFile = TFile::Open(argv[3], "RECREATE"); // output file name
 
     if(outputFile == NULL or outputFile == 0){
-      std::stringstream message;
+      stringstream message;
       message << "can't create output file " << argv[3];
       throw runtime_error(message.str());
     }
 
     //--- create output tree ---
-    treeWriter = new ExRootTreeWriter(outputFile, "Delphes");
+    treeWriter    = new ExRootTreeWriter(outputFile, "Delphes");
     wgtTreeWriter = new ExRootTreeWriter(outputFile, "Weights");
 
     // Mjj cut set to zero as default, starting event and number of events
-    std::string sSeed = "0";
-    float       Mjj_cut     = 0;
-    int         skimFullyHadronic  = 1;
-    int         startEvent = 0, nEvent = -1;
+    string  sSeed = "0";
+    float   Mjj_cut     = 0;
+    int     skimFullyHadronic  = 1;
+    int     startEvent = 0, nEvent = -1;
 
-    if (argc >= 5) Mjj_cut = atof(argv[4]);
+    if (argc >= 5) 
+      Mjj_cut = atof(argv[4]);
     
-    if (argc >= 6) skimFullyHadronic = atoi(argv[5]);
+    if (argc >= 6) 
+      skimFullyHadronic = atoi(argv[5]);
                     
-    if (argc >= 7) startEvent = atoi(argv[6]);
+    if (argc >= 7) 
+      startEvent = atoi(argv[6]);
     
-    if (argc >= 8) nEvent = atoi(argv[7]);                                                     
+    if (argc >= 8) 
+      nEvent = atoi(argv[7]);                                                     
     
     //--- deals with the HepMc output of Pythia8 ---> no need to store it
     ExRootTreeWriter *treeHepMC = new ExRootTreeWriter();
     ExRootTreeBranch *branchEventHEPMC = treeHepMC->NewBranch("Event",HepMCEvent::Class());
-    ExRootTreeBranch *branchEventLHE   = treeWriter->NewBranch("LHEFEvent", LHEFEvent::Class());
 
+    ExRootTreeBranch *branchEventLHE   = treeWriter->NewBranch("LHEFEvent", LHEFEvent::Class());
     ExRootTreeBranch *branchLHEFrwgt   = wgtTreeWriter->NewBranch("LHEFrwgt", LHEFrwgt::Class());
 
 
@@ -165,7 +170,7 @@ int main(int argc, char *argv[]){
     //----- initialize fast lhe file reader for preselection -----
     //------------------------------------------------------------
 
-    std::ifstream inputLHE (inputFile.c_str(), ios::in); // read the input LHE file  
+    ifstream inputLHE (inputFile.c_str(), ios::in); // read the input LHE file  
     int skippedCounter = 0;
 
     //-----------------------------
@@ -181,7 +186,7 @@ int main(int argc, char *argv[]){
     }
 
     //--- Initialize Les Houches Event File run. List initialization information.
-    std::string sRandomSeed = "Random:seed = "+sSeed;
+    string sRandomSeed = "Random:seed = "+sSeed;
     //--- random seed from start event number
     pythia->readString("Random:setSeed = on");
 
@@ -193,7 +198,7 @@ int main(int argc, char *argv[]){
     pythia->init();
     
     if(pythia->LHAeventSkip(startEvent)){
-      std::cout << "### skipped first " << startEvent << " events" << std::endl;
+      cout << "### skipped first " << startEvent << " events" << endl;
     }
 
     ExRootProgressBar progressBar(-1);
@@ -206,44 +211,53 @@ int main(int argc, char *argv[]){
     readStopWatch.Start();
 
     // read LHE info
-    std::ifstream InputLHE (inputFile.c_str(), ios::in); // read the input LHE file                                                                                        
+    ifstream InputLHE (inputFile.c_str(), ios::in); // read the input LHE file                                                                                        
     LHEF::Reader Reader (InputLHE) ;
 
     LHEFrwgt* lheWgt = 0;
-    std::istringstream headerBlock(Reader.headerBlock);
-    std::string line;
+    stringstream headerBlock(Reader.headerBlock);
+    string line;
     bool readingAnoinputs = false;
     bool foundAnoinputs = false;
     while (std::getline(headerBlock, line)) {
       if (readingAnoinputs) {
 	int opnum; float opval;
 	if (sscanf(line.c_str(), "%d %e", &opnum, &opval)) {
-	  lheWgt->opNum.push_back(opnum);
-	  lheWgt->opVal.push_back(opval);
-	  foundAnoinputs = true;
+	  if(lheWgt !=0){
+           lheWgt->opNum.push_back(opnum);
+	   lheWgt->opVal.push_back(opval);
+	  }
+	  foundAnoinputs = true;	  
 	} else
 	  break;
       } else if (line.find("Block anoinputs") != std::string::npos) {
-	lheWgt = static_cast<LHEFrwgt *>(branchLHEFrwgt->NewEntry());
+	lheWgt = static_cast<LHEFrwgt*>(branchLHEFrwgt->NewEntry());
 	readingAnoinputs = true;
       }      
-    }    
-    wgtTreeWriter->Fill();
-    lheWgt->opNum.clear();
-    lheWgt->opVal.clear();
+    }
+        
+    wgtTreeWriter->Fill();    
+    if(lheWgt != 0){
+      lheWgt->opNum.clear();
+      lheWgt->opVal.clear();
+    }
 
     if (foundAnoinputs) {
       for (uint iwgt = 0; iwgt < Reader.heprup.weightinfo.size(); iwgt++) {
 	for (uint ip = 0; ip < Reader.heprup.weightinfo[iwgt].operators.size(); ip++) {
-	  lheWgt->opNum.push_back(Reader.heprup.weightinfo[iwgt].operators[ip].first);
-	  lheWgt->opVal.push_back(Reader.heprup.weightinfo[iwgt].operators[ip].second);
+	  if(lheWgt != 0){
+	    lheWgt->opNum.push_back(Reader.heprup.weightinfo[iwgt].operators[ip].first);
+	    lheWgt->opVal.push_back(Reader.heprup.weightinfo[iwgt].operators[ip].second);
+	  }
 	}
 	wgtTreeWriter->Fill();
-	lheWgt->opNum.clear();
-	lheWgt->opVal.clear();	
+	if(lheWgt != 0){
+	  lheWgt->opNum.clear();
+	  lheWgt->opVal.clear();	
+	}
       }
     }
-
+    
     while (Reader.readEvent ()){
      if( startCounter < startEvent ) {
        startCounter++;
@@ -303,7 +317,7 @@ int main(int argc, char *argv[]){
 
     delete pythia;
     delete confReader;
-
+    
     return 0;
   }
   
