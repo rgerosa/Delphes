@@ -48,7 +48,7 @@ set ExecutionPath {
 
   RunPUPPI
   PuppiRhoKt4
-  PuppiRhoGridFastJet
+  PuppiRhoGrid
   PuppiJetFinder
 
   PuppiJetPileUpSubtractor
@@ -651,23 +651,23 @@ module RunPUPPI RunPUPPI {
   set NeutralInputArray Calorimeter/eflowTowers
   set PVInputArray      ModifyBeamSpot/PV
   ## min puppi weight and use dZ vertex option
-  set MinPuppiWeight 0.01
-  set UseExp         false
+  set MinPuppiWeight    0.10
+  set UseExp            false
   ## define puppi algorithm parameters (more than one for the same eta region is possible) 
-  add EtaMinBin           0.   2.5   2.5  
-  add EtaMaxBin           2.5  10.0  10.0 
-  add PtMinBin            0.1  0.8   0.8  
-  add ConeSizeBin         0.3  0.3   0.3  
-  add RMSPtMinBin         0.1  0.5   0.5  
-  add RMSScaleFactorBin   1.0  1.0   1.0  
-  add NeutralMinEBin      0.2  0.2   0.2  
-  add NeutralPtSlope      0.02 0.02  0.02 
-  add ApplyCHS            true true  true 
-  add UseCharged          true false false
-  add ApplyLowPUCorr      true true  true  
-  add MetricId            5    0     1     
+  add EtaMinBin           0.    2.5    2.5    3.0   3.0      
+  add EtaMaxBin           2.5   3.0    3.0    10.0  10.0
+  add PtMinBin            0.    0.5    0.5    0.5   0.5    
+  add ConeSizeBin         0.2   0.2    0.2    0.2   0.2
+  add RMSPtMinBin         0.1   0.5    0.5    0.5   0.5
+  add RMSScaleFactorBin   1.0   1.0    1.0    1.0   1.0
+  add NeutralMinEBin      0.2   1.0    1.0    1.5   1.5
+  add NeutralPtSlope      0.02  0.02   0.02   0.02  0.02
+  add ApplyCHS            true  true   true   true  true
+  add UseCharged          true  false  false  false false
+  add ApplyLowPUCorr      true  true   true   true  true
+  add MetricId            5     5      0      5     0
   ## output name
-  set OutputArray         PuppiParticles
+  set OutputArray PuppiParticles
   set OutputArrayTracks   puppiTracks
   set OutputArrayNeutrals puppiNeutrals
 } 
@@ -695,8 +695,6 @@ module FastJetFinder PuppiRhoKt4 {
   set InputArray RunPUPPI/PuppiParticles
   ## compute rho clustering the event  
   set ComputeRho     true
-  ## not compute rho using the grid
-  set ComputeRhoGrid false
   # area algorithm: 0 Do not compute area, 1 Active area explicit ghosts, 2 One ghost passive area, 3 Passive area, 4 Voronoi, 5 Active area
   set AreaAlgorithm 1
   # jet algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
@@ -731,6 +729,20 @@ module FastJetFinder PuppiRhoGridFastJet {
   set JetPTMin 0.0
 }
 
+module FastJetFinder PuppiRhoGrid {
+  ## take as input the particle flow particles
+  set InputArray RunPUPPI/PuppiParticles
+  ## compute rho clustering the event  
+  set ComputeRho     false
+  ## not compute rho using the grid
+  set ComputeRhoGridParticles true
+  set RhoOutputArray rho
+  ## eta bins for rho evaluation
+  add RhoEtaRange 0.0 2.5
+  add RhoEtaRange 2.5 5.0
+  set JetPTMin 0.0
+}
+
 ########################
 ## Correct puppi jets ##
 ########################
@@ -738,7 +750,7 @@ module FastJetFinder PuppiRhoGridFastJet {
 module JetPileUpSubtractor PuppiJetPileUpSubtractor { ## make the rho correction 
   set JetInputArray PuppiJetFinder/jets
   ## take the Rho from cluster the event with kt jets (decide to use this or the median grid or the safeAreaSbtraction)
-  set RhoInputArray PuppiRhoKt4/rho
+  set RhoInputArray PuppiRhoGrid/rho
   set OutputArray jets
   set doSafe4VAreaSubtraction false
   set JetPTMin 20.0
@@ -2186,7 +2198,7 @@ module TreeWriter TreeWriter {
   ## PUPPI
   #add Branch RunPUPPI/PuppiParticles puppiParticles GenParticle
   add Branch PuppiRhoKt4/rho         PuppiRhoKt4 Rho
-  add Branch PuppiRhoGridFastJet/rho PuppiRhoGridFastJet Rho
+  add Branch PuppiRhoGrid/rho PuppiRhoGrid Rho
   #add Branch PuppiJetFinder/jets     RawPuppiJet Jet
   #add Branch PuppiJetPileUpSubtractor/jets PuppiJet Jet
   #add Branch PuppiJetPileUpSubtractorGrid/jets PuppiJetGrid Jet
