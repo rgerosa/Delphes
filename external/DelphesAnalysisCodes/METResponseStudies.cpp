@@ -49,10 +49,8 @@ int main (int argc, char** argv){
   std::string inputFileDirectory = argv[1]; 
 
   TChain *inputChain = new TChain("Delphes");
-  inputChain->Add((inputFileDirectory+"/*1.root").c_str());
-  inputChain->Add((inputFileDirectory+"/*2.root").c_str());
-  inputChain->Add((inputFileDirectory+"/*3.root").c_str());
-  
+  inputChain->Add((inputFileDirectory+"/*.root").c_str());
+ 
   std::cout<<"number of events to analyze : "<<inputChain->GetEntries()<<std::endl;
 
   // threshold for jet and leptons
@@ -201,7 +199,7 @@ int main (int argc, char** argv){
   cCanvas->SetBottomMargin(0.12);
   cCanvas->SetFrameBorderMode(0);
 
-  TLatex * tex = new TLatex(0.94,0.92," 13 TeV");
+  TLatex * tex = new TLatex(0.94,0.92," 14 TeV");
   tex->SetNDC();
   tex->SetTextAlign(31);
   tex->SetTextFont(42);
