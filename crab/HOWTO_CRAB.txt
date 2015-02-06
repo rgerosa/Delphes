@@ -1,0 +1,45 @@
+--== Running Delphes on the Grid ==--
+
+1) Setting up the work area
+In addition to the files on github, you need the following 
+in the working directory:
+- Delphes.tgz          : the compiled Delphes area
+- fastjet-3.1.0.tar.gz : the fastjet source as downloaded in the main instructions
+- pythia8201.tgz       : the pythia source as downloaded in the main instructions
+- the_fjcontrib.tgz    : the updated fastjet source tree
+Note: The crab script will recreate the fastjet, fastjet-contrib and pythia installs on the grid-node from these files. If the main instuctions change it is not enough to update the local install, these source files need to be updated too.
+
+2) Create a grid job:
+> python runDelphesOnCrab.py 
+options are:
+-c --crabcfg    : template for the crab cfg file
+-r --runscript  : shell script template for execution on the gridnode
+-f --folder     : folder where to store the grid job
+-d --dir        : eos folder with input LHE files
+-p --pattern'   : input file pattern
+
+Notes:
+-You'll have to adjust the crabConfig_TEMPLATE.py in several ways:
+ config.Site.storageSite    : choose a site where you have storage quota
+ config.Data.outLFN         : first part of output path at the T2
+ config.Data.primaryDataset : second part of the output path at the T2
+-for now there is a one-to-one correspondence between input files and grid jobs.
+ ToDo: make the file splitting possible
+
+3) Submit Job:
+General crab3 tutorial https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookCRAB3Tutorial
+-set up crab environment (see above)
+-set up grid proxy
+> crab submit -c <folder from step2>/crabConfig.py
+-Babysit and resubmit as necessary
+
+4) Creating trees
+- get the log files from the grid-jobs (either with "crab getlogs" or direct copy from the T2) and unpack into <folder from step2>/pass
+> pyhton checklogs.py -d <folder from step2>
+This will look at the logfiles from successful jobs to determine wich have actually completed properly and produces a corresponding "finished.txt" file, that contains the known good output files
+- set up a grid-proxy in your home directory, so that it will be available on lsf
+> X509_USER_PROXY=$HOME/testproxy voms-proxy-init
+- Run scripts/makeDelphesDumper.py, using finished.txt for --inputdir
+
+
+
