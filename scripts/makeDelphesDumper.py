@@ -49,9 +49,17 @@ def writeJobs(workingdir,executable,inputdir,outputname,eosoutdir,njobs):
     #----------------------------------------------------------------
     # --- prepare the list of files to be analyzed --> read from eos
     #-----------------------------------------------------------------
-    listoffiles = [];
-    listoffiles = makeFilesList(inputdir,workingdir,"",options.fileKey); ## make the file list for the input directory on eos
+    listoffiles=[]
+    iseos=True
+    if os.path.isfile(inputdir):
+        iseos=False
+        inf = open(inputdir,'r')
+        for line in inf:
+            listoffiles.append(str.strip(line))
+    else:
+        listoffiles = makeFilesList(inputdir,workingdir,"",options.fileKey); ## make the file list for the input directory on eos
     
+
     #---------------------------------------------
     # --- now split the jobs
     #---------------------------------------------
@@ -62,10 +70,18 @@ def writeJobs(workingdir,executable,inputdir,outputname,eosoutdir,njobs):
 
      #--- prepare the list of files for each job
      f = open('%s/input_%d.txt'%(jobdir,job), 'w')
+     #f2 = open('%s/input_bare_%d.txt'%(jobdir,job), 'w')
      sublist = [file for i,file in enumerate(listoffiles) if (i%njobs==job)]
      for fname in sublist:
-        f.write('%s \n'%fname)
+         if iseos:
+             f.write('%s \n'%fname)
+         else:
+             f.write('root://cms-xrd-global.cern.ch//%s \n'%fname)
 
+         #f2.write(fname.split('/')[-1]+"\n")
+             
+     f.close()
+     #f2.close()
 
      ### prepare the job scripts                                                                                                                                                          
      jobscript = open('%s/subJob_%d.sh'%(jobdir,job),'w')
@@ -74,8 +90,11 @@ def writeJobs(workingdir,executable,inputdir,outputname,eosoutdir,njobs):
      jobscript.write('cd - \n')
      jobscript.write('scp '+os.getcwd()+"/"+executable+" ./ \n");     
      jobscript.write('if ( \n')
-     jobscript.write('\t touch %s/sub_%d.run \n'%(jobdir,job))      
-     jobscript.write('\t ./%s %s/input_%d.txt %s_%d.root'%(executable,jobdir,job,outputname,job))
+     jobscript.write('\t touch %s/sub_%d.run \n'%(jobdir,job))    
+     if iseos:
+         jobscript.write('\t ./%s %s/input_%d.txt %s_%d.root\n'%(executable,jobdir,job,outputname,job))
+     else:
+         jobscript.write('\t X509_USER_PROXY=$HOME/testproxy ./%s %s/input_%d.txt %s_%d.root\n'%(executable,jobdir,job,outputname,job))
      jobscript.write(') then \n')
      if (eosoutdir == ''):
        jobscript.write('\t cp ./%s_%d.root %s \n'%(outputname,job,jobdir))
