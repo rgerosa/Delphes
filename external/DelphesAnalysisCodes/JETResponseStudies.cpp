@@ -2183,6 +2183,8 @@ int main (int argc, char** argv){
   ResponseReco_lowPt_central->SetLineColor(kBlue);
   ResponseReco_lowPt_central->GetXaxis()->SetTitle("(p_{T}^{Reco}-p_{T}^{Gen})/p_{T}^{Gen}");
   ResponseReco_lowPt_central->GetYaxis()->SetTitle("Entries");
+  int integral = ResponseReco_lowPt_central->Integral();
+  ResponseReco_lowPt_central->Scale(1./integral);
   ResponseReco_lowPt_central->Draw("hist");
 
   gPad->Update();
@@ -2200,6 +2202,8 @@ int main (int argc, char** argv){
   
   ResponsePuppi_lowPt_central->SetLineWidth(2);
   ResponsePuppi_lowPt_central->SetLineColor(kRed);
+  integral = ResponsePuppi_lowPt_central->Integral();
+  ResponsePuppi_lowPt_central->Scale(1./integral);
   ResponsePuppi_lowPt_central->Draw("hist");
   
   gPad->Update();
@@ -2251,6 +2255,8 @@ int main (int argc, char** argv){
   ResponseReco_lowPt_forward_1->SetLineColor(kBlue);
   ResponseReco_lowPt_forward_1->GetXaxis()->SetTitle("(p_{T}^{Reco}-p_{T}^{Gen})/p_{T}^{Gen}");
   ResponseReco_lowPt_forward_1->GetYaxis()->SetTitle("Entries");
+  integral = ResponseReco_lowPt_forward_1->Integral();
+  ResponseReco_lowPt_forward_1->Scale(1./integral);
   ResponseReco_lowPt_forward_1->Draw("hist");
 
   gPad->Update();
@@ -2268,6 +2274,8 @@ int main (int argc, char** argv){
   
   ResponsePuppi_lowPt_forward_1->SetLineWidth(2);
   ResponsePuppi_lowPt_forward_1->SetLineColor(kRed);
+  integral = ResponsePuppi_lowPt_forward_1->Integral();
+  ResponsePuppi_lowPt_forward_1->Scale(1./integral);
   ResponsePuppi_lowPt_forward_1->Draw("hist");
   
   gPad->Update();
@@ -2318,6 +2326,8 @@ int main (int argc, char** argv){
   ResponseReco_lowPt_forward_2->SetLineColor(kBlue);
   ResponseReco_lowPt_forward_2->GetXaxis()->SetTitle("(p_{T}^{Reco}-p_{T}^{Gen})/p_{T}^{Gen}");
   ResponseReco_lowPt_forward_2->GetYaxis()->SetTitle("Entries");
+  integral = ResponseReco_lowPt_forward_2->Integral();
+  ResponseReco_lowPt_forward_2->Scale(1./integral);
   ResponseReco_lowPt_forward_2->Draw("hist");
 
   gPad->Update();
@@ -2335,6 +2345,8 @@ int main (int argc, char** argv){
   
   ResponsePuppi_lowPt_forward_2->SetLineWidth(2);
   ResponsePuppi_lowPt_forward_2->SetLineColor(kRed);
+  integral = ResponsePuppi_lowPt_forward_2->Integral();
+  ResponsePuppi_lowPt_forward_2->Scale(1./integral);
   ResponsePuppi_lowPt_forward_2->Draw("hist");
   
   gPad->Update();
@@ -2386,6 +2398,8 @@ int main (int argc, char** argv){
   ResponseReco_highPt_central->SetLineColor(kBlue);
   ResponseReco_highPt_central->GetXaxis()->SetTitle("(p_{T}^{Reco}-p_{T}^{Gen})/p_{T}^{Gen}");
   ResponseReco_highPt_central->GetYaxis()->SetTitle("Entries");
+  integral = ResponseReco_highPt_central->Integral();
+  ResponseReco_highPt_central->Scale(1./integral);
   ResponseReco_highPt_central->Draw("hist");
 
   gPad->Update();
@@ -2403,6 +2417,8 @@ int main (int argc, char** argv){
   
   ResponsePuppi_highPt_central->SetLineWidth(2);
   ResponsePuppi_highPt_central->SetLineColor(kRed);
+  integral = ResponsePuppi_highPt_central->Integral();
+  ResponsePuppi_highPt_central->Scale(1./integral);
   ResponsePuppi_highPt_central->Draw("hist");
   
   gPad->Update();
@@ -2454,6 +2470,8 @@ int main (int argc, char** argv){
   ResponseReco_highPt_forward_1->SetLineColor(kBlue);
   ResponseReco_highPt_forward_1->GetXaxis()->SetTitle("(p_{T}^{Reco}-p_{T}^{Gen})/p_{T}^{Gen}");
   ResponseReco_highPt_forward_1->GetYaxis()->SetTitle("Entries");
+  integral = ResponseReco_highPt_forward_1->Integral();
+  ResponseReco_highPt_forward_1->Scale(1./integral);
   ResponseReco_highPt_forward_1->Draw("hist");
 
   gPad->Update();
@@ -2471,6 +2489,8 @@ int main (int argc, char** argv){
   
   ResponsePuppi_highPt_forward_1->SetLineWidth(2);
   ResponsePuppi_highPt_forward_1->SetLineColor(kRed);
+  integral = ResponsePuppi_highPt_forward_1->Integral();
+  ResponsePuppi_highPt_forward_1->Scale(1./integral);
   ResponsePuppi_highPt_forward_1->Draw("hist");
   
   gPad->Update();
@@ -2523,6 +2543,8 @@ int main (int argc, char** argv){
   ResponseReco_highPt_forward_2->SetLineColor(kBlue);
   ResponseReco_highPt_forward_2->GetXaxis()->SetTitle("(p_{T}^{Reco}-p_{T}^{Gen})/p_{T}^{Gen}");
   ResponseReco_highPt_forward_2->GetYaxis()->SetTitle("Entries");
+  integral = ResponseReco_highPt_forward_2->Integral();
+  ResponseReco_highPt_forward_2->Scale(1./integral);
   ResponseReco_highPt_forward_2->Draw("hist");
 
   gPad->Update();
@@ -2540,6 +2562,8 @@ int main (int argc, char** argv){
   
   ResponsePuppi_highPt_forward_2->SetLineWidth(2);
   ResponsePuppi_highPt_forward_2->SetLineColor(kRed);
+  integral = ResponsePuppi_highPt_forward_2->Integral();
+  ResponsePuppi_highPt_forward_2->Scale(1./integral);
   ResponsePuppi_highPt_forward_2->Draw("hist");
   
   gPad->Update();
@@ -2591,6 +2615,9 @@ int main (int argc, char** argv){
   ResponseReco_deta->SetLineColor(kBlue);
   ResponseReco_deta->GetXaxis()->SetTitle("(#Delta#eta_{jj}^{Reco}-#Delta#eta_{jj}^{Gen})/#Delta#eta_{jj}^{Gen}");
   ResponseReco_deta->GetYaxis()->SetTitle("Entries");
+  integral = ResponseReco_deta->Integral();
+  ResponseReco_deta->Scale(1./integral);
+ 
   ResponseReco_deta->Draw("hist");
 
   gPad->Update();
@@ -2608,6 +2635,8 @@ int main (int argc, char** argv){
   
   ResponsePuppi_deta->SetLineWidth(2);
   ResponsePuppi_deta->SetLineColor(kRed);
+  integral = ResponsePuppi_deta->Integral();
+  ResponsePuppi_deta->Scale(1./integral);
   ResponsePuppi_deta->Draw("hist");
   
   gPad->Update();
@@ -2659,6 +2688,8 @@ int main (int argc, char** argv){
   ResponseReco_mjj->SetLineColor(kBlue);
   ResponseReco_mjj->GetXaxis()->SetTitle("(M_{jj}^{Reco}-M_{jj}^{Gen})/M_{jj}^{Gen}");
   ResponseReco_mjj->GetYaxis()->SetTitle("Entries");
+  integral = ResponseReco_mjj->Integral();
+  ResponseReco_mjj->Scale(1./integral);
   ResponseReco_mjj->Draw("hist");
 
   gPad->Update();
@@ -2676,6 +2707,8 @@ int main (int argc, char** argv){
   
   ResponsePuppi_mjj->SetLineWidth(2);
   ResponsePuppi_mjj->SetLineColor(kRed);
+  integral = ResponsePuppi_mjj->Integral();
+  ResponsePuppi_mjj->Scale(1./integral);
   ResponsePuppi_mjj->Draw("hist");
   
   gPad->Update();
