@@ -253,6 +253,7 @@ int main (int argc, char *argv[]){
 
   //-------- LHE event weights
   int nlheweights = 657;
+  float evtsperfile = 100;
   float eventLHEweight_tmp[nlheweights];
   if (fillWeights) {
     for(int ilhe=0; ilhe<nlheweights; ilhe++){
@@ -763,10 +764,13 @@ int main (int argc, char *argv[]){
     
 
     if (fillWeights) {
+      for(int i=0; i<nlheweights; i++) 
+	eventLHEweight_tmp[i] = -999;
       LHEFEvent* lheevent         = (LHEFEvent*) branchLHEEvent->At(0);
       vector<Double_t> lheweights = lheevent->lheWeights;
-      for(vector<Double_t>::iterator it = lheweights.begin(); it != lheweights.end(); ++it)
-	eventLHEweight_tmp[(uint)(it-lheweights.begin())] = *it;
+      float replicas = ((float)numberOfEntries)/evtsperfile;
+      for(vector<Double_t>::iterator it = lheweights.begin(); it != lheweights.end(); ++it)      
+	eventLHEweight_tmp[(uint)(it-lheweights.begin())] = (*it)/replicas;
     }        
         
     int lhe_entries = branchLHEParticle->GetEntriesFast();
