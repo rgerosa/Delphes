@@ -4,6 +4,7 @@
 #include <fstream>
 #include <utility>
 
+#include "TObject.h"
 #include "TROOT.h"
 #include "TSystem.h"
 #include "TString.h"
@@ -78,6 +79,58 @@ float DeltaPhi(float phi1, float phi2){
   return dphi;
 }
 
+void FillWeightsInfo(const char* fileName, int noperators, float* operatorVal, TTree* ch, bool isList) {
+
+  TChain* weightsInfo = new TChain("Weights");
+  ExRootTreeReader *weightsTree = new ExRootTreeReader(weightsInfo);  
+  if (isList) {
+    ifstream inFile(fileName);
+    string buffer;
+    if(!inFile.is_open()){
+      std::cerr << "** ERROR: Can't open '" << fileName << "' for input" << std::endl;
+      return;
+    }
+    inFile >> buffer;
+    weightsInfo->Add(buffer.c_str());
+  } else {
+    weightsInfo->Add(fileName);
+  }
+  weightsInfo->BranchRef();
+
+  TClonesArray* branchLHErwgt= weightsTree->UseBranch("LHEFrwgt");  
+  float operatorVal_baseline[noperators];
+
+  weightsTree->ReadEntry(0);
+  LHEFrwgt* lherwgt = (LHEFrwgt*) branchLHErwgt->At(0);
+  vector<Int_t> opNum    = lherwgt->opNum;
+  vector<Double_t> opVal = lherwgt->opVal;
+  for (int i=0; i<noperators; i++) {
+    operatorVal_baseline[i] = opVal[i];
+    operatorVal[i] = opVal[i];
+  }
+  ch->Fill();
+
+  Long64_t numberOfEntries = weightsTree->GetEntries();
+  for(int iEvent = 1; iEvent<numberOfEntries; iEvent++){
+
+    weightsTree->ReadEntry(iEvent);
+    lherwgt = (LHEFrwgt*) branchLHErwgt->At(0);
+    
+    opNum = lherwgt->opNum;
+    opVal = lherwgt->opVal;
+    
+    for (int i=0; i<noperators; i++)
+      operatorVal[i] = operatorVal_baseline[i];
+    
+    for(vector<Int_t>::iterator it = opNum.begin(); it != opNum.end(); ++it)
+      operatorVal[(*it)-1] = opVal[(uint)(it-opNum.begin())];
+
+    ch->Fill();
+
+  }
+
+}
+
 // function to fill a TChain with the list of input files to be processed
 bool FillChain(TChain& chain, const std::string& inputFileList){
   std::ifstream inFile(inputFileList.c_str());
@@ -93,6 +146,7 @@ bool FillChain(TChain& chain, const std::string& inputFileList){
   }
   return true;
 }
+
 
 //************************
 // main
@@ -113,18 +167,45 @@ int main (int argc, char *argv[]){
   // reading input files
   if(argc < 3){
     cout << "ERROR: not enough info provided" << endl;
+    cout << "Usage: DelphesDumper [-w] inputFile outputFile" << endl;
+    cout << "\t-w: add weight information" << endl;
+    cout << "\tinputFile: a Delphes ROOT file or a list of these in a text file" << endl;
+    cout << "\toutputFile: the flat tree ROOT file" << endl;    
     return 0;
+  }
+  
+  bool fillWeights = false;
+  if(argc == 4) {
+    argv[1] = argv[2];
+    argv[2] = argv[3];
+    fillWeights = true;
   }
 
   TFile* outputFile = TFile::Open(argv[2],"recreate");
   TTree* easyTree = new TTree("easyDelphes","easyDelphes");
 
+  int noperators = 20;
+  float operatorVal_tmp[noperators];
+  TTree* weightsInfo = NULL;
+  if (fillWeights) {
+    weightsInfo = new TTree("weightsInfo","weightsInfo");
+    for(int iop=0; iop<noperators; iop++){
+      TString operatorValStr = "operatorVal"; operatorValStr += (iop+1);
+      weightsInfo->Branch(operatorValStr,&operatorVal_tmp[iop],operatorValStr+"/F");
+    }
+  }
+
+
   //-------------------------------------------------
   TString inputFileName = Form("%s",std::string(argv[1]).c_str());
-  if(inputFileName.Contains(".root"))
+  if(inputFileName.Contains(".root")) {
     delphesNtuples -> Add(argv[1]);
-  else if (inputFileName.Contains(".txt")){
+    if (fillWeights) 
+      FillWeightsInfo(argv[1], noperators, operatorVal_tmp, weightsInfo, false);    
+  } else if (inputFileName.Contains(".txt")){
     FillChain(*delphesNtuples,inputFileName.Data());
+    if (fillWeights) 
+      FillWeightsInfo(argv[1], noperators, operatorVal_tmp, weightsInfo, true);    
   }
   else{
     cout << "ERROR: input argv[1] extension not known" << endl;
@@ -145,6 +226,7 @@ int main (int argc, char *argv[]){
   // -> all objects in the output tree are stored in decreasing pt order.
   //--------- getting objects from the delphes tree
 
+  TClonesArray* branchLHEEvent    = delphesTree->UseBranch("LHEFEvent");
   TClonesArray* branchLHEParticle = delphesTree->UseBranch("LHEParticles");
   TClonesArray* branchEl          = delphesTree->UseBranch("Electron");
   TClonesArray* branchMu          = delphesTree->UseBranch("Muon");
@@ -168,6 +250,17 @@ int main (int argc, char *argv[]){
   TClonesArray* branchPuppiRhoGFJ= delphesTree->UseBranch("PuppiRhoGridFastJet");
              
   //--------- Creating branches for the new (light) tree    
+
+  //-------- LHE event weights
+  int nlheweights = 657;
+  float eventLHEweight_tmp[nlheweights];
+  if (fillWeights) {
+    for(int ilhe=0; ilhe<nlheweights; ilhe++){
+      TString eventLHEweightStr = "eventLHEweight"; eventLHEweightStr += (ilhe);
+      easyTree->Branch(eventLHEweightStr,&eventLHEweight_tmp[ilhe],eventLHEweightStr+"/F");
+    }    
+  }
+
   //--------- LHE Information
 
   int nlhe  = 4;
@@ -666,89 +759,97 @@ int main (int argc, char *argv[]){
       vbosonLHEpt_tmp[k]=-999;  vbosonLHEeta_tmp[k]=-999;  vbosonLHEphi_tmp[k]=-999;  vbosonLHEpid_tmp[k]=-999;  vbosonLHEspin_tmp[k]=-999; 
       vbosonLHEch_tmp[k]=-999;  vbosonLHEm_tmp[k]=-999;
     }
-        
-        
-      int lhe_entries = branchLHEParticle->GetEntriesFast();
-        
-                
-      for (int i = 0 ; i < lhe_entries  ; i++) {
-	LHEParticle *lhepart = (LHEParticle*) branchLHEParticle->At(i);
-	int type   =  lhepart-> PID;
-	int status =  lhepart-> Status;
-            
-	// no incoming particle
-	if(status == -1) continue;
-            
-            
-	if (type < 6 && type > -6) {
-	  lhepartonID.push_back(i);
-	  lheParton.push_back(lhepart);
-	}
-            
-	if (type == 21) {
-	  lhegluonID.push_back(i);
-	  lheGluon.push_back(lhepart);
-	}
-            
-	if (type == 24 || type ==-24 || type == 23 ) {
-	  lhevbosonID.push_back(i);
-	  lheVBoson.push_back(lhepart);
-	}
-            
-	if (type == 11 || type == 13 || type == 15 ||type == -11 || type == -13 || type == -15 ) {
-	  lheleptonID.push_back(i);
-	  lheLepton.push_back(lhepart);
-	}
-            
-	if (type == 12 || type == 14 || type == 16 ||type == -12 || type == -14 || type == -16 ) {
-	  lheneutrinoID.push_back(i);
-	  lheNeutrino.push_back(lhepart);
-	}
-      } //lheloop
-      
-            
-      // sorting in PT            
-      sort(lheParton.begin(), lheParton.end(),lheParticleDescendingPt());
-      sort(lheLepton.begin(), lheLepton.end(),lheParticleDescendingPt());
-      sort(lheNeutrino.begin(), lheNeutrino.end(),lheParticleDescendingPt());
-      sort(lheGluon.begin(), lheGluon.end(),lheParticleDescendingPt());
-      sort(lheVBoson.begin(), lheVBoson.end(),lheParticleDescendingPt());
-            
-      int jl = (lheleptonID.size()<4) ? lheleptonID.size():4;
-      int jp = (lhepartonID.size()<4) ? lhepartonID.size():4;
-      int jn = (lheneutrinoID.size()<4) ? lheneutrinoID.size():4;
-      int jg = (lhegluonID.size()<2) ? lhegluonID.size():2;
-      int jb = (lhevbosonID.size()<2) ? lhevbosonID.size():2;
-            
-      for(int j=0; j<jp; j++){
-	jetLHEPartonpt_tmp[j] = lheParton.at(j)->PT;
-	jetLHEPartoneta_tmp[j] = lheParton.at(j)->Eta;
-	jetLHEPartonphi_tmp[j] = lheParton.at(j)->Phi;
-	jetLHEPartonpid_tmp[j] = lheParton.at(j)->PID;
-	jetLHEPartonspin_tmp[j] = lheParton.at(j)->Spin;
-                
-      }
-            
-      for(int j=0; j<jg; j++){
-	jetLHEGluonpt_tmp[j] = lheGluon.at(j)->PT;
-	jetLHEGluoneta_tmp[j] = lheGluon.at(j)->Eta;
-	jetLHEGluonphi_tmp[j] = lheGluon.at(j)->Phi;
-	jetLHEGluonpid_tmp[j] = lheGluon.at(j)->PID;
-	jetLHEGluonspin_tmp[j] = lheGluon.at(j)->Spin;
-                
-      }
 
-      for(int j=0; j<jl; j++){
-	leptonLHEpt_tmp[j] = lheLepton.at(j)->PT;
-	leptonLHEeta_tmp[j] = lheLepton.at(j)->Eta;
-	leptonLHEphi_tmp[j] = lheLepton.at(j)->Phi;
-	leptonLHEpid_tmp[j] = lheLepton.at(j)->PID;
-	leptonLHEspin_tmp[j] = lheLepton.at(j)->Spin;
-	leptonLHEch_tmp[j] = lheLepton.at(j)->Charge;
-	leptonLHEm_tmp[j] = lheLepton.at(j)->Mass;
-                
+    
+
+    if (fillWeights) {
+      LHEFEvent* lheevent         = (LHEFEvent*) branchLHEEvent->At(0);
+      vector<Double_t> lheweights = lheevent->lheWeights;
+      for(vector<Double_t>::iterator it = lheweights.begin(); it != lheweights.end(); ++it)
+	eventLHEweight_tmp[(uint)(it-lheweights.begin())] = *it;
+    }        
+        
+    int lhe_entries = branchLHEParticle->GetEntriesFast();
+    
+    
+    for (int i = 0 ; i < lhe_entries  ; i++) {
+      LHEParticle *lhepart = (LHEParticle*) branchLHEParticle->At(i);
+      int type   =  lhepart-> PID;
+      int status =  lhepart-> Status;
+      
+      // no incoming particle
+      if(status == -1) continue;
+      
+      
+      if (type < 6 && type > -6) {
+	lhepartonID.push_back(i);
+	lheParton.push_back(lhepart);
       }
-	
+      
+      if (type == 21) {
+	lhegluonID.push_back(i);
+	lheGluon.push_back(lhepart);
+      }
+      
+      if (type == 24 || type ==-24 || type == 23 ) {
+	lhevbosonID.push_back(i);
+	lheVBoson.push_back(lhepart);
+      }
+      
+      if (type == 11 || type == 13 || type == 15 ||type == -11 || type == -13 || type == -15 ) {
+	lheleptonID.push_back(i);
+	lheLepton.push_back(lhepart);
+      }
+      
+      if (type == 12 || type == 14 || type == 16 ||type == -12 || type == -14 || type == -16 ) {
+	lheneutrinoID.push_back(i);
+	lheNeutrino.push_back(lhepart);
+      }
+    } //lheloop
+    
+    
+      // sorting in PT            
+    sort(lheParton.begin(), lheParton.end(),lheParticleDescendingPt());
+    sort(lheLepton.begin(), lheLepton.end(),lheParticleDescendingPt());
+    sort(lheNeutrino.begin(), lheNeutrino.end(),lheParticleDescendingPt());
+    sort(lheGluon.begin(), lheGluon.end(),lheParticleDescendingPt());
+    sort(lheVBoson.begin(), lheVBoson.end(),lheParticleDescendingPt());
+    
+    int jl = (lheleptonID.size()<4) ? lheleptonID.size():4;
+    int jp = (lhepartonID.size()<4) ? lhepartonID.size():4;
+    int jn = (lheneutrinoID.size()<4) ? lheneutrinoID.size():4;
+    int jg = (lhegluonID.size()<2) ? lhegluonID.size():2;
+    int jb = (lhevbosonID.size()<2) ? lhevbosonID.size():2;
+    
+    for(int j=0; j<jp; j++){
+      jetLHEPartonpt_tmp[j] = lheParton.at(j)->PT;
+      jetLHEPartoneta_tmp[j] = lheParton.at(j)->Eta;
+      jetLHEPartonphi_tmp[j] = lheParton.at(j)->Phi;
+      jetLHEPartonpid_tmp[j] = lheParton.at(j)->PID;
+      jetLHEPartonspin_tmp[j] = lheParton.at(j)->Spin;
+      
+    }
+    
+    for(int j=0; j<jg; j++){
+      jetLHEGluonpt_tmp[j] = lheGluon.at(j)->PT;
+      jetLHEGluoneta_tmp[j] = lheGluon.at(j)->Eta;
+      jetLHEGluonphi_tmp[j] = lheGluon.at(j)->Phi;
+      jetLHEGluonpid_tmp[j] = lheGluon.at(j)->PID;
+      jetLHEGluonspin_tmp[j] = lheGluon.at(j)->Spin;
+      
+    }
+    
+    for(int j=0; j<jl; j++){
+      leptonLHEpt_tmp[j] = lheLepton.at(j)->PT;
+      leptonLHEeta_tmp[j] = lheLepton.at(j)->Eta;
+      leptonLHEphi_tmp[j] = lheLepton.at(j)->Phi;
+      leptonLHEpid_tmp[j] = lheLepton.at(j)->PID;
+      leptonLHEspin_tmp[j] = lheLepton.at(j)->Spin;
+      leptonLHEch_tmp[j] = lheLepton.at(j)->Charge;
+      leptonLHEm_tmp[j] = lheLepton.at(j)->Mass;
+      
+    }
+    
 	
 
             
@@ -1415,13 +1516,12 @@ int main (int argc, char *argv[]){
 
         
       easyTree -> Fill();
-		
     }
     
 	
 	
   //easyTree -> Print("easyDelphes");
-  outputFile -> Write();
+  outputFile -> Write("", TObject::kOverwrite);
   delete outputFile;
 }
 
