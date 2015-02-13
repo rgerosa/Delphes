@@ -178,9 +178,10 @@ void FastJetFinder::Init(){
   fRhoOutputArray = ExportArray(GetString("RhoOutputArray", "rho"));
   
   //simple outputs during running
-  fDebugOutputCollector.addVariable ("EneutralNOtime") ;
   fDebugOutputCollector.addVariable ("timeSpreadInJet") ;
   fDebugOutputCollector.addVariable ("JetTiming") ;
+  fDebugOutputCollector.addVariable ("w_timeSpreadInJet") ;
+  fDebugOutputCollector.addVariable ("w_JetTiming") ;
   
 }
 
@@ -368,8 +369,12 @@ void FastJetFinder::Process(){
       std::vector<fastjet::PseudoJet> ghosts,jetParticles;
       SelectorIsPureGhost().sift(itOutputList->constituents(), ghosts, jetParticles);
 
-      float jetTiming = -1. ;
-      float timeSpread = 0. ;
+      float sumJetTiming = 0. ;
+      float sumJetTimingSq = 0. ;
+      float w_sumJetTiming = 0. ;
+      float w_sumJetTimingSq = 0. ;
+      int nTowers = 0 ;
+      int w_nTowers = 0 ;
       // loop on the jets constituents
       for(itInputList = jetParticles.begin(); itInputList != jetParticles.end(); ++itInputList){
 
@@ -381,24 +386,36 @@ void FastJetFinder::Process(){
         if(dphi > dphiMax) dphiMax = dphi;
         candidate->AddCandidate(constituent);
 
-/* 
-        if (constituent->Charge == 0)
-          cout << "constituent " 
-               << "\t" << constituent->Momentum.E ()
-               << "\t" << constituent->Position.T ()
-               << endl ;
-*/
-
+        // select neutral constituents = calo towers
+        // with non-null edges = not additional photon towers from pflow 
         if (constituent->Charge == 0 &&
-            constituent->Position.T () > 999998)
-          fDebugOutputCollector.fillContainer ("EneutralNOtime", constituent->Momentum.E ()) ;
+            constituent->Edges[0] + constituent->Edges[1] + 
+            constituent->Edges[2] + constituent->Edges[3] != 0)
+          {
+            sumJetTiming += constituent->Position.T () ;
+            sumJetTimingSq += constituent->Position.T () * constituent->Position.T () ;
+            float weight = constituent->Momentum.E () ;
+            w_sumJetTimingSq += weight * constituent->Position.T () * constituent->Position.T () ;
+            weight = sqrt (weight) ;
+            w_sumJetTiming += weight * constituent->Position.T () ;
+            w_nTowers += weight ;
+            ++nTowers ;
+          }
 
       } // loop on the jets constituents
 
-// FIXME
-//  fDebugOutputCollector.addVariable ("timeSpreadInJet") ;
-//  fDebugOutputCollector.addVariable ("JetTiming") ;
+      if (nTowers != 0)
+        {
+          float sigma = (nTowers * sumJetTimingSq - sumJetTiming * sumJetTiming) /
+                        (nTowers * nTowers) ;
+          fDebugOutputCollector.fillContainer ("timeSpreadInJet", sigma) ;
+          fDebugOutputCollector.fillContainer ("JetTiming", sumJetTiming / nTowers) ;
 
+          sigma = (w_nTowers * w_sumJetTimingSq - w_sumJetTiming * w_sumJetTiming) /
+                   (w_nTowers * w_nTowers) ;
+          fDebugOutputCollector.fillContainer ("w_timeSpreadInJet", sigma) ;
+          fDebugOutputCollector.fillContainer ("w_JetTiming", w_sumJetTiming / w_nTowers) ;
+        }
 
       candidate->Momentum = momentum;
       candidate->Area.SetPxPyPzE(area.px(), area.py(), area.pz(), area.E());
