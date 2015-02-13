@@ -46,6 +46,9 @@ using namespace std;
 PileUpMerger::PileUpMerger() :
   fReader(0), fItInputArray(0)
 {
+//  fDebugOutputCollector ()
+//  simpleOutputFileName  = GetString("simpleOutputFileName", "simpleOutput_PU.root");
+//  debugOutputCollector (simpleOutputFileName) ;
 }
 
 //------------------------------------------------------------------------------
@@ -71,6 +74,8 @@ void PileUpMerger::Init()
   fOutputBSX = GetDouble("OutputBSX",0.);
   fOutputBSY = GetDouble("OutputBSY",0.);
 
+  fDebugOutputCollector.addVariable ("PUinitT") ;
+  fDebugOutputCollector.addVariable ("PUinitZ") ;
 
   fileName = GetString("PileUpFile", "MinBias.pileup");
   fReader = new DelphesPileUpReader(fileName);
@@ -89,6 +94,8 @@ void PileUpMerger::Init()
 
 void PileUpMerger::Finish()
 {
+  std::string outfile = GetString ("simpleOutputFileName", "simpleOutput_PU.root") ;
+  fDebugOutputCollector.save (outfile) ;
   if(fReader) delete fReader;
 }
 
@@ -132,7 +139,10 @@ void PileUpMerger::Process()
     dphi = gRandom->Uniform(-TMath::Pi(), TMath::Pi());
 //    dt = gRandom->Gaus(0., fZVertexSpread*(mm/ns)/c_light);
     dt = gRandom->Gaus (0., fTVertexSpread) ;
-     
+ 
+    fDebugOutputCollector.fillContainer ("PUinitT", dt) ;
+    fDebugOutputCollector.fillContainer ("PUinitZ", dz) ;
+    
     while(fReader->ReadParticle(pid, x, y, z, t, px, py, pz, e))
     {  
       candidate = factory->NewCandidate();

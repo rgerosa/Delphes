@@ -15,6 +15,7 @@
  */
 
 #include "classes/DelphesModule.h"
+#include "modules/simpleVariableCollector.h"
 #include "TRandom3.h"
 
 class TObjArray;
@@ -48,7 +49,9 @@ private:
 
   TObjArray *fOutputArray; //!
 
-  TObjArray *fNPUOutputArray; //!                                                                                                                                                    
+  TObjArray *fNPUOutputArray; //!   
+  
+  simpleVariableCollector fDebugOutputCollector ;                                                                                                                                                 
 
   ClassDef(PileUpMerger, 2)
 };
