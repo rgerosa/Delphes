@@ -60,8 +60,11 @@ void PileUpMerger::Init()
 {
   const char *fileName;
 
-  fMeanPileUp  = GetDouble("MeanPileUp", 10);
-  fZVertexSpread = GetDouble("ZVertexSpread", 0.05)*1.0E3;
+  fMeanPileUp  = GetDouble ("MeanPileUp", 10) ;
+  fZVertexSpread = GetDouble ("ZVertexSpread", 0.05) * m ;
+  // meters in the cfg file, mm in the code
+  fTVertexSpread = GetDouble ("TVertexSpread", 160) / s ;
+  // ns in the cfg file, s in the code
 
   fInputBSX = GetDouble("InputBSX",0.);
   fInputBSY = GetDouble("InputBSY",0.);
@@ -124,10 +127,11 @@ void PileUpMerger::Process()
 
     fReader->ReadEntry(entry);
 
+    //PG FIXME add more distributions, to simulate the crab-kissing scheme
     dz = gRandom->Gaus(0.0, fZVertexSpread);
     dphi = gRandom->Uniform(-TMath::Pi(), TMath::Pi());
-    dt = gRandom->Gaus(0., fZVertexSpread*(mm/ns)/c_light);
-   
+//    dt = gRandom->Gaus(0., fZVertexSpread*(mm/ns)/c_light);
+    dt = gRandom->Gaus (0., fTVertexSpread) ;
      
     while(fReader->ReadParticle(pid, x, y, z, t, px, py, pz, e))
     {  

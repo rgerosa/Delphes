@@ -35,6 +35,7 @@ private:
 
   Double_t fMeanPileUp;
   Double_t fZVertexSpread;
+  Double_t fTVertexSpread;
 
   Double_t fInputBSX, fInputBSY;
   Double_t fOutputBSX, fOutputBSY;
