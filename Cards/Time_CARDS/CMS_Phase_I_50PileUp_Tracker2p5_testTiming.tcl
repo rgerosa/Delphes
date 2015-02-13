@@ -116,8 +116,10 @@ module PileUpMerger PileUpMerger {
  # spread in the beam direction in m (assumed gaussian) ; 
  set ZVertexSpread 0.053
  # time spread in the events happening in ns (assumed gaussian) ; 
- set ZVertexSpread 160 # baseline
-# set ZVertexSpread 100 # crab-kiss
+ # baseline = 160 ns, crab-kiss = 100 ns
+ set TVertexSpread 160
+ # set TVertexSpread 100
+ set simpleOutputFileName /afs/cern.ch/user/g/govoni/work/TP/Delphes/testSample/simpleOutput_PU.root
 }
 
 ##################
