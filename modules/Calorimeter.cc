@@ -112,7 +112,6 @@ void Calorimeter::Init(){
     paramFractions = param[i*2 + 1];
     ecalFraction = paramFractions[0].GetDouble();
     hcalFraction = paramFractions[1].GetDouble();
-
     fFractionMap[param[i*2].GetInt()] = make_pair(ecalFraction, hcalFraction);
   }
 
@@ -139,10 +138,14 @@ void Calorimeter::Init(){
 
   // For timing
   // So far this flag needs to be false
-  // Curved extrapolation not supported
-  electronsFromTrack = false;
+  // since the curved extrapolation not supported
+  // if this value is true, electron timing is taken from the track,
+  // otherwise is taken from the particle collection
+  fElectronsFromTrack  = false;
 
-  fTimingEMin = GetDouble("TimingEMin",4.);
+  //PG FIXME where does this come from?
+  // suggested from A. Bornheim, reasonable according to him
+  fTimingEMin = GetDouble ("TimingEMin", 4.) ;
 
 }
 
@@ -168,7 +171,7 @@ void Calorimeter::Process(){
   Int_t number;
   Long64_t towerHit, towerEtaPhi, hitEtaPhi;
   Double_t ecalFraction, hcalFraction;
-  Double_t ecalEnergy, hcalEnergy;
+  Double_t ecalEnergy, hcalEnergy, totalEnergy;
   Int_t pdgCode;
 
   TFractionMap::iterator itFractionMap;
@@ -189,7 +192,10 @@ void Calorimeter::Process(){
   fTrackPDGId.clear();
 
 
-  // loop over all tracks
+  // loop over all tracks to get the deposited energy due to the
+  // charged hadrons and electrons. 
+  // THis energy is added to the tower as additional information,
+  // that will be used in FinalizeTower to mimic the particle flow
   fItTrackInputArray->Reset();
   number = -1;
   while((track = static_cast<Candidate*>(fItTrackInputArray->Next()))){
@@ -226,13 +232,18 @@ void Calorimeter::Process(){
 
     flags = 1; // charged tracks flags equal one add to the tower hits
  
-    // make tower hit {16-bits for eta bin number, 16-bits for phi bin number, 8-bits for flags, 24-bits for track number}
+    // make tower hit:
+    //    {16-bits for eta bin number, 
+    //     16-bits for phi bin number, 
+    //     8-bits for flags, 
+    //     24-bits for track number}
     towerHit = (Long64_t(etaBin) << 48) | (Long64_t(phiBin) << 32) | (Long64_t(flags) << 24) | Long64_t(number);
 
     fTowerHits.push_back(towerHit);
- }
+  } // loop over all tracks
 
-  // loop over all particles of the event
+  // loop over all particles of the event,
+  // to get the energy of all the particles that hit the calorimeter
   fItParticleInputArray->Reset();
   number = -1;
   while((particle = static_cast<Candidate*>(fItParticleInputArray->Next()))){
@@ -275,22 +286,25 @@ void Calorimeter::Process(){
     // make tower hit {16-bits for eta bin number, 16-bits for phi bin number, 8-bits for flags, 24-bits for particle number}
     towerHit = (Long64_t(etaBin) << 48) | (Long64_t(phiBin) << 32) | (Long64_t(flags) << 24) | Long64_t(number);
     fTowerHits.push_back(towerHit); // fill tower hit vectors
-  }
-
+  } // loop over all particles of the event
 
   // all hits are sorted first by eta bin number, then by phi bin number,
   // then by flags and then by particle or track number
   sort(fTowerHits.begin(),fTowerHits.end()); // sort the hit
 
-  // loop over all hits
+  // loop over all hits (tracks and calo deposits)
   towerEtaPhi = 0;
   fTower = 0;
-  for(itTowerHits = fTowerHits.begin(); itTowerHits != fTowerHits.end(); ++itTowerHits) { // loop over the hits
+  
+  // loop over the hits
+  for(itTowerHits = fTowerHits.begin(); itTowerHits != fTowerHits.end(); ++itTowerHits) { 
     towerHit  = (*itTowerHits);
     flags     = (towerHit >> 24) & 0x00000000000000FFLL; // take the flag
     number    = (towerHit) & 0x0000000000FFFFFFLL;       // take the number
     hitEtaPhi = towerHit >> 32;
-    if(towerEtaPhi != hitEtaPhi){  // first time hit, no  more than once since we have sorted tower as a function of eta and phi hits
+    if(towerEtaPhi != hitEtaPhi){  
+      // first time hit, no  more than once since we have sorted tower 
+      // as a function of eta and phi hits
 
       // switch to next tower
       towerEtaPhi = hitEtaPhi;
@@ -325,7 +339,7 @@ void Calorimeter::Process(){
       fTowerPhotonHits = 0;
 
       fTowerTrackArray->Clear();
-    }
+    }  // first time hit
 
     // check for track hits
     if(flags & 1){
@@ -335,37 +349,31 @@ void Calorimeter::Process(){
 
       bool dbg_scz = false;
       if (dbg_scz) {
-	cout << "   Calorimeter input track has x y z t " << track->Position.X() << " " << track->Position.Y() << " " << track->Position.Z() << " " << track->Position.T() 
-	     << endl;
-	Candidate *prt = static_cast<Candidate*>(track->GetCandidates()->Last());
-	const TLorentzVector &ini = prt->Position;
-
-	cout << "                and parent has x y z t " << ini.X() << " " << ini.Y() << " " << ini.Z() << " " << ini.T();
-
+        cout << "   Calorimeter input track has x y z t " << track->Position.X() 
+             << " " << track->Position.Y() << " " << track->Position.Z() << " " << track->Position.T() 
+             << endl;
+        Candidate *prt = static_cast<Candidate*>(track->GetCandidates()->Last());
+        const TLorentzVector &ini = prt->Position;
+        cout << "                and parent has x y z t " << ini.X() << " " << ini.Y() 
+             << " " << ini.Z() << " " << ini.T();
       }
 
       ecalEnergy = momentum.E() * fTrackECalFractions[number];
       hcalEnergy = momentum.E() * fTrackHCalFractions[number];
-     
 
       fTrackECalEnergy += ecalEnergy;
       fTrackHCalEnergy += hcalEnergy;
 
-      if (ecalEnergy > fTimingEMin && fTower) {
-	if (electronsFromTrack) {
-	  //	  cout << " SCZ Debug pushing back track hit E=" << ecalEnergy << " T=" << track->Position.T() << " isPU=" << track->IsPU << " isRecoPU=" << track->IsRecoPU 
-	  //	       << " PID=" << track->PID << endl;
-	  fTower->ecal_E_t.push_back(std::make_pair<float,float>(ecalEnergy,track->Position.T()));
-	} else {
-	  //	  cout << " Skipping track hit E=" << ecalEnergy << " T=" << track->Position.T() << " isPU=" << track->IsPU << " isRecoPU=" << track->IsRecoPU 
-	  //	       << " PID=" << track->PID << endl;
-	}
-      }
+      totalEnergy = ecalEnergy + hcalEnergy ;
 
+      if ( totalEnergy > fTimingEMin && fTower && fElectronsFromTrack) {
+        fTower->ecal_E_t.push_back(std::make_pair<float,float>(totalEnergy,track->Position.T()));
+      }
+      
       fTowerTrackArray->Add(track);
 
       continue; // go to the next hit
-    }
+    } // check for track hits
 
     // check for photon and electron hits in current tower
     if(flags & 2) ++fTowerPhotonHits;
@@ -377,28 +385,20 @@ void Calorimeter::Process(){
     ecalEnergy = momentum.E() * fTowerECalFractions[number];
     hcalEnergy = momentum.E() * fTowerHCalFractions[number];
 
- 
     fTowerECalEnergy += ecalEnergy;
     fTowerHCalEnergy += hcalEnergy;
 
-    if (ecalEnergy > fTimingEMin && fTower) {
-      if (abs(particle->PID) != 11 || !electronsFromTrack) {
-	//	cout << " SCZ Debug About to push back particle hit E=" << ecalEnergy << " T=" << particle->Position.T() << " isPU=" << particle->IsPU 
-	//   << " PID=" << particle->PID << endl;
-	fTower->ecal_E_t.push_back(std::make_pair<float,float>(ecalEnergy,particle->Position.T()));
-      } else {
-	
-	// N.B. Only charged particle set to leave ecal energy is the electrons
-	//	cout << " SCZ Debug To avoid double-counting, skipping particle hit E=" << ecalEnergy << " T=" << particle->Position.T() << " isPU=" << particle->IsPU 
-	//	     << " PID=" << particle->PID << endl;
-	
-      }
+    totalEnergy = ecalEnergy + hcalEnergy ;
+
+    // FIXME still removing electrons!!
+    if ( (totalEnergy > fTimingEMin && fTower) &&
+         (abs(particle->PID) != 11 || !fElectronsFromTrack) ) {
+        fTower->ecal_E_t.push_back(std::make_pair<float,float>(totalEnergy,particle->Position.T()));
     }
 
     fTower->PID = fParticlePDGId.at(number);
-
     fTower->AddCandidate(particle);
-  }
+  } // loop over the hits
   
   // finalize last tower
   FinalizeTower();
@@ -461,7 +461,6 @@ void Calorimeter::FinalizeTower(){
     if(fTowerPhotonHits > 0 && fTowerTrackHits == 0){      
       fPhotonOutputArray->Add(fTower);
     }
-        
     fTowerOutputArray->Add(fTower);
   }
 

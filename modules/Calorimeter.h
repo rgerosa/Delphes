@@ -68,10 +68,14 @@ private:
   const TObjArray *fParticleInputArray; //!
   const TObjArray *fTrackInputArray; //!
 
+  // HCAL+ECAL towers with all the energy accounted
   TObjArray *fTowerOutputArray; //!
+  // photons
   TObjArray *fPhotonOutputArray; //!
 
+  // tracks, taken in input and replicated in output
   TObjArray *fEFlowTrackOutputArray; //!
+  // PF towers: energy deposits cleaned from tracks
   TObjArray *fEFlowTowerOutputArray; //!
 
   TObjArray *fTowerTrackArray; //!
@@ -80,7 +84,7 @@ private:
   void FinalizeTower();
   Double_t LogNormal(Double_t mean, Double_t sigma);
 
-  bool electronsFromTrack; // for timing
+  bool fElectronsFromTrack; // for timing
 
   ClassDef(Calorimeter, 1)
 };
