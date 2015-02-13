@@ -45,11 +45,7 @@ using namespace std;
 
 PileUpMerger::PileUpMerger() :
   fReader(0), fItInputArray(0)
-{
-//  fDebugOutputCollector ()
-//  simpleOutputFileName  = GetString("simpleOutputFileName", "simpleOutput_PU.root");
-//  debugOutputCollector (simpleOutputFileName) ;
-}
+{}
 
 //------------------------------------------------------------------------------
 
@@ -62,12 +58,13 @@ PileUpMerger::~PileUpMerger()
 void PileUpMerger::Init()
 {
   const char *fileName;
+  fEventCounter = 0 ;
 
   fMeanPileUp  = GetDouble ("MeanPileUp", 10) ;
   fZVertexSpread = GetDouble ("ZVertexSpread", 0.05) * m ;
   // meters in the cfg file, mm in the code
-  fTVertexSpread = GetDouble ("TVertexSpread", 160) / s ;
-  // ns in the cfg file, s in the code
+  fTVertexSpread = GetDouble ("TVertexSpread", 160) ;
+  // ns in the cfg file and in the code
 
   fInputBSX = GetDouble("InputBSX",0.);
   fInputBSY = GetDouble("InputBSY",0.);
@@ -139,10 +136,13 @@ void PileUpMerger::Process()
     dphi = gRandom->Uniform(-TMath::Pi(), TMath::Pi());
 //    dt = gRandom->Gaus(0., fZVertexSpread*(mm/ns)/c_light);
     dt = gRandom->Gaus (0., fTVertexSpread) ;
- 
-    fDebugOutputCollector.fillContainer ("PUinitT", dt) ;
-    fDebugOutputCollector.fillContainer ("PUinitZ", dz) ;
-    
+
+    if (fEventCounter < 100)
+      {
+        fDebugOutputCollector.fillContainer ("PUinitT", dt) ;
+        fDebugOutputCollector.fillContainer ("PUinitZ", dz) ;
+      }
+      
     while(fReader->ReadParticle(pid, x, y, z, t, px, py, pz, e))
     {  
       candidate = factory->NewCandidate();
@@ -181,6 +181,7 @@ void PileUpMerger::Process()
   candidate->Momentum.SetPtEtaPhiE((float)poisson, 0.0, 0.0, (float)poisson); // cheating and storing NPU as a float
   fNPUOutputArray->Add(candidate);
 
+  fEventCounter++ ;
 }
 
 //------------------------------------------------------------------------------

@@ -51,7 +51,8 @@ private:
 
   TObjArray *fNPUOutputArray; //!   
   
-  simpleVariableCollector fDebugOutputCollector ;                                                                                                                                                 
+  simpleVariableCollector fDebugOutputCollector ;    
+  int fEventCounter ;                                                                                                                                             
 
   ClassDef(PileUpMerger, 2)
 };
