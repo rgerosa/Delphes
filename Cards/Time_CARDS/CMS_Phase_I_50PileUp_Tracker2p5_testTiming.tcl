@@ -280,7 +280,8 @@ module MomentumSmearing MuonMomentumSmearing {
 #################################################################
 
 module Merger TrackMerger {
-  ## take smeared charged hadron and electrons as only tracks to take into account in the calorimeter simulation
+  ## take smeared charged hadron and electrons as only tracks 
+  ## to take into account in the calorimeter simulation
   add InputArray ChargedHadronMomentumSmearing/chargedHadrons
   add InputArray ElectronEnergySmearing/electrons
   set OutputArray tracks
@@ -300,6 +301,10 @@ module Calorimeter Calorimeter {
   set PhotonOutputArray photons
   set EFlowTrackOutputArray eflowTracks
   set EFlowTowerOutputArray eflowTowers
+
+  #PG all the particles enter in the timing definition of the tower,
+  #PG regardless of their energy
+  set TimingEMin 0.
 
   set pi [expr {acos(-1)}]
 
@@ -504,6 +509,7 @@ module FastJetFinder FastJetFinder {
   set JetAlgorithm  6
   set ParameterR    0.4
   set JetPTMin      10.0
+  set simpleOutputFileName /afs/cern.ch/user/g/govoni/work/TP/Delphes/testSample/simpleOutput_FJ.root
 }
 
 ##################
@@ -643,7 +649,8 @@ module Merger GenMissingET {
 ### Run the puppi code  ###
 ###########################
 module Merger TrackMergerWithMuon {
-  ## take smeared charged hadron and electrons as only tracks to take into account in the calorimeter simulation
+  ## take smeared charged hadron and electrons as only tracks 
+  ## to take into account in the calorimeter simulation
   add InputArray Calorimeter/eflowTracks    
   add InputArray MuonMomentumSmearing/muons 
   set OutputArray tracks

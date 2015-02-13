@@ -11,6 +11,7 @@
  */
 
 #include "classes/DelphesModule.h"
+#include "modules/simpleVariableCollector.h"
 
 #include <map>
 
@@ -82,6 +83,9 @@ private:
 
   TObjArray *fOutputArray; //!
   TObjArray *fRhoOutputArray; //!
+
+  simpleVariableCollector fDebugOutputCollector ;    
+  int fEventCounter ;                                                                                                                                             
 
   ClassDef(FastJetFinder, 1)
 

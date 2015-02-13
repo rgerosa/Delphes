@@ -176,6 +176,12 @@ void FastJetFinder::Init(){
   // create output arrays
   fOutputArray    = ExportArray(GetString("OutputArray", "jets"));
   fRhoOutputArray = ExportArray(GetString("RhoOutputArray", "rho"));
+  
+  //simple outputs during running
+  fDebugOutputCollector.addVariable ("EneutralNOtime") ;
+  fDebugOutputCollector.addVariable ("timeSpreadInJet") ;
+  fDebugOutputCollector.addVariable ("JetTiming") ;
+  
 }
 
 //------------------------------------------------------------------------------
@@ -186,6 +192,8 @@ void FastJetFinder::Finish()
   if(fDefinition)     delete fDefinition;
   if(fAreaDefinition) delete fAreaDefinition;
   if(fPlugin) delete static_cast<JetDefinition::Plugin*>(fPlugin);
+  std::string outfile = GetString ("simpleOutputFileName", "simpleOutput_FJ.root") ;
+  fDebugOutputCollector.save (outfile) ;
 }
 
 //------------------------------------------------------------------------------
@@ -209,6 +217,7 @@ void FastJetFinder::Process(){
 
   fItInputArray->Reset();
   number = 0;
+  // loop on particle candidates
   while((candidate = static_cast<Candidate*>(fItInputArray->Next()))){
     // for genjets mostly
     if (fKeepPileUp == 0 && candidate->IsPU > 0) {
@@ -221,7 +230,7 @@ void FastJetFinder::Process(){
     jet.set_user_index(number);
     inputList.push_back(jet);
     ++number;
-  }
+  } // loop on particle candidates
 
   // construct jets
   fastjet::ClusterSequenceArea *sequence = new ClusterSequenceArea(inputList, *fDefinition, *fAreaDefinition);
@@ -243,7 +252,7 @@ void FastJetFinder::Process(){
       candidate->Edges[1] = itEtaRangeMap->second;
       fRhoOutputArray->Add(candidate);
     }
-  }
+  } // if(fComputeRho && fAreaDefinition)
 
   /////////////////////////////////////////////////
   // use grid median background method
@@ -268,7 +277,7 @@ void FastJetFinder::Process(){
       candidate->Edges[1] = itEtaRangeMap->second;
       fRhoOutputArray->Add(candidate);
     }    
-  }
+  } // else if(fComputeRhoGrid && fAreaDefinition)
 
   /////////////////////////////////////////////////
   // use CMSSW like method
@@ -279,21 +288,21 @@ void FastJetFinder::Process(){
       // define eta bins
       vector<float> phibins;
       for (int i = 0; i<10 ;i++) 
-	phibins.push_back(-TMath::Pi()+(2*i+1)*TMath::TwoPi()/20.);
-       //define the eta bins --> region dependent
+      phibins.push_back(-TMath::Pi()+(2*i+1)*TMath::TwoPi()/20.);
+      //define the eta bins --> region dependent
       vector<float> etabins;
       if (fabs(itEtaRangeMap->first) == 0 and fabs(itEtaRangeMap->second) == 2.5) { // just in the central region
-	for (int i = 0; i<8 ;++i) 
-	  etabins.push_back(-2.5+0.6*i);
+        for (int i = 0; i<8 ;++i) 
+          etabins.push_back(-2.5+0.6*i);
       } 
       else if (fabs(itEtaRangeMap->first) == 2.5 and fabs(itEtaRangeMap->second) == 5) { // forward generic region
-	for (int i=0;i<10;++i) {
-	  if (i<5) etabins.push_back(-5.1+0.6*i);
-	  else etabins.push_back(2.7+0.6*(i-5));
-	}
+        for (int i=0;i<10;++i) {
+          if (i<5) etabins.push_back(-5.1+0.6*i);
+          else etabins.push_back(2.7+0.6*(i-5));
+        }
       } 
       else if ( fabs(itEtaRangeMap->first) == 0 and fabs(itEtaRangeMap->second) == 5) { // all detector
-	for (int i=0;i<18;++i) etabins.push_back(-5.1+0.6*i);
+        for (int i=0;i<18;++i) etabins.push_back(-5.1+0.6*i);
       }
 
       float etadist = etabins[1]-etabins[0]; // distance in eta
@@ -303,16 +312,16 @@ void FastJetFinder::Process(){
       vector<float> sumPFNallSMDQ;
       sumPFNallSMDQ.reserve(etabins.size()*phibins.size());
       for (unsigned int ieta=0;ieta<etabins.size();++ieta) {
-	for (unsigned int iphi=0;iphi<phibins.size();++iphi) {
-	  float pfniso_ieta_iphi = 0;
-	  for(std::vector<fastjet::PseudoJet>::const_iterator itPart = inputList.begin(); itPart != inputList.end(); itPart++) {
-	    if (fabs(etabins[ieta]-itPart->eta())>etahalfdist) continue;
-            
-	    if (fabs(deltaPhi(phibins[iphi],itPart->phi()))>phihalfdist) continue;
-	    pfniso_ieta_iphi+=itPart->pt();
-	  }
-	  sumPFNallSMDQ.push_back(pfniso_ieta_iphi);
-	}
+        for (unsigned int iphi=0;iphi<phibins.size();++iphi) {
+          float pfniso_ieta_iphi = 0;
+          for(std::vector<fastjet::PseudoJet>::const_iterator itPart = inputList.begin(); 
+              itPart != inputList.end(); itPart++) {
+            if (fabs(etabins[ieta]-itPart->eta())>etahalfdist) continue;
+            if (fabs(deltaPhi(phibins[iphi],itPart->phi()))>phihalfdist) continue;
+            pfniso_ieta_iphi+=itPart->pt();
+          }
+        sumPFNallSMDQ.push_back(pfniso_ieta_iphi);
+        }
       }
       float evt_smdq = 0;
       std::sort(sumPFNallSMDQ.begin(),sumPFNallSMDQ.end());
@@ -325,207 +334,231 @@ void FastJetFinder::Process(){
       candidate->Edges[1] = itEtaRangeMap->second;
       fRhoOutputArray->Add(candidate);
     }
-  }
+  } // else if(fComputeRhoGridParticles)
 
+  /////////////////////////////////////////////////
+  // do not calculate rho, but actually cluster the jets
+  ////////////////////////////////////////////////
   else{
 
-   // take inclusive jets with a pt cut applied  
-   outputList.clear();
-   outputList = sorted_by_pt(sequence->inclusive_jets(fJetPTMin));
+    // take inclusive jets with a pt cut applied  
+    outputList.clear();
+    outputList = sorted_by_pt(sequence->inclusive_jets(fJetPTMin)); 
 
-   // loop over all jets and export them
-   detaMax = 0.0;
-   dphiMax = 0.0;
+    // loop over all jets and export them
+    detaMax = 0.0;
+    dphiMax = 0.0;
   
-   std::vector<fastjet::PseudoJet>::const_iterator itInputList, itOutputList;
-   PseudoJet area;
+    std::vector<fastjet::PseudoJet>::const_iterator itInputList, itOutputList;
+    PseudoJet area;
 
-   // Loop on the outputjets after clustering
-   for(itOutputList = outputList.begin(); itOutputList != outputList.end(); ++itOutputList){
+    // Loop on the outputjets after clustering
+    for(itOutputList = outputList.begin(); itOutputList != outputList.end(); ++itOutputList){
 
-    // set momentum
-    momentum.SetPxPyPzE(itOutputList->px(), itOutputList->py(), itOutputList->pz(), itOutputList->E());
-    area.reset(0.0, 0.0, 0.0, 0.0);
-    if(fAreaDefinition) area = itOutputList->area_4vector(); // take the jet aarea
+      // set momentum
+      momentum.SetPxPyPzE(itOutputList->px(), itOutputList->py(), itOutputList->pz(), itOutputList->E());
+      area.reset(0.0, 0.0, 0.0, 0.0);
+      if(fAreaDefinition) area = itOutputList->area_4vector(); // take the jet aarea
 
-    candidate = factory->NewCandidate();
+      candidate = factory->NewCandidate();
 
-    inputList.clear();
+      inputList.clear();
 
-    // filter away the ghosts
-    std::vector<fastjet::PseudoJet> ghosts,jetParticles;
-    SelectorIsPureGhost().sift(itOutputList->constituents(), ghosts, jetParticles);
+      // filter away the ghosts
+      std::vector<fastjet::PseudoJet> ghosts,jetParticles;
+      SelectorIsPureGhost().sift(itOutputList->constituents(), ghosts, jetParticles);
 
-    for(itInputList = jetParticles.begin(); itInputList != jetParticles.end(); ++itInputList){
+      float jetTiming = -1. ;
+      float timeSpread = 0. ;
+      // loop on the jets constituents
+      for(itInputList = jetParticles.begin(); itInputList != jetParticles.end(); ++itInputList){
 
-      // Take the original constistuen from delphes particle array
-      constituent = static_cast<Candidate*>(fInputArray->At(itInputList->user_index()));      
-      deta = TMath::Abs(momentum.Eta()-constituent->Momentum.Eta());
-      dphi = TMath::Abs(momentum.DeltaPhi(constituent->Momentum));
-      if(deta > detaMax) detaMax = deta;
-      if(dphi > dphiMax) dphiMax = dphi;
-      candidate->AddCandidate(constituent);
-    }
+        // Take the original constistuent from delphes particle array
+        constituent = static_cast<Candidate*>(fInputArray->At(itInputList->user_index()));      
+        deta = TMath::Abs(momentum.Eta()-constituent->Momentum.Eta());
+        dphi = TMath::Abs(momentum.DeltaPhi(constituent->Momentum));
+        if(deta > detaMax) detaMax = deta;
+        if(dphi > dphiMax) dphiMax = dphi;
+        candidate->AddCandidate(constituent);
 
-    candidate->Momentum = momentum;
-    candidate->Area.SetPxPyPzE(area.px(), area.py(), area.pz(), area.E());
+/* 
+        if (constituent->Charge == 0)
+          cout << "constituent " 
+               << "\t" << constituent->Momentum.E ()
+               << "\t" << constituent->Position.T ()
+               << endl ;
+*/
 
-    candidate->DeltaEta = detaMax;
-    candidate->DeltaPhi = dphiMax;
+        if (constituent->Charge == 0 &&
+            constituent->Position.T () > 999998)
+          fDebugOutputCollector.fillContainer ("EneutralNOtime", constituent->Momentum.E ()) ;
 
-    //------------------------------------
-    // SubStructure
-    //-----------------------------------
-    if (itOutputList->perp() > 200){
+      } // loop on the jets constituents
+
+// FIXME
+//  fDebugOutputCollector.addVariable ("timeSpreadInJet") ;
+//  fDebugOutputCollector.addVariable ("JetTiming") ;
+
+
+      candidate->Momentum = momentum;
+      candidate->Area.SetPxPyPzE(area.px(), area.py(), area.pz(), area.E());
+      candidate->DeltaEta = detaMax;
+      candidate->DeltaPhi = dphiMax;
 
       //------------------------------------
-      // Trimming
-      //------------------------------------
+      // SubStructure
+      //-----------------------------------
+      if (itOutputList->perp() > 200){
 
-      double Rtrim   = 0.2;
-      double ptfrac = 0.05;
-      fastjet::Filter    trimmer(fastjet::JetDefinition(fastjet::kt_algorithm,Rtrim),fastjet::SelectorPtFractionMin(ptfrac));
-      fastjet::PseudoJet trimmed_jet = trimmer(*itOutputList);
+        //------------------------------------
+        // Trimming
+        //------------------------------------
 
-      candidate->TrimmedMass = trimmed_jet.m();
-      candidate->TrimmedPt   = trimmed_jet.pt();
-      candidate->TrimmedEta  = trimmed_jet.eta();
-      candidate->TrimmedPhi  = trimmed_jet.phi();
+        double Rtrim   = 0.2;
+        double ptfrac = 0.05;
+        fastjet::Filter    trimmer(fastjet::JetDefinition(fastjet::kt_algorithm,Rtrim),fastjet::SelectorPtFractionMin(ptfrac));
+        fastjet::PseudoJet trimmed_jet = trimmer(*itOutputList);
+
+        candidate->TrimmedMass = trimmed_jet.m();
+        candidate->TrimmedPt   = trimmed_jet.pt();
+        candidate->TrimmedEta  = trimmed_jet.eta();
+        candidate->TrimmedPhi  = trimmed_jet.phi();
       
-      // three hardest subjet 
-      std::vector<fastjet::PseudoJet>  subjets = trimmed_jet.pieces();
-      subjets    = sorted_by_pt(subjets);
-      candidate->NSubJetsTrimmed = subjets.size();
+        // three hardest subjet 
+        std::vector<fastjet::PseudoJet>  subjets = trimmed_jet.pieces();
+        subjets    = sorted_by_pt(subjets);
+        candidate->NSubJetsTrimmed = subjets.size();
 
-      for (size_t i = 0; i < subjets.size() and i < 3; i++){
-	if(subjets.at(i).pt() < 0) continue ; 
-        if(i == 1){ 	
-         candidate->TrimmedMassSub1 = subjets.at(i).m();
-         candidate->TrimmedPtSub1   = subjets.at(i).pt();
-         candidate->TrimmedEtaSub1  = subjets.at(i).eta();
-         candidate->TrimmedPhiSub1  = subjets.at(i).phi();
-	}
-        else if(i == 2){ 	
-         candidate->TrimmedMassSub2 = subjets.at(i).m();
-         candidate->TrimmedPtSub2   = subjets.at(i).pt();
-         candidate->TrimmedEtaSub2  = subjets.at(i).eta();
-         candidate->TrimmedPhiSub2  = subjets.at(i).phi();
-	}
-        else if(i == 3){ 	
-         candidate->TrimmedMassSub3 = subjets.at(i).m();
-         candidate->TrimmedPtSub3   = subjets.at(i).pt();
-         candidate->TrimmedEtaSub3  = subjets.at(i).eta();
-         candidate->TrimmedPhiSub3  = subjets.at(i).phi();
-	}
-      }
+        for (size_t i = 0; i < subjets.size() and i < 3; i++){
+          if(subjets.at(i).pt() < 0) continue ; 
+          if(i == 1){     
+            candidate->TrimmedMassSub1 = subjets.at(i).m();
+            candidate->TrimmedPtSub1   = subjets.at(i).pt();
+            candidate->TrimmedEtaSub1  = subjets.at(i).eta();
+            candidate->TrimmedPhiSub1  = subjets.at(i).phi();
+          }
+          else if(i == 2){     
+            candidate->TrimmedMassSub2 = subjets.at(i).m();
+            candidate->TrimmedPtSub2   = subjets.at(i).pt();
+            candidate->TrimmedEtaSub2  = subjets.at(i).eta();
+            candidate->TrimmedPhiSub2  = subjets.at(i).phi();
+          }
+          else if(i == 3){     
+            candidate->TrimmedMassSub3 = subjets.at(i).m();
+            candidate->TrimmedPtSub3   = subjets.at(i).pt();
+            candidate->TrimmedEtaSub3  = subjets.at(i).eta();
+            candidate->TrimmedPhiSub3  = subjets.at(i).phi();
+          }
+        }
 
-      //------------------------------------
-      // Pruning
-      //------------------------------------
+        //------------------------------------
+        // Pruning
+        //------------------------------------
 
-      double Zcut   = 0.1;
-      double Rcut   = 0.5;
-      double Rprun  = 0.8;
+        double Zcut   = 0.1;
+        double Rcut   = 0.5;
+        double Rprun  = 0.8;
 
-      fastjet::Pruner    pruner(fastjet::JetDefinition(fastjet::cambridge_algorithm,Rprun),Zcut,Rcut);
-      fastjet::PseudoJet pruned_jet = pruner(*itOutputList);
+        fastjet::Pruner    pruner(fastjet::JetDefinition(fastjet::cambridge_algorithm,Rprun),Zcut,Rcut);
+        fastjet::PseudoJet pruned_jet = pruner(*itOutputList);
 
-      candidate->PrunedMass = pruned_jet.m();
-      candidate->PrunedPt   = pruned_jet.pt();
-      candidate->PrunedEta  = pruned_jet.eta();
-      candidate->PrunedPhi  = pruned_jet.phi();
-      subjets.clear();
+        candidate->PrunedMass = pruned_jet.m();
+        candidate->PrunedPt   = pruned_jet.pt();
+        candidate->PrunedEta  = pruned_jet.eta();
+        candidate->PrunedPhi  = pruned_jet.phi();
+        subjets.clear();
       
-      // three hardest subjet 
-      subjets    = pruned_jet.pieces();
-      subjets    = sorted_by_pt(subjets);
-      candidate->NSubJetsPruned = subjets.size();
+        // three hardest subjet 
+        subjets    = pruned_jet.pieces();
+        subjets    = sorted_by_pt(subjets);
+        candidate->NSubJetsPruned = subjets.size();
 
-      for (size_t i = 0; i < subjets.size() and i < 3; i++){
-	if(subjets.at(i).pt() < 0) continue ; 
-        if(i == 1){ 	
-         candidate->PrunedMassSub1 = subjets.at(i).m();
-         candidate->PrunedPtSub1   = subjets.at(i).pt();
-         candidate->PrunedEtaSub1  = subjets.at(i).eta();
-         candidate->PrunedPhiSub1  = subjets.at(i).phi();
-	}
-        else if(i == 2){ 	
-         candidate->PrunedMassSub2 = subjets.at(i).m();
-         candidate->PrunedPtSub2   = subjets.at(i).pt();
-         candidate->PrunedEtaSub2  = subjets.at(i).eta();
-         candidate->PrunedPhiSub2  = subjets.at(i).phi();
-	}
-        else if(i == 3){ 	
-         candidate->PrunedMassSub3 = subjets.at(i).m();
-         candidate->PrunedPtSub3   = subjets.at(i).pt();
-         candidate->PrunedEtaSub3  = subjets.at(i).eta();
-         candidate->PrunedPhiSub3  = subjets.at(i).phi();
-	}
-      }
+        for (size_t i = 0; i < subjets.size() and i < 3; i++){
+          if(subjets.at(i).pt() < 0) continue ; 
+          if(i == 1){     
+            candidate->PrunedMassSub1 = subjets.at(i).m();
+            candidate->PrunedPtSub1   = subjets.at(i).pt();
+            candidate->PrunedEtaSub1  = subjets.at(i).eta();
+            candidate->PrunedPhiSub1  = subjets.at(i).phi();
+          }
+          else if(i == 2){     
+            candidate->PrunedMassSub2 = subjets.at(i).m();
+            candidate->PrunedPtSub2   = subjets.at(i).pt();
+            candidate->PrunedEtaSub2  = subjets.at(i).eta();
+            candidate->PrunedPhiSub2  = subjets.at(i).phi();
+          }
+          else if(i == 3){     
+            candidate->PrunedMassSub3 = subjets.at(i).m();
+            candidate->PrunedPtSub3   = subjets.at(i).pt();
+            candidate->PrunedEtaSub3  = subjets.at(i).eta();
+            candidate->PrunedPhiSub3  = subjets.at(i).phi();
+          }
+        }
 
-      //------------------------------------
-      // SoftDrop
-      //------------------------------------
+        //------------------------------------
+        // SoftDrop
+        //------------------------------------
 
-      double beta   = 0.;
-      double symmetry_cut   = 0.1;
-      double R0     = 0.8;
+        double beta   = 0.;
+        double symmetry_cut   = 0.1;
+        double R0     = 0.8;
 
-      contrib::SoftDrop  softDrop(beta,symmetry_cut,R0);
-      fastjet::PseudoJet softdrop_jet = softDrop(*itOutputList);
+        contrib::SoftDrop  softDrop(beta,symmetry_cut,R0);
+        fastjet::PseudoJet softdrop_jet = softDrop(*itOutputList);
 
-      candidate->SoftDropMass = softdrop_jet.m();
-      candidate->SoftDropPt   = softdrop_jet.pt();
-      candidate->SoftDropEta  = softdrop_jet.eta();
-      candidate->SoftDropPhi  = softdrop_jet.phi();
+        candidate->SoftDropMass = softdrop_jet.m();
+        candidate->SoftDropPt   = softdrop_jet.pt();
+        candidate->SoftDropEta  = softdrop_jet.eta();
+        candidate->SoftDropPhi  = softdrop_jet.phi();
 
-      // three hardest subjet 
-      subjets.clear();
-      subjets    = softdrop_jet.pieces();
-      subjets    = sorted_by_pt(subjets);
-      candidate->NSubJetsSoftDrop = softdrop_jet.pieces().size();
+        // three hardest subjet 
+        subjets.clear();
+        subjets    = softdrop_jet.pieces();
+        subjets    = sorted_by_pt(subjets);
+        candidate->NSubJetsSoftDrop = softdrop_jet.pieces().size();
 
-      for (size_t i = 0; i < subjets.size()  and i < 3; i++){
-	if(subjets.at(i).pt() < 0) continue ; 
-        if(i == 1){ 	
-         candidate->SoftDropMassSub1 = subjets.at(i).m();
-         candidate->SoftDropPtSub1   = subjets.at(i).pt();
-         candidate->SoftDropEtaSub1  = subjets.at(i).eta();
-         candidate->SoftDropPhiSub1  = subjets.at(i).phi();
-	}
-        else if(i == 2){ 	
-         candidate->SoftDropMassSub2 = subjets.at(i).m();
-         candidate->SoftDropPtSub2   = subjets.at(i).pt();
-         candidate->SoftDropEtaSub2  = subjets.at(i).eta();
-         candidate->SoftDropPhiSub2  = subjets.at(i).phi();
-	}
-        else if(i == 3){ 	
-         candidate->SoftDropMassSub3 = subjets.at(i).m();
-         candidate->SoftDropPtSub3   = subjets.at(i).pt();
-         candidate->SoftDropEtaSub3  = subjets.at(i).eta();
-         candidate->SoftDropPhiSub3  = subjets.at(i).phi();
-	}
-      }
+        for (size_t i = 0; i < subjets.size()  and i < 3; i++){
+          if(subjets.at(i).pt() < 0) continue ; 
+          if(i == 1){     
+            candidate->SoftDropMassSub1 = subjets.at(i).m();
+            candidate->SoftDropPtSub1   = subjets.at(i).pt();
+            candidate->SoftDropEtaSub1  = subjets.at(i).eta();
+            candidate->SoftDropPhiSub1  = subjets.at(i).phi();
+          }
+          else if(i == 2){     
+            candidate->SoftDropMassSub2 = subjets.at(i).m();
+            candidate->SoftDropPtSub2   = subjets.at(i).pt();
+            candidate->SoftDropEtaSub2  = subjets.at(i).eta();
+            candidate->SoftDropPhiSub2  = subjets.at(i).phi();
+          }
+          else if(i == 3){     
+            candidate->SoftDropMassSub3 = subjets.at(i).m();
+            candidate->SoftDropPtSub3   = subjets.at(i).pt();
+            candidate->SoftDropEtaSub3  = subjets.at(i).eta();
+            candidate->SoftDropPhiSub3  = subjets.at(i).phi();
+          }
+        }
 
-      //------------------------------------
-      // NSubJettiness
-      //------------------------------------
-      beta = 1.0;     // power for angular dependence, e.g. beta = 1 --> linear k-means, beta = 2 --> quadratic/classic k-means
-      R0   = 0.8;     // Characteristic jet radius for normalization
-      Rcut = 10000.0; // maximum R particles can be from axis to be included in jet (large value for no cutoff)
+        //------------------------------------
+        // NSubJettiness
+        //------------------------------------
+        beta = 1.0;     // power for angular dependence, e.g. beta = 1 --> linear k-means, beta = 2 --> quadratic/classic k-means
+        R0   = 0.8;     // Characteristic jet radius for normalization
+        Rcut = 10000.0; // maximum R particles can be from axis to be included in jet (large value for no cutoff)
       
-      fastjet::contrib::Nsubjettiness nSub1(1,fastjet::contrib::Njettiness::onepass_kt_axes,beta,R0,Rcut);
-      fastjet::contrib::Nsubjettiness nSub2(2,fastjet::contrib::Njettiness::onepass_kt_axes,beta,R0,Rcut);
-      fastjet::contrib::Nsubjettiness nSub3(3,fastjet::contrib::Njettiness::onepass_kt_axes,beta,R0,Rcut);
-      candidate->Tau1 = nSub1(*itOutputList);
-      candidate->Tau2 = nSub2(*itOutputList);
-      candidate->Tau3 = nSub3(*itOutputList);
+        fastjet::contrib::Nsubjettiness nSub1(1,fastjet::contrib::Njettiness::onepass_kt_axes,beta,R0,Rcut);
+        fastjet::contrib::Nsubjettiness nSub2(2,fastjet::contrib::Njettiness::onepass_kt_axes,beta,R0,Rcut);
+        fastjet::contrib::Nsubjettiness nSub3(3,fastjet::contrib::Njettiness::onepass_kt_axes,beta,R0,Rcut);
+        candidate->Tau1 = nSub1(*itOutputList);
+        candidate->Tau2 = nSub2(*itOutputList);
+        candidate->Tau3 = nSub3(*itOutputList);
 
-    }
-
-    fOutputArray->Add(candidate);
-   }
-  }
+      } // substructure
+  
+      fOutputArray->Add(candidate);
+    } // Loop on the outputjets after clustering
+  } // actually cluster the jets
 
   delete sequence;
+  fEventCounter++ ;
 }

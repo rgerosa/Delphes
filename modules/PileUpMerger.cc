@@ -137,6 +137,7 @@ void PileUpMerger::Process()
 //    dt = gRandom->Gaus(0., fZVertexSpread*(mm/ns)/c_light);
     dt = gRandom->Gaus (0., fTVertexSpread) ;
 
+    // to check that distributions follow the coded shapes
     if (fEventCounter < 100)
       {
         fDebugOutputCollector.fillContainer ("PUinitT", dt) ;
