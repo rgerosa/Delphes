@@ -18,6 +18,9 @@ class simpleVariableCollector
         for (std::map<std::string, std::vector<float> * >::iterator it = m_container.begin () ;
              it != m_container.end () ; ++it)
           delete it->second ;
+        for (std::map<std::string, std::vector<std::vector<float>> * >::iterator it = m_container2D.begin () ;
+             it != m_container2D.end () ; ++it)
+          delete it->second ;
       }      
 
     int addVariable (std::string varname)

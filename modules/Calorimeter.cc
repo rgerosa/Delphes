@@ -68,8 +68,17 @@ Calorimeter::~Calorimeter(){
 
   if(fECalResolutionFormula) delete fECalResolutionFormula;
   if(fHCalResolutionFormula) delete fHCalResolutionFormula;
-  if(fTowerTrackArray)   delete fTowerTrackArray;
-  if(fItTowerTrackArray) delete fItTowerTrackArray;
+  if(fTowerTrackArray)       delete fTowerTrackArray;
+  if(fItTowerTrackArray)     delete fItTowerTrackArray;
+
+  if(fItParticleInputArray)  delete fItParticleInputArray;
+  if(fItTrackInputArray)     delete fItTrackInputArray;
+  if(fItLHEPartonInputArray) delete fItLHEPartonInputArray;
+
+  vector< vector< Double_t >* >::iterator itPhiBin;
+  for (itPhiBin = fPhiBins.begin(); itPhiBin != fPhiBins.end(); ++itPhiBin){
+    delete *itPhiBin;
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -187,6 +196,7 @@ void Calorimeter::Init(){
   //simple outputs during running
   fDebugOutputCollector.addVariable2D ("eta:time") ;
   fDebugOutputCollector.addVariable2D ("m_eta:time") ;
+  fDebugOutputCollector.addVariable2D ("m_eta:time_nc") ;
   fDebugOutputCollector.addVariable2D ("Nm_eta:time") ;
   fEventCounter = 0 ;
 
@@ -195,14 +205,6 @@ void Calorimeter::Init(){
 //------------------------------------------------------------------------------
 
 void Calorimeter::Finish(){
-
-  vector< vector< Double_t >* >::iterator itPhiBin;
-  if(fItParticleInputArray) delete fItParticleInputArray;
-  if(fItTrackInputArray) delete fItTrackInputArray;
-  for(itPhiBin = fPhiBins.begin(); itPhiBin != fPhiBins.end(); ++itPhiBin){
-    delete *itPhiBin;
-  }
-  if(fItLHEPartonInputArray) delete fItLHEPartonInputArray;
 
   std::string outfile = GetString ("simpleOutputFileName", "simpleOutput_Ca.root") ;
   fDebugOutputCollector.save (outfile) ;
@@ -463,13 +465,15 @@ void Calorimeter::Process(){
         fDebugOutputCollector.fillContanier2D ("eta:time", 
            feta, particle->Position.T () - delay) ;
         if (isMatching (particle->Position, LHEParticles)) 
-          fDebugOutputCollector.fillContanier2D ("m_eta:time", 
-             feta, particle->Position.T () - delay) ;
+          {
+            fDebugOutputCollector.fillContanier2D ("m_eta:time", 
+               feta, particle->Position.T () - delay) ;
+            fDebugOutputCollector.fillContanier2D ("m_eta:time_nc", 
+               feta, particle->Position.T ()) ;
+          }
         else
           fDebugOutputCollector.fillContanier2D ("Nm_eta:time", 
              feta, particle->Position.T () - delay) ;
-
-
     }
 
     fTower->PID = fParticlePDGId.at(number);
