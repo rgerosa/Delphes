@@ -31,12 +31,29 @@
 
 using namespace std;
 
+
+
+//------------------------------------------------------------------------------
+
+inline bool isMatching (TLorentzVector & part, vector<TLorentzVector> & set) 
+{
+  for (unsigned int i = 0 ; i < set.size () ; ++i)
+    {
+      if (part.DeltaR (set.at (i)) < 0.3) return true ;
+    }
+  return false ;
+}
+
 //------------------------------------------------------------------------------
 
 Calorimeter::Calorimeter() :
   fECalResolutionFormula(0), fHCalResolutionFormula(0),
   fItParticleInputArray(0), fItTrackInputArray(0),
-  fTowerTrackArray(0), fItTowerTrackArray(0) {
+  fTowerTrackArray(0), fItTowerTrackArray(0),
+  fItLHEPartonInputArray (0),
+  fDelayBarrel ("fDelayBarrel", "pol4", 0, 5),
+  fDelayEndcap ("fDelayEndcap", "pol4", 0, 5)
+  {
 
   fECalResolutionFormula = new DelphesFormula;
   fHCalResolutionFormula = new DelphesFormula;
@@ -126,6 +143,10 @@ void Calorimeter::Init(){
   fTrackInputArray = ImportArray(GetString("TrackInputArray", "ParticlePropagator/tracks"));
   fItTrackInputArray = fTrackInputArray->MakeIterator();
 
+  //PG for matching to LHE particles, for timing studies
+  fLHEPartonInputArray = ImportArray(GetString("LHEPartonInputArray", "Delphes/LHEParticles"));
+  fItLHEPartonInputArray = fLHEPartonInputArray->MakeIterator();
+
   // create output arrays
   // calo tower output
   fTowerOutputArray  = ExportArray(GetString("TowerOutputArray", "towers"));
@@ -143,9 +164,31 @@ void Calorimeter::Init(){
   // otherwise is taken from the particle collection
   fElectronsFromTrack  = false;
 
+  Double_t delayBarrelParams[5] ;
+  delayBarrelParams[0] = GetDouble ("DelayBarrel_0",  1257.22) ;
+  delayBarrelParams[1] = GetDouble ("DelayBarrel_1",  436.655) ;
+  delayBarrelParams[2] = GetDouble ("DelayBarrel_2", -444.181) ;
+  delayBarrelParams[3] = GetDouble ("DelayBarrel_3",  961.054) ;
+  delayBarrelParams[4] = GetDouble ("DelayBarrel_4", -235.284) ;
+  fDelayBarrel.SetParameters (delayBarrelParams) ;
+
+  Double_t delayEndcapParams[5] ;
+  delayEndcapParams[0] = GetDouble ("DelayEndcap_0",  4494.45) ;
+  delayEndcapParams[1] = GetDouble ("DelayEndcap_1", -1525.16) ;
+  delayEndcapParams[2] = GetDouble ("DelayEndcap_2",  619.747) ;
+  delayEndcapParams[3] = GetDouble ("DelayEndcap_3", -114.044) ;
+  delayEndcapParams[4] = GetDouble ("DelayEndcap_4",  7.84058) ;
+  fDelayEndcap.SetParameters (delayEndcapParams) ;
+
   //PG FIXME where does this come from?
   // suggested from A. Bornheim, reasonable according to him
   fTimingEMin = GetDouble ("TimingEMin", 4.) ;
+
+  //simple outputs during running
+  fDebugOutputCollector.addVariable2D ("eta:time") ;
+  fDebugOutputCollector.addVariable2D ("m_eta:time") ;
+  fDebugOutputCollector.addVariable2D ("Nm_eta:time") ;
+  fEventCounter = 0 ;
 
 }
 
@@ -159,6 +202,10 @@ void Calorimeter::Finish(){
   for(itPhiBin = fPhiBins.begin(); itPhiBin != fPhiBins.end(); ++itPhiBin){
     delete *itPhiBin;
   }
+  if(fItLHEPartonInputArray) delete fItLHEPartonInputArray;
+
+  std::string outfile = GetString ("simpleOutputFileName", "simpleOutput_Ca.root") ;
+  fDebugOutputCollector.save (outfile) ;
 }
 
 //------------------------------------------------------------------------------
@@ -191,6 +238,19 @@ void Calorimeter::Process(){
   fParticlePDGId.clear();
   fTrackPDGId.clear();
 
+  // get the eta, phi, pt of the LHE partons that could generate
+  // a Delphes jet
+  vector<TLorentzVector> LHEParticles ;
+  fItLHEPartonInputArray->Reset () ;
+  while (Candidate * LHEparticle = static_cast<Candidate*> (fItLHEPartonInputArray->Next ()))
+    {
+      if (LHEparticle->Status != 1) continue ;
+      if (fabs (LHEparticle->PID) == 11 ||   // electron
+          fabs (LHEparticle->PID) < 7   ||   // quarks
+          fabs (LHEparticle->PID) == 21 ||   // gluon
+          fabs (LHEparticle->PID) == 21)     // photon
+        LHEParticles.push_back (LHEparticle->Momentum) ;
+    }
 
   // loop over all tracks to get the deposited energy due to the
   // charged hadrons and electrons. 
@@ -394,6 +454,22 @@ void Calorimeter::Process(){
     if ( (totalEnergy > fTimingEMin && fTower) &&
          (abs(particle->PID) != 11 || !fElectronsFromTrack) ) {
         fTower->ecal_E_t.push_back(std::make_pair<float,float>(totalEnergy,particle->Position.T()));
+
+        float delay = 0. ;
+        float feta = fabs (particle->Position.Eta ()) ;
+        if (feta < 1.6) delay = fDelayBarrel.Eval (feta) ;
+        else            delay = fDelayEndcap.Eval (feta) ;
+        
+        fDebugOutputCollector.fillContanier2D ("eta:time", 
+           feta, particle->Position.T () - delay) ;
+        if (isMatching (particle->Position, LHEParticles)) 
+          fDebugOutputCollector.fillContanier2D ("m_eta:time", 
+             feta, particle->Position.T () - delay) ;
+        else
+          fDebugOutputCollector.fillContanier2D ("Nm_eta:time", 
+             feta, particle->Position.T () - delay) ;
+
+
     }
 
     fTower->PID = fParticlePDGId.at(number);
@@ -402,6 +478,7 @@ void Calorimeter::Process(){
   
   // finalize last tower
   FinalizeTower();
+  ++fEventCounter ;
 }
 
 //------------------------------------------------------------------------------

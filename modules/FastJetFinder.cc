@@ -182,6 +182,8 @@ void FastJetFinder::Init(){
   fDebugOutputCollector.addVariable ("JetTiming") ;
   fDebugOutputCollector.addVariable ("w_timeSpreadInJet") ;
   fDebugOutputCollector.addVariable ("w_JetTiming") ;
+  fEventCounter = 0 ;
+
   
 }
 

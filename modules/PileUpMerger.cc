@@ -58,7 +58,6 @@ PileUpMerger::~PileUpMerger()
 void PileUpMerger::Init()
 {
   const char *fileName;
-  fEventCounter = 0 ;
 
   fMeanPileUp  = GetDouble ("MeanPileUp", 10) ;
   fZVertexSpread = GetDouble ("ZVertexSpread", 0.05) * m ;
@@ -71,9 +70,6 @@ void PileUpMerger::Init()
   fOutputBSX = GetDouble("OutputBSX",0.);
   fOutputBSY = GetDouble("OutputBSY",0.);
 
-  fDebugOutputCollector.addVariable ("PUinitT") ;
-  fDebugOutputCollector.addVariable ("PUinitZ") ;
-
   fileName = GetString("PileUpFile", "MinBias.pileup");
   fReader = new DelphesPileUpReader(fileName);
 
@@ -84,6 +80,10 @@ void PileUpMerger::Init()
   // create output arrays
   fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
   fNPUOutputArray = ExportArray(GetString("NPUOutputArray", "NPU"));
+
+  fDebugOutputCollector.addVariable ("PUinitT") ;
+  fDebugOutputCollector.addVariable ("PUinitZ") ;
+  fEventCounter = 0 ;
 
 }
 

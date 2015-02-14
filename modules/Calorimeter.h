@@ -9,10 +9,13 @@
  */
 
 #include "classes/DelphesModule.h"
+#include "modules/simpleVariableCollector.h"
 
 #include <map>
 #include <set>
 #include <vector>
+
+#include "TF1.h"
 
 class TObjArray;
 class DelphesFormula;
@@ -85,6 +88,15 @@ private:
   Double_t LogNormal(Double_t mean, Double_t sigma);
 
   bool fElectronsFromTrack; // for timing
+
+  const TObjArray *fLHEPartonInputArray; //! 
+  TIterator *fItLHEPartonInputArray; //!  
+
+  TF1 fDelayBarrel ;
+  TF1 fDelayEndcap ;
+
+  simpleVariableCollector fDebugOutputCollector ;    
+  int fEventCounter ;                                                                                                                                             
 
   ClassDef(Calorimeter, 1)
 };

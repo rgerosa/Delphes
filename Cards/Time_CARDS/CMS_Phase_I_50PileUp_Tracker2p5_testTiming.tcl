@@ -46,17 +46,6 @@ set ExecutionPath {
 
   PileUpJetID
 
-  RunPUPPI
-  PuppiRhoKt4
-  PuppiRhoGrid
-  PuppiJetFinder
-
-  PuppiJetPileUpSubtractor
-  PuppiJetFlavourAssociation
-
-  PuppiBTagging
-
-  PuppiPileUpJetID
 
   PhotonEfficiency
   PhotonIsolation 
@@ -69,11 +58,9 @@ set ExecutionPath {
 
   GenMissingET
   MissingET
-  PuppiMissingET
 
   GenScalarHT
   ScalarHT
-  PuppiScalarHT
 
   TreeWriter
 
@@ -91,6 +78,22 @@ set ExecutionPath {
 #### remove the module which do the filter of jet constituent
 # ConstituentFilter
 # PuppiConstituentFilter
+
+#### removing all puppi modules for the time being
+
+#  RunPUPPI
+#  PuppiRhoKt4
+#  PuppiRhoGrid
+#  PuppiJetFinder
+
+#  PuppiJetPileUpSubtractor
+#  PuppiJetFlavourAssociation
+
+#  PuppiBTagging
+
+#  PuppiPileUpJetID
+#  PuppiMissingET
+#  PuppiScalarHT
 
 #################
 # PileUp Merger #
@@ -293,18 +296,48 @@ module Merger TrackMerger {
 
 module Calorimeter Calorimeter {
   ## particle from the propagation without any efficiency or smearing (for neutrals)
-  set ParticleInputArray ParticlePropagator/stableParticles
+  set ParticleInputArray    ParticlePropagator/stableParticles
   ## track after smearing and efficiency: used for charged particles
-  set TrackInputArray   TrackMerger/tracks
+  set TrackInputArray       TrackMerger/tracks
+  set LHEPartonInputArray   Delphes/LHEParticles
+
   ## output collections
-  set TowerOutputArray  towers
-  set PhotonOutputArray photons
+  set TowerOutputArray      towers
+  set PhotonOutputArray     photons
   set EFlowTrackOutputArray eflowTracks
   set EFlowTowerOutputArray eflowTowers
+  
+  # flat ntuples output
+  set simpleOutputFileName /afs/cern.ch/user/g/govoni/work/TP/Delphes/testSample/simpleOutput_Ca.root
 
-  #PG all the particles enter in the timing definition of the tower,
-  #PG regardless of their energy
+  # ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- 
+  #   timing of the calo deposits
+  # ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- 
+  
+  # minimum threshold for a particle deposit in a tower
+  # to enter in the computation of the timing associated to a tower
   set TimingEMin 0.
+
+  # profile of the delay for a particle traveling from the interaction vertex
+  # to the calorimetry, determined from LHE particles in Delphes
+  # originating from (0,0,0)
+  # up to eta = 1.6
+  set DelayBarrel_0 1257.22
+  set DelayBarrel_1 436.655
+  set DelayBarrel_2 -444.181
+  set DelayBarrel_3 961.054
+  set DelayBarrel_4 -235.284
+
+  # from eta da 1.6
+  set DelayEndcap_0  4494.45
+  set DelayEndcap_1 -1525.16
+  set DelayEndcap_2  619.747
+  set DelayEndcap_3 -114.044
+  set DelayEndcap_4  7.84058
+
+  # ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- 
+  #   calorimetry granularity
+  # ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- 
 
   set pi [expr {acos(-1)}]
 
@@ -2209,23 +2242,23 @@ module TreeWriter TreeWriter {
 
   ## PUPPI
   #add Branch RunPUPPI/PuppiParticles puppiParticles GenParticle
-  add Branch PuppiRhoKt4/rho         PuppiRhoKt4 Rho
-  add Branch PuppiRhoGrid/rho PuppiRhoGrid Rho
+  #add Branch PuppiRhoKt4/rho         PuppiRhoKt4 Rho
+  #add Branch PuppiRhoGrid/rho PuppiRhoGrid Rho
   #add Branch PuppiJetFinder/jets     RawPuppiJet Jet
   #add Branch PuppiJetPileUpSubtractor/jets PuppiJet Jet
   #add Branch PuppiJetPileUpSubtractorGrid/jets PuppiJetGrid Jet
   #add Branch PuppiJetPileUpSubtractor4VArea/jets PuppiJet4VArea Jet
-  add Branch PuppiPileUpJetID/jets PuppiJetPUID Jet
+  #add Branch PuppiPileUpJetID/jets PuppiJetPUID Jet
 
   ## MET
   add Branch GenMissingET/momentum GenMissingET MissingET
   add Branch MissingET/momentum MissingET MissingET
-  add Branch PuppiMissingET/momentum PuppiMissingET MissingET
+  #add Branch PuppiMissingET/momentum PuppiMissingET MissingET
 
   ## HT
   add Branch ScalarHT/energy HT ScalarHT
   add Branch GenScalarHT/energy GenHT ScalarHT
-  add Branch PuppiScalarHT/energy PuppiHT ScalarHT
+  #add Branch PuppiScalarHT/energy PuppiHT ScalarHT
 
   ## photons and leptons
   add Branch ElectronIsolation/electrons Electron Electron
