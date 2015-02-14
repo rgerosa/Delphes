@@ -114,7 +114,7 @@ void JetFlavourAssociation::Init(){
   fItPartonInputArray = fPartonInputArray->MakeIterator();
 
   fLHEPartonInputArray = ImportArray(GetString("LHEPartonInputArray", "Delphes/LHEParticles"));
-  fItLHEPartonInputArray = fPartonInputArray->MakeIterator();
+  fItLHEPartonInputArray = fLHEPartonInputArray->MakeIterator();
 
   fFilter    = new ExRootFilter(fPartonInputArray);
   fFilterLHE = new ExRootFilter(fLHEPartonInputArray);
