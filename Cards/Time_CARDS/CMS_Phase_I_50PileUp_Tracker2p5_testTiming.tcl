@@ -115,7 +115,7 @@ module PileUpMerger PileUpMerger {
  # pre-generated minbias input file --> change this dummy name <random access with unifor number between 0 and NEntries>
  set PileUpFile /afs/cern.ch/user/g/govoni/work/TP/Delphes/testSample/MB_1.mb
  #average expected pile up <poissonian generation>
- set MeanPileUp 50
+ set MeanPileUp 0
  # spread in the beam direction in m (assumed gaussian) ; 
  set ZVertexSpread 0.053
  # time spread in the events happening in ns (assumed gaussian) ; 
@@ -130,7 +130,8 @@ module PileUpMerger PileUpMerger {
 ##################
 
 module ModifyBeamSpot ModifyBeamSpot {
-  set ZVertexSpread 0.053
+#  set ZVertexSpread 0.053
+  set ZVertexSpread 0.
   set InputArray    PileUpMerger/stableParticles 
   set OutputArray   stableParticles
   set PVOutputArray PV  
@@ -322,18 +323,45 @@ module Calorimeter Calorimeter {
   # to the calorimetry, determined from LHE particles in Delphes
   # originating from (0,0,0)
   # up to eta = 1.6
-  set DelayBarrel_0 1257.22
-  set DelayBarrel_1 436.655
-  set DelayBarrel_2 -444.181
-  set DelayBarrel_3 961.054
-  set DelayBarrel_4 -235.284
+#  set DelayBarrel_0 1257.22
+#  set DelayBarrel_1 436.655
+#  set DelayBarrel_2 -444.181
+#  set DelayBarrel_3 961.054
+#  set DelayBarrel_4 -235.284
 
-  # from eta da 1.6
-  set DelayEndcap_0  4494.45
-  set DelayEndcap_1 -1525.16
-  set DelayEndcap_2  619.747
-  set DelayEndcap_3 -114.044
-  set DelayEndcap_4  7.84058
+#  set DelayBarrel_0 1290.84
+#  set DelayBarrel_1 -15.0934
+#  set DelayBarrel_2 703.678
+#  set DelayBarrel_3 -81.2547
+#  set DelayBarrel_4 90.4117
+
+  set DelayBarrel_0 1287.51    
+  set DelayBarrel_1 5.55276    
+  set DelayBarrel_2 635.669    
+  set DelayBarrel_3 19.2171    
+  set DelayBarrel_4 30.0051    
+  set DelayBarrel_5 12.1216    
+
+  # from eta = 1.6
+#  set DelayEndcap_0  4494.45
+#  set DelayEndcap_1 -1525.16
+#  set DelayEndcap_2  619.747
+#  set DelayEndcap_3 -114.044
+#  set DelayEndcap_4  7.84058
+
+#  set DelayEndcap_0  4437.37
+#  set DelayEndcap_1 -1260.96
+#  set DelayEndcap_2  387.109
+#  set DelayEndcap_3 -46.5449
+#  set DelayEndcap_4  1.56776
+
+  set DelayEndcap_0  6.41347e+03
+  set DelayEndcap_1 -4.49583e+03
+  set DelayEndcap_2  2.40551e+03
+  set DelayEndcap_3 -6.47156e+02
+  set DelayEndcap_4  8.70166e+01
+  set DelayEndcap_5 -4.66147e+00
+
 
   # ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- 
   #   calorimetry granularity

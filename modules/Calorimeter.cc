@@ -31,15 +31,13 @@
 
 using namespace std;
 
-
-
 //------------------------------------------------------------------------------
 
 inline bool isMatching (TLorentzVector & part, vector<TLorentzVector> & set) 
 {
   for (unsigned int i = 0 ; i < set.size () ; ++i)
     {
-      if (part.DeltaR (set.at (i)) < 0.3) return true ;
+      if (part.DeltaR (set.at (i)) < 0.1) return true ;
     }
   return false ;
 }
@@ -51,8 +49,8 @@ Calorimeter::Calorimeter() :
   fItParticleInputArray(0), fItTrackInputArray(0),
   fTowerTrackArray(0), fItTowerTrackArray(0),
   fItLHEPartonInputArray (0),
-  fDelayBarrel ("fDelayBarrel", "pol4", 0, 5),
-  fDelayEndcap ("fDelayEndcap", "pol4", 0, 5)
+  fDelayBarrel ("fDelayBarrel", "pol5", 0, 5),
+  fDelayEndcap ("fDelayEndcap", "pol5", 0, 5)
   {
 
   fECalResolutionFormula = new DelphesFormula;
@@ -173,20 +171,22 @@ void Calorimeter::Init(){
   // otherwise is taken from the particle collection
   fElectronsFromTrack  = false;
 
-  Double_t delayBarrelParams[5] ;
+  Double_t delayBarrelParams[6] ;
   delayBarrelParams[0] = GetDouble ("DelayBarrel_0",  1257.22) ;
   delayBarrelParams[1] = GetDouble ("DelayBarrel_1",  436.655) ;
   delayBarrelParams[2] = GetDouble ("DelayBarrel_2", -444.181) ;
   delayBarrelParams[3] = GetDouble ("DelayBarrel_3",  961.054) ;
   delayBarrelParams[4] = GetDouble ("DelayBarrel_4", -235.284) ;
+  delayBarrelParams[5] = GetDouble ("DelayBarrel_4", -235.284) ;
   fDelayBarrel.SetParameters (delayBarrelParams) ;
 
-  Double_t delayEndcapParams[5] ;
+  Double_t delayEndcapParams[6] ;
   delayEndcapParams[0] = GetDouble ("DelayEndcap_0",  4494.45) ;
   delayEndcapParams[1] = GetDouble ("DelayEndcap_1", -1525.16) ;
   delayEndcapParams[2] = GetDouble ("DelayEndcap_2",  619.747) ;
   delayEndcapParams[3] = GetDouble ("DelayEndcap_3", -114.044) ;
   delayEndcapParams[4] = GetDouble ("DelayEndcap_4",  7.84058) ;
+  delayEndcapParams[5] = GetDouble ("DelayEndcap_4",  7.84058) ;
   fDelayEndcap.SetParameters (delayEndcapParams) ;
 
   //PG FIXME where does this come from?
@@ -194,10 +194,15 @@ void Calorimeter::Init(){
   fTimingEMin = GetDouble ("TimingEMin", 4.) ;
 
   //simple outputs during running
-  fDebugOutputCollector.addVariable2D ("eta:time") ;
-  fDebugOutputCollector.addVariable2D ("m_eta:time") ;
-  fDebugOutputCollector.addVariable2D ("m_eta:time_nc") ;
-  fDebugOutputCollector.addVariable2D ("Nm_eta:time") ;
+  fDebugOutputCollector.addVariable ("DR") ;
+  fDebugOutputCollector.addVariable ("partType") ;
+  fDebugOutputCollector.addVariable ("m_partType") ;
+  fDebugOutputCollector.addVariable ("Nm_partType") ;
+  fDebugOutputCollector.addVariable3D ("eta:time:pt") ;
+  fDebugOutputCollector.addVariable3D ("m_eta:time:pt") ;
+  fDebugOutputCollector.addVariable3D ("m_eta:time_nc:pt") ;
+  fDebugOutputCollector.addVariable3D ("Nm_eta:time:pt") ;
+  fDebugOutputCollector.addNtuple ("eta:time:pt:PID") ;
   fEventCounter = 0 ;
 
 }
@@ -248,6 +253,7 @@ void Calorimeter::Process(){
     {
       if (LHEparticle->Status != 1) continue ;
       if (fabs (LHEparticle->PID) == 11 ||   // electron
+//          1) 
           fabs (LHEparticle->PID) < 7   ||   // quarks
           fabs (LHEparticle->PID) == 21 ||   // gluon
           fabs (LHEparticle->PID) == 21)     // photon
@@ -429,7 +435,13 @@ void Calorimeter::Process(){
       totalEnergy = ecalEnergy + hcalEnergy ;
 
       if ( totalEnergy > fTimingEMin && fTower && fElectronsFromTrack) {
-        fTower->ecal_E_t.push_back(std::make_pair<float,float>(totalEnergy,track->Position.T()));
+        float delay = 0. ;
+        float feta = fabs (track->Position.Eta ()) ;
+        if (feta < 1.6) delay = fDelayBarrel.Eval (feta) ;
+        else            delay = fDelayEndcap.Eval (feta) ;
+        
+        fTower->ecal_E_t.push_back(
+          std::make_pair<float,float>(totalEnergy, track->Position.T() - delay));
       }
       
       fTowerTrackArray->Add(track);
@@ -452,34 +464,57 @@ void Calorimeter::Process(){
 
     totalEnergy = ecalEnergy + hcalEnergy ;
 
-    // FIXME still removing electrons!!
     if ( (totalEnergy > fTimingEMin && fTower) &&
          (abs(particle->PID) != 11 || !fElectronsFromTrack) ) {
-        fTower->ecal_E_t.push_back(std::make_pair<float,float>(totalEnergy,particle->Position.T()));
 
         float delay = 0. ;
         float feta = fabs (particle->Position.Eta ()) ;
         if (feta < 1.6) delay = fDelayBarrel.Eval (feta) ;
         else            delay = fDelayEndcap.Eval (feta) ;
         
-        fDebugOutputCollector.fillContanier2D ("eta:time", 
-           feta, particle->Position.T () - delay) ;
+        fTower->ecal_E_t.push_back(
+          std::make_pair<float,float>(totalEnergy, particle->Position.T() - delay));
+
+        double Rmin = 100. ; 
+        for (unsigned int i = 0 ; i < LHEParticles.size () ; ++i)
+          {
+            if (particle->Position.DeltaR (LHEParticles.at (i)) < Rmin) 
+              Rmin = particle->Position.DeltaR (LHEParticles.at (i)) ;
+          }
+        fDebugOutputCollector.fillContainer ("DR", Rmin) ;
+        fDebugOutputCollector.fillContainer ("partType", particle->PID) ;
+
+        fDebugOutputCollector.fillContanier3D ("eta:time:pt", 
+           feta, particle->Position.T () - delay, particle->Momentum.Pt ()) ;
+
+        fDebugOutputCollector.getNtuple ("eta:time:pt:PID")->Fill 
+          (
+            feta,
+            particle->Position.T () - delay,
+            particle->Momentum.Pt (),
+            particle->PID
+          ) ;
+
         if (isMatching (particle->Position, LHEParticles)) 
           {
-            fDebugOutputCollector.fillContanier2D ("m_eta:time", 
-               feta, particle->Position.T () - delay) ;
-            fDebugOutputCollector.fillContanier2D ("m_eta:time_nc", 
-               feta, particle->Position.T ()) ;
+            fDebugOutputCollector.fillContainer ("m_partType", particle->PID) ;
+            fDebugOutputCollector.fillContanier3D ("m_eta:time:pt", 
+               feta, particle->Position.T () - delay, particle->Momentum.Pt ()) ;
+            fDebugOutputCollector.fillContanier3D ("m_eta:time_nc:pt", 
+               feta, particle->Position.T (), particle->Momentum.Pt ()) ;
           }
         else
-          fDebugOutputCollector.fillContanier2D ("Nm_eta:time", 
-             feta, particle->Position.T () - delay) ;
+          {
+            fDebugOutputCollector.fillContainer ("Nm_partType", particle->PID) ;
+            fDebugOutputCollector.fillContanier3D ("Nm_eta:time:pt", 
+               feta, particle->Position.T () - delay, particle->Momentum.Pt ()) ;
+          }
     }
 
     fTower->PID = fParticlePDGId.at(number);
     fTower->AddCandidate(particle);
   } // loop over the hits
-  
+
   // finalize last tower
   FinalizeTower();
   ++fEventCounter ;
@@ -496,9 +531,11 @@ void Calorimeter::FinalizeTower(){
 
   if(!fTower) return;
 
-  ecalSigma  = fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, fTowerECalEnergy); // take ecal resolution
+  // ECAL resolution
+  ecalSigma  = fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, fTowerECalEnergy);
   ecalEnergy = LogNormal(fTowerECalEnergy, ecalSigma);
 
+  // HCAL resolution
   hcalSigma  = fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, fTowerHCalEnergy);
   hcalEnergy = LogNormal(fTowerHCalEnergy, hcalSigma);
 
