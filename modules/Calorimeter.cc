@@ -177,7 +177,7 @@ void Calorimeter::Init(){
   delayBarrelParams[2] = GetDouble ("DelayBarrel_2", -444.181) ;
   delayBarrelParams[3] = GetDouble ("DelayBarrel_3",  961.054) ;
   delayBarrelParams[4] = GetDouble ("DelayBarrel_4", -235.284) ;
-  delayBarrelParams[5] = GetDouble ("DelayBarrel_4", -235.284) ;
+  delayBarrelParams[5] = GetDouble ("DelayBarrel_5", -235.284) ;
   fDelayBarrel.SetParameters (delayBarrelParams) ;
 
   Double_t delayEndcapParams[6] ;
@@ -186,7 +186,7 @@ void Calorimeter::Init(){
   delayEndcapParams[2] = GetDouble ("DelayEndcap_2",  619.747) ;
   delayEndcapParams[3] = GetDouble ("DelayEndcap_3", -114.044) ;
   delayEndcapParams[4] = GetDouble ("DelayEndcap_4",  7.84058) ;
-  delayEndcapParams[5] = GetDouble ("DelayEndcap_4",  7.84058) ;
+  delayEndcapParams[5] = GetDouble ("DelayEndcap_5",  7.84058) ;
   fDelayEndcap.SetParameters (delayEndcapParams) ;
 
   //PG FIXME where does this come from?
