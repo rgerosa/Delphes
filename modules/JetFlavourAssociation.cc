@@ -181,17 +181,18 @@ void JetFlavourAssociation::GetAlgoFlavour(Candidate* jet, TIter & itPartonArray
   float maxPt = 0;
   float minDr = 1000;
   Candidate* parton, *LHEParton;
-  int pdgCode, pdgCodeMax ;
-
+  int pdgCode, pdgCodeMax = -1 ;
+  
   itPartonArray.Reset();
   while((parton = static_cast<Candidate*>(itPartonArray.Next()))){ 
 
     // default delphes method
+    pdgCode = TMath::Abs(parton->PID);     
     if(TMath::Abs(parton->PID) == 21) pdgCode = 0;
     if(jet->Momentum.DeltaR(parton->Momentum) <= fDeltaR){
        if(pdgCodeMax < pdgCode) pdgCodeMax = pdgCode;
     }
-
+    
     bool isGoodParton = true;
     itLHEPartonArray.Reset();
     while((LHEParton = static_cast<Candidate*>(itLHEPartonArray.Next()))){
@@ -230,6 +231,7 @@ void JetFlavourAssociation::GetAlgoFlavour(Candidate* jet, TIter & itPartonArray
 	}	  
       }
     }
+    
   }
  
   jet->flavourHeaviest  = TMath::Abs(tempParticle.PID);
@@ -243,12 +245,12 @@ void JetFlavourAssociation::GetAlgoFlavour(Candidate* jet, TIter & itPartonArray
   if(pdgCodeMax == -1) pdgCodeMax = 0;
 
   jet->flavourDefault = pdgCodeMax;
-
+  
 }
 
 
 void JetFlavourAssociation::GetPhysicsFlavour(Candidate* jet, TIter & itPartonArray, TIter & itLHEPartonArray){
-
+  
   Candidate tempParticle ;
   Candidate tempNearest;
   float     minDr = 1000;
@@ -273,6 +275,7 @@ void JetFlavourAssociation::GetPhysicsFlavour(Candidate* jet, TIter & itPartonAr
       }
   }
 
+  
   itPartonArray.Reset();
   itLHEPartonArray.Reset();
   while((parton = static_cast<Candidate*>(itPartonArray.Next()))){ 
@@ -284,7 +287,9 @@ void JetFlavourAssociation::GetPhysicsFlavour(Candidate* jet, TIter & itPartonAr
 	    break;
 	}
       }
+
       if(!isGoodCandidate) continue;
+
       if(parton->D1 != -1 or parton->D2!=-1){         
         if((TMath::Abs(parton->PID) < 4 or TMath::Abs(parton->PID) == 21)) continue ;
         if(dist < TheBiggerConeSize) contaminations.push_back(*parton);
@@ -293,22 +298,32 @@ void JetFlavourAssociation::GetPhysicsFlavour(Candidate* jet, TIter & itPartonAr
   
 
   jet->flavourNearest3 =  TMath::Abs(tempNearest.PID);
-  if(nInTheCone != 1) jet->flavourPhysics = 0;
-  else if(contaminations.size() == 0) jet->flavourPhysics = TMath::Abs(tempParticle.PID);
+  
+  if(nInTheCone != 1) 
+    jet->flavourPhysics = 0;
+  else if(contaminations.size() == 0) 
+    jet->flavourPhysics = TMath::Abs(tempParticle.PID);
   else if(contaminations.size() != 0){ 
     jet->flavourPhysics = TMath::Abs(tempParticle.PID);
+   
     for(size_t iPart = 0; iPart < contaminations.size() ; iPart++){
       int contaminatingFlavour = TMath::Abs(contaminations.at(iPart).PID);
       int numberOfMothers = 0;
       if(contaminations.at(iPart).M1 !=-1) numberOfMothers++;
       if(contaminations.at(iPart).M2 !=-1) numberOfMothers++;
-      if( numberOfMothers > 0 && dynamic_cast<Candidate*>(fParticleInputArray->At(contaminations.at(iPart).M1))->Momentum.DeltaR(tempParticle.Momentum) < 0.001 ) continue; // mother is the initialParton --> OK
-      if( TMath::Abs(tempParticle.PID) == 4 ) {
-	 if( contaminatingFlavour == 4 ) continue; // keep association --> the initialParton is a c --> the contaminated parton is a c
-	 jet->flavourPhysics = 0; // all the other cases reject!
-         break;
+      if(contaminations.at(iPart).M1 !=-1 and dynamic_cast<Candidate*>(fParticleInputArray->At(contaminations.at(iPart).M1)) !=0){
+	if( numberOfMothers > 0 && dynamic_cast<Candidate*>(fParticleInputArray->At(contaminations.at(iPart).M1))->Momentum.DeltaR(tempParticle.Momentum) < 0.001 ) continue;
       }
-    }
-  }
-  
+      if(contaminations.at(iPart).M2 !=-1 and dynamic_cast<Candidate*>(fParticleInputArray->At(contaminations.at(iPart).M2)) !=0){
+ 	if( numberOfMothers > 0 && dynamic_cast<Candidate*>(fParticleInputArray->At(contaminations.at(iPart).M2))->Momentum.DeltaR(tempParticle.Momentum) < 0.001 ) continue;
+      }
+      // mother is the initialParton --> OK	
+      if( TMath::Abs(tempParticle.PID) == 4 ) {
+	if( contaminatingFlavour == 4 ) continue; // keep association --> the initialParton is a c --> the contaminated parton is a c
+	jet->flavourPhysics = 0; // all the other cases reject!
+	break;
+      }
+    }   
+  }    
 }
+
