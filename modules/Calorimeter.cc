@@ -1,8 +1,6 @@
 /** \class Calorimeter
  *  Fills calorimeter towers, performs calorimeter resolution smearing,
  *  preselects towers hit by photons and creates energy flow objects.
- *  $Date: 2013-09-04 17:20:22 +0200 (Wed, 04 Sep 2013) $
- *  $Revision: 1280 $
  *  \author P. Demin - UCL, Louvain-la-Neuve
 */
 
@@ -28,6 +26,9 @@
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
+
+static const double c_light     = 0.299792458 ; // mm/ps , or m/ns
+static const double inv_c_light = 3.335640952 ; // ps/mm or ns/m
 
 using namespace std;
 
@@ -172,21 +173,21 @@ void Calorimeter::Init(){
   fElectronsFromTrack  = false;
 
   Double_t delayBarrelParams[6] ;
-  delayBarrelParams[0] = GetDouble ("DelayBarrel_0",  1257.22) ;
-  delayBarrelParams[1] = GetDouble ("DelayBarrel_1",  436.655) ;
-  delayBarrelParams[2] = GetDouble ("DelayBarrel_2", -444.181) ;
-  delayBarrelParams[3] = GetDouble ("DelayBarrel_3",  961.054) ;
-  delayBarrelParams[4] = GetDouble ("DelayBarrel_4", -235.284) ;
-  delayBarrelParams[5] = GetDouble ("DelayBarrel_5", -235.284) ;
+  delayBarrelParams[0] = GetDouble ("DelayBarrel_0", 0.) ;
+  delayBarrelParams[1] = GetDouble ("DelayBarrel_1", 0.) ;
+  delayBarrelParams[2] = GetDouble ("DelayBarrel_2", 0.) ;
+  delayBarrelParams[3] = GetDouble ("DelayBarrel_3", 0.) ;
+  delayBarrelParams[4] = GetDouble ("DelayBarrel_4", 0.) ;
+  delayBarrelParams[5] = GetDouble ("DelayBarrel_5", 0.) ;
   fDelayBarrel.SetParameters (delayBarrelParams) ;
 
   Double_t delayEndcapParams[6] ;
-  delayEndcapParams[0] = GetDouble ("DelayEndcap_0",  4494.45) ;
-  delayEndcapParams[1] = GetDouble ("DelayEndcap_1", -1525.16) ;
-  delayEndcapParams[2] = GetDouble ("DelayEndcap_2",  619.747) ;
-  delayEndcapParams[3] = GetDouble ("DelayEndcap_3", -114.044) ;
-  delayEndcapParams[4] = GetDouble ("DelayEndcap_4",  7.84058) ;
-  delayEndcapParams[5] = GetDouble ("DelayEndcap_5",  7.84058) ;
+  delayEndcapParams[0] = GetDouble ("DelayEndcap_0", 0.) ;
+  delayEndcapParams[1] = GetDouble ("DelayEndcap_1", 0.) ;
+  delayEndcapParams[2] = GetDouble ("DelayEndcap_2", 0.) ;
+  delayEndcapParams[3] = GetDouble ("DelayEndcap_3", 0.) ;
+  delayEndcapParams[4] = GetDouble ("DelayEndcap_4", 0.) ;
+  delayEndcapParams[5] = GetDouble ("DelayEndcap_5", 0.) ;
   fDelayEndcap.SetParameters (delayEndcapParams) ;
 
   //PG FIXME where does this come from?
@@ -194,15 +195,16 @@ void Calorimeter::Init(){
   fTimingEMin = GetDouble ("TimingEMin", 4.) ;
 
   //simple outputs during running
-  fDebugOutputCollector.addVariable ("DR") ;
-  fDebugOutputCollector.addVariable ("partType") ;
-  fDebugOutputCollector.addVariable ("m_partType") ;
-  fDebugOutputCollector.addVariable ("Nm_partType") ;
-  fDebugOutputCollector.addVariable3D ("eta:time:pt") ;
+//   fDebugOutputCollector.addVariable ("DR") ;
+//   fDebugOutputCollector.addVariable ("m_partType") ;
+//   fDebugOutputCollector.addVariable ("Nm_partType") ;
   fDebugOutputCollector.addVariable3D ("m_eta:time:pt") ;
   fDebugOutputCollector.addVariable3D ("m_eta:time_nc:pt") ;
   fDebugOutputCollector.addVariable3D ("Nm_eta:time:pt") ;
-  fDebugOutputCollector.addNtuple ("eta:time:pt:PID") ;
+  fDebugOutputCollector.addVariable4D ("eta:time:pt:PID") ;
+
+  fDebugOutputCollector.addVariable3D ("tower_eta:time:pt") ;
+  fDebugOutputCollector.addVariable3D ("tower_eta:time:E") ;
   fEventCounter = 0 ;
 
 }
@@ -440,8 +442,10 @@ void Calorimeter::Process(){
         if (feta < 1.6) delay = fDelayBarrel.Eval (feta) ;
         else            delay = fDelayEndcap.Eval (feta) ;
         
+        float time = track->Position.T () * inv_c_light ;
+
         fTower->ecal_E_t.push_back(
-          std::make_pair<float,float>(totalEnergy, track->Position.T() - delay));
+          std::make_pair<float,float>(totalEnergy, time - delay));
       }
       
       fTowerTrackArray->Add(track);
@@ -463,34 +467,38 @@ void Calorimeter::Process(){
     fTowerHCalEnergy += hcalEnergy;
 
     totalEnergy = ecalEnergy + hcalEnergy ;
-
+    
     if ( (totalEnergy > fTimingEMin && fTower) &&
          (abs(particle->PID) != 11 || !fElectronsFromTrack) ) {
+
+        // the time in the delphes propagation is in mm, 
+        // converting here in ps
+        float time = particle->Position.T () * inv_c_light ;
 
         float delay = 0. ;
         float feta = fabs (particle->Position.Eta ()) ;
         if (feta < 1.6) delay = fDelayBarrel.Eval (feta) ;
         else            delay = fDelayEndcap.Eval (feta) ;
         
+        // the timing is corrected in the map,
+        // since I assume that the knowledge of the position of the detID
+        // is enough to determine the correction.
+        // The PV z position could be used to introduce a correction
+        // to the delay of the order of cz
         fTower->ecal_E_t.push_back(
-          std::make_pair<float,float>(totalEnergy, particle->Position.T() - delay));
+          std::make_pair<float,float> (totalEnergy, time - delay));
 
-        double Rmin = 100. ; 
-        for (unsigned int i = 0 ; i < LHEParticles.size () ; ++i)
-          {
-            if (particle->Position.DeltaR (LHEParticles.at (i)) < Rmin) 
-              Rmin = particle->Position.DeltaR (LHEParticles.at (i)) ;
-          }
-        fDebugOutputCollector.fillContainer ("DR", Rmin) ;
-        fDebugOutputCollector.fillContainer ("partType", particle->PID) ;
+//         double Rmin = 100. ; 
+//         for (unsigned int i = 0 ; i < LHEParticles.size () ; ++i)
+//           {
+//             if (particle->Position.DeltaR (LHEParticles.at (i)) < Rmin) 
+//               Rmin = particle->Position.DeltaR (LHEParticles.at (i)) ;
+//           }
+//         fDebugOutputCollector.fillContainer ("DR", Rmin) ;
 
-        fDebugOutputCollector.fillContanier3D ("eta:time:pt", 
-           feta, particle->Position.T () - delay, particle->Momentum.Pt ()) ;
-
-        fDebugOutputCollector.getNtuple ("eta:time:pt:PID")->Fill 
-          (
+        fDebugOutputCollector.fillContainer4D ("eta:time:pt:PID", 
             feta,
-            particle->Position.T () - delay,
+            time - delay,
             particle->Momentum.Pt (),
             particle->PID
           ) ;
@@ -498,16 +506,16 @@ void Calorimeter::Process(){
         if (isMatching (particle->Position, LHEParticles)) 
           {
             fDebugOutputCollector.fillContainer ("m_partType", particle->PID) ;
-            fDebugOutputCollector.fillContanier3D ("m_eta:time:pt", 
-               feta, particle->Position.T () - delay, particle->Momentum.Pt ()) ;
-            fDebugOutputCollector.fillContanier3D ("m_eta:time_nc:pt", 
-               feta, particle->Position.T (), particle->Momentum.Pt ()) ;
+            fDebugOutputCollector.fillContainer3D ("m_eta:time:pt", 
+               feta, time - delay, particle->Momentum.Pt ()) ;
+            fDebugOutputCollector.fillContainer3D ("m_eta:time_nc:pt", 
+               feta, time, particle->Momentum.Pt ()) ;
           }
         else
           {
             fDebugOutputCollector.fillContainer ("Nm_partType", particle->PID) ;
-            fDebugOutputCollector.fillContanier3D ("Nm_eta:time:pt", 
-               feta, particle->Position.T () - delay, particle->Momentum.Pt ()) ;
+            fDebugOutputCollector.fillContainer3D ("Nm_eta:time:pt", 
+               feta, time - delay, particle->Momentum.Pt ()) ;
           }
     }
 
@@ -568,6 +576,18 @@ void Calorimeter::FinalizeTower(){
   fTower->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
   fTower->Eem = ecalEnergy;
   fTower->Ehad = hcalEnergy;
+
+  fDebugOutputCollector.fillContainer3D ("tower_eta:time:pt",
+     fabs (fTower->Position.Eta ()),
+     fTower->Position.T (),
+     fTower->Momentum.Pt ()
+    ) ;
+
+  fDebugOutputCollector.fillContainer3D ("tower_eta:time:E",
+     fabs (fTower->Position.Eta ()),
+     fTower->Position.T (),
+     fTower->Momentum.E ()
+    ) ;
 
   fTower->Edges[0] = fTowerEdges[0];
   fTower->Edges[1] = fTowerEdges[1];

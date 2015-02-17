@@ -107,11 +107,16 @@ module PileUpMerger PileUpMerger {
  ## store NPU
  set NPUOutputArray NPU
  # Get rid of beam spot from http://red-gridftp11.unl.edu/Snowmass/MinBias100K_14TeV.pileup ...
- set InputBSX 2.44
- set InputBSY 3.39
+# set InputBSX 2.44
+# set InputBSY 3.39
  # replace it with beam spot from CMSSW files  
- set OutputBSX 0.24
- set OutputBSY 0.39  
+# set OutputBSX 0.24
+# set OutputBSY 0.39  
+
+ set OutputBSX 0.
+ set OutputBSY 0.  
+ set OutputBSZ 0.  
+
  # pre-generated minbias input file --> change this dummy name <random access with unifor number between 0 and NEntries>
  set PileUpFile /afs/cern.ch/user/g/govoni/work/TP/Delphes/testSample/MB_1.mb
  #average expected pile up <poissonian generation>
@@ -119,9 +124,9 @@ module PileUpMerger PileUpMerger {
  # spread in the beam direction in m (assumed gaussian) ; 
  set ZVertexSpread 0.053
  # time spread in the events happening in ns (assumed gaussian) ; 
- # baseline = 160 ns, crab-kiss = 100 ns
- set TVertexSpread 160
- # set TVertexSpread 100
+ # baseline = 160 ps, crab-kiss = 100 ps
+ set TVertexSpread 0.160
+ # set TVertexSpread 0.100
  set simpleOutputFileName /afs/cern.ch/user/g/govoni/work/TP/Delphes/testSample/simpleOutput_PU.root
 }
 
@@ -315,52 +320,29 @@ module Calorimeter Calorimeter {
   #   timing of the calo deposits
   # ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- 
   
-  # minimum threshold for a particle deposit in a tower
+  # Minimum threshold for a particle deposit in a tower
   # to enter in the computation of the timing associated to a tower
+  # in GeV.
   set TimingEMin 0.
 
   # profile of the delay for a particle traveling from the interaction vertex
   # to the calorimetry, determined from LHE particles in Delphes
   # originating from (0,0,0)
   # up to eta = 1.6
-#  set DelayBarrel_0 1257.22
-#  set DelayBarrel_1 436.655
-#  set DelayBarrel_2 -444.181
-#  set DelayBarrel_3 961.054
-#  set DelayBarrel_4 -235.284
-
-#  set DelayBarrel_0 1290.84
-#  set DelayBarrel_1 -15.0934
-#  set DelayBarrel_2 703.678
-#  set DelayBarrel_3 -81.2547
-#  set DelayBarrel_4 90.4117
-
-  set DelayBarrel_0 1287.51    
-  set DelayBarrel_1 5.55276    
-  set DelayBarrel_2 635.669    
-  set DelayBarrel_3 19.2171    
-  set DelayBarrel_4 30.0051    
-  set DelayBarrel_5 12.1216    
+  set DelayBarrel_0   4294.67
+  set DelayBarrel_1     18.52
+  set DelayBarrel_2   2120.36
+  set DelayBarrel_3     64.10
+  set DelayBarrel_4    100.09
+  set DelayBarrel_5     40.43
 
   # from eta = 1.6
-#  set DelayEndcap_0  4494.45
-#  set DelayEndcap_1 -1525.16
-#  set DelayEndcap_2  619.747
-#  set DelayEndcap_3 -114.044
-#  set DelayEndcap_4  7.84058
-
-#  set DelayEndcap_0  4437.37
-#  set DelayEndcap_1 -1260.96
-#  set DelayEndcap_2  387.109
-#  set DelayEndcap_3 -46.5449
-#  set DelayEndcap_4  1.56776
-
-  set DelayEndcap_0  6.41347e+03
-  set DelayEndcap_1 -4.49583e+03
-  set DelayEndcap_2  2.40551e+03
-  set DelayEndcap_3 -6.47156e+02
-  set DelayEndcap_4  8.70166e+01
-  set DelayEndcap_5 -4.66147e+00
+  set DelayEndcap_0  21393.03
+  set DelayEndcap_1 -14996.47
+  set DelayEndcap_2   8023.92
+  set DelayEndcap_3  -2158.68
+  set DelayEndcap_4    290.26
+  set DelayEndcap_5    -15.55
 
 
   # ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- 

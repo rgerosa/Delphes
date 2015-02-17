@@ -62,13 +62,14 @@ void PileUpMerger::Init()
   fMeanPileUp  = GetDouble ("MeanPileUp", 10) ;
   fZVertexSpread = GetDouble ("ZVertexSpread", 0.05) * m ;
   // meters in the cfg file, mm in the code
-  fTVertexSpread = GetDouble ("TVertexSpread", 160) ;
+  fTVertexSpread = GetDouble ("TVertexSpread", 0.160) ;
   // ns in the cfg file and in the code
 
   fInputBSX = GetDouble("InputBSX",0.);
   fInputBSY = GetDouble("InputBSY",0.);
   fOutputBSX = GetDouble("OutputBSX",0.);
   fOutputBSY = GetDouble("OutputBSY",0.);
+  fOutputBSZ = GetDouble("OutputBSZ",0.);
 
   fileName = GetString("PileUpFile", "MinBias.pileup");
   fReader = new DelphesPileUpReader(fileName);
@@ -132,7 +133,7 @@ void PileUpMerger::Process()
     fReader->ReadEntry(entry);
 
     //PG FIXME add more distributions, to simulate the crab-kissing scheme
-    dz = gRandom->Gaus(0.0, fZVertexSpread);
+    dz = gRandom->Gaus(0.0, fZVertexSpread) + fOutputBSZ ;
     dphi = gRandom->Uniform(-TMath::Pi(), TMath::Pi());
 //    dt = gRandom->Gaus(0., fZVertexSpread*(mm/ns)/c_light);
     dt = gRandom->Gaus (0., fTVertexSpread) ;

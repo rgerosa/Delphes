@@ -85,6 +85,20 @@ class simpleVariableCollector
       }
     
     
+    
+    
+// ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+    
+    
+    int addVariable4D (std::string varname)
+      {
+        if (m_container4D.find (varname) != m_container4D.end ())
+          return 1 ;
+        m_container4D[varname] = new std::vector<std::vector<float> > () ;
+        return 0 ;
+      }
+    
+    
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
     
     
@@ -115,7 +129,7 @@ class simpleVariableCollector
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
     
     
-    int fillContanier2D (
+    int fillContainer2D (
       std::string varname, float first, float second)
       {
         if (m_container2D.find (varname) == m_container2D.end ())
@@ -131,7 +145,7 @@ class simpleVariableCollector
 // ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
     
     
-    int fillContanier3D (
+    int fillContainer3D (
       std::string varname, float first, float second, float third)
       {
         if (m_container3D.find (varname) == m_container3D.end ())
@@ -140,7 +154,25 @@ class simpleVariableCollector
         m_container3D[varname]->push_back (dummy) ;
         m_container3D[varname]->back ().at (0) = first ;
         m_container3D[varname]->back ().at (1) = second ;
-        m_container3D[varname]->back ().at (2) = second ;
+        m_container3D[varname]->back ().at (2) = third ;
+        return 0 ; 
+      }
+    
+    
+// ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+    
+    
+    int fillContainer4D (
+      std::string varname, float first, float second, float third, float fourth)
+      {
+        if (m_container4D.find (varname) == m_container4D.end ())
+          return 1 ;
+        std::vector<float> dummy (4) ;
+        m_container4D[varname]->push_back (dummy) ;
+        m_container4D[varname]->back ().at (0) = first ;
+        m_container4D[varname]->back ().at (1) = second ;
+        m_container4D[varname]->back ().at (2) = third ;
+        m_container4D[varname]->back ().at (3) = fourth ;
         return 0 ; 
       }
     
@@ -191,6 +223,21 @@ class simpleVariableCollector
                 ) ;
             N.Write () ;  
           }
+        for (std::map<std::string, std::vector<std::vector<float>> * >::iterator it = m_container4D.begin () ;
+             it != m_container4D.end () ; ++it)
+          {
+            TString name = it->first.c_str () ;
+            name.ReplaceAll (":", "_") ;
+            TNtuple N (name, name, "fir:sec:thi:fou") ;
+            for (unsigned int i = 0 ; i < it->second->size () ; ++i)
+              N.Fill (
+                  it->second->at (i).at (0), 
+                  it->second->at (i).at (1), 
+                  it->second->at (i).at (2), 
+                  it->second->at (i).at (3)
+                ) ;
+            N.Write () ;  
+          }
         outfile.Close () ;
         return ;  
       }
@@ -200,6 +247,7 @@ class simpleVariableCollector
     std::map<std::string, std::vector<float> * >  m_container ;
     std::map<std::string, std::vector<std::vector<float> > * >  m_container2D ;
     std::map<std::string, std::vector<std::vector<float> > * >  m_container3D ;
+    std::map<std::string, std::vector<std::vector<float> > * >  m_container4D ;
 
     std::map<TString, TNtuple * >  m_NtupleContainer ;
 } ;

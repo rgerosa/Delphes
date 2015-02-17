@@ -39,7 +39,7 @@ private:
   Double_t fTVertexSpread;
 
   Double_t fInputBSX, fInputBSY;
-  Double_t fOutputBSX, fOutputBSY;
+  Double_t fOutputBSX, fOutputBSY, fOutputBSZ ;
 
   DelphesPileUpReader *fReader;
 
