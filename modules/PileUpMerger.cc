@@ -137,12 +137,13 @@ void PileUpMerger::Process()
     fReader->ReadEntry(entry);
 
     //PG FIXME add more distributions, to simulate the crab-kissing scheme
-    dz = gRandom->Gaus (0.0, fZVertexSpread) + fOutputBSZ ;
+    dz   = gRandom->Gaus (0.0, fZVertexSpread) + fOutputBSZ ;
     dphi = gRandom->Uniform (-TMath::Pi (), TMath::Pi ()) ;
+    dt   = gRandom->Gaus (0., fTVertexSpread * c_light) ;
+// PG FIXME question for Seth
 // this that follows is the original formula from Seth's code, 
 // which I am afraid is bugged, since smears in time not in mm
 //    dt = gRandom->Gaus(0., fZVertexSpread*(mm/ns)/c_light);
-    dt = gRandom->Gaus (0., fTVertexSpread * c_light) ;
 
     // to check that distributions follow the coded shapes
     if (fEventCounter < 100)
@@ -154,32 +155,37 @@ void PileUpMerger::Process()
     // loop on particles  
     while (fReader->ReadParticle (pid, x, y, z, t, px, py, pz, e))
     {  
-      candidate = factory->NewCandidate();
+      candidate = factory->NewCandidate () ;
 
       // Get rid of BS position in PU
       // To deal with http://red-gridftp11.unl.edu/Snowmass/MinBias100K_14TeV.pileup fInputBSX = 2.44 and fInputBSY = 3.93
-      x = x - fInputBSX;
-      y = y - fInputBSY;
+      //PG FIXME question for Seth, what are these?
+      x -= fInputBSX ;
+      y -= fInputBSY ;
+      x += fOutputBSX ;
+      y += fOutputBSY ;
 
       candidate->PID = pid;
 
       candidate->Status = 1;
-      pdgParticle = pdg->GetParticle(pid);
-      candidate->Charge = pdgParticle ? Int_t(pdgParticle->Charge()/3.0) : -999;
-      candidate->Mass = pdgParticle ? pdgParticle->Mass() : -999.9;
+      pdgParticle = pdg->GetParticle (pid) ;
+      candidate->Charge = pdgParticle ? Int_t (pdgParticle->Charge () / 3.0) : -999 ;
+      candidate->Mass = pdgParticle ? pdgParticle->Mass () : -999.9 ;
 
-      candidate->IsPU = event+1; // might as well store which PU vertex this comes from so they can be separated
+      candidate->IsPU = event + 1 ; // might as well store which PU vertex this comes from so they can be separated
 
-      candidate->Momentum.SetPxPyPzE(px, py, pz, e);
-      candidate->Momentum.RotateZ(dphi);
+      candidate->Momentum.SetPxPyPzE (px, py, pz, e) ;
+      candidate->Momentum.RotateZ (dphi) ;
 
-      candidate->Position.SetXYZT(x,y,dz,dt); // Use CMSSW dz,dt (ignoring old values), keep x y
+      //PG FIXME question for Seth: why didn't he add the offset on top
+      //         of the pythia position output?
+      candidate->Position.SetXYZT (x, y, z + dz, t + dt) ; // Use CMSSW dz,dt (ignoring old values), keep x y
       // Kept for backward compatibility - ModifyBeamSpot will change them again, it's needed to do the primary event also
 
-      candidate->Position.RotateZ(dphi);
+      candidate->Position.RotateZ (dphi) ;
 
       // CMSSW uses fOutputBSX = 0.24 and fOutputBSY = 0.39 in the files I looked at
-      candidate->Position += TLorentzVector(fOutputBSX,fOutputBSY,0.,0.);
+//      candidate->Position += TLorentzVector (fOutputBSX, fOutputBSY, 0., 0.);
 
       fOutputArray->Add(candidate);
     } // loop on particles

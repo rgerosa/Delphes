@@ -116,16 +116,16 @@ module PileUpMerger PileUpMerger {
  set OutputBSY 0.  
  set OutputBSZ 0.  
 
- # pre-generated minbias input file --> change this dummy name <random access with unifor number between 0 and NEntries>
+ # pre-generated minbias input file
  set PileUpFile /afs/cern.ch/user/g/govoni/work/TP/Delphes/testSample/MB_1.mb
- #average expected pile up <poissonian generation>
+ #average expected pile up (poissonian generation)
  set MeanPileUp 0
- # spread in the beam direction in m (assumed gaussian) ; 
+ # spread in the beam direction in mm (assumed gaussian) ; 
  set ZVertexSpread 53
- # time spread in the events happening in ns (assumed gaussian) ; 
+ # time spread in the events happening in ps (assumed gaussian) ; 
  # baseline = 160 ps, crab-kiss = 100 ps
- set TVertexSpread 0.160
- # set TVertexSpread 0.100
+ set TVertexSpread 160
+ # set TVertexSpread 100
  set simpleOutputFileName /afs/cern.ch/user/g/govoni/work/TP/Delphes/testSample/simpleOutput_PU.root
 }
 
