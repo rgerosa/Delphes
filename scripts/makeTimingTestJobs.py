@@ -65,7 +65,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args ()
     
-    folder = 'job_' + args.punum + '_' + args.puzpos + '_' + args.puzsmear + '_' + args.putsmear
+    folder = 'job_PU' + args.punum + '_Zpos' + args.puzpos + '_Zsmear' + args.puzsmear + '_Tsmear' + args.putsmear
     folder = folder.replace ('.', 'p')
     folder = rootfolder + '/' + folder
     
@@ -88,7 +88,14 @@ if __name__ == "__main__":
         + ' ' + args.lhefile + ' ' + outfile + ' 0 0 1 ' + args.totEvents
 
     jobname = prepareJob (folder, delphesCommand)
-    runCommand ('bsub -u pippopluto -q ' + args.lsfQueue + ' < ' + jobname, 1, TESTING == 0)
-
+    command = 'bsub -q ' + args.lsfQueue + ' < ' + jobname
+    runCommand (command, 1, TESTING == 0)
+     
+    filename = folder + '/command.txt'
+    f = open (filename, 'w')
+    f.write (command + '\n')
+    f.close ()
+ 
+   
 
     

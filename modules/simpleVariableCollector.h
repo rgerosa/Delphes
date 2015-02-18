@@ -23,12 +23,15 @@ class simpleVariableCollector
         for (std::map<std::string, std::vector<float> * >::iterator it = m_container.begin () ;
              it != m_container.end () ; ++it)
           delete it->second ;
+
         for (std::map<TString, TNtuple * >::iterator it = m_NtupleContainer.begin () ;
              it != m_NtupleContainer.end () ; ++it)
           delete it->second ;
+
         for (std::map<std::string, std::vector<std::vector<float> > * >::iterator it = m_container2D.begin () ;
              it != m_container2D.end () ; ++it)
           delete it->second ;
+
         for (std::map<std::string, std::vector<std::vector<float> > * >::iterator it = m_container3D.begin () ;
              it != m_container3D.end () ; ++it)
           delete it->second ;

@@ -36,7 +36,9 @@ static const double mm  = 1.;
 static const double m = 1000.*mm;
 static const double ns  = 1.;
 static const double s = 1.e+9 *ns;
-static const double c_light   = 2.99792458e+8 * m/s;
+
+static const double c_light     = 0.299792458 ; // mm/ps , or m/ns
+static const double inv_c_light = 3.335640952 ; // ps/mm or ns/m
 
 
 using namespace std;
@@ -60,19 +62,20 @@ void PileUpMerger::Init()
   const char *fileName;
 
   fMeanPileUp  = GetDouble ("MeanPileUp", 10) ;
-  fZVertexSpread = GetDouble ("ZVertexSpread", 0.05) * m ;
-  // meters in the cfg file, mm in the code
-  fTVertexSpread = GetDouble ("TVertexSpread", 0.160) ;
-  // ns in the cfg file and in the code
+  fZVertexSpread = GetDouble ("ZVertexSpread", 53)  ;
+  // mm in the cfg file, mm in the code
+  fTVertexSpread = GetDouble ("TVertexSpread", 160) ;
+  // ps in the cfg file, ps in the code
 
-  fInputBSX = GetDouble("InputBSX",0.);
-  fInputBSY = GetDouble("InputBSY",0.);
-  fOutputBSX = GetDouble("OutputBSX",0.);
-  fOutputBSY = GetDouble("OutputBSY",0.);
-  fOutputBSZ = GetDouble("OutputBSZ",0.);
+  // in mm
+  fInputBSX  = GetDouble ("InputBSX", 0.) ;
+  fInputBSY  = GetDouble ("InputBSY", 0.) ;
+  fOutputBSX = GetDouble ("OutputBSX", 0.) ;
+  fOutputBSY = GetDouble ("OutputBSY", 0.) ;
+  fOutputBSZ = GetDouble ("OutputBSZ", 0.) ;
 
-  fileName = GetString("PileUpFile", "MinBias.pileup");
-  fReader = new DelphesPileUpReader(fileName);
+  fileName = GetString ("PileUpFile", "MinBias.pileup") ;
+  fReader = new DelphesPileUpReader (fileName) ;
 
   // import input array
   fInputArray = ImportArray(GetString("InputArray", "Delphes/stableParticles"));
@@ -122,6 +125,7 @@ void PileUpMerger::Process()
   poisson = gRandom->Poisson(fMeanPileUp);
 
   allEntries = fReader->GetEntries();
+  // loop on events
   for(event = 0; event < poisson; ++event)
   {
     do
@@ -133,10 +137,12 @@ void PileUpMerger::Process()
     fReader->ReadEntry(entry);
 
     //PG FIXME add more distributions, to simulate the crab-kissing scheme
-    dz = gRandom->Gaus(0.0, fZVertexSpread) + fOutputBSZ ;
-    dphi = gRandom->Uniform(-TMath::Pi(), TMath::Pi());
+    dz = gRandom->Gaus (0.0, fZVertexSpread) + fOutputBSZ ;
+    dphi = gRandom->Uniform (-TMath::Pi (), TMath::Pi ()) ;
+// this that follows is the original formula from Seth's code, 
+// which I am afraid is bugged, since smears in time not in mm
 //    dt = gRandom->Gaus(0., fZVertexSpread*(mm/ns)/c_light);
-    dt = gRandom->Gaus (0., fTVertexSpread) ;
+    dt = gRandom->Gaus (0., fTVertexSpread * c_light) ;
 
     // to check that distributions follow the coded shapes
     if (fEventCounter < 100)
@@ -144,8 +150,9 @@ void PileUpMerger::Process()
         fDebugOutputCollector.fillContainer ("PUinitT", dt) ;
         fDebugOutputCollector.fillContainer ("PUinitZ", dz) ;
       }
-      
-    while(fReader->ReadParticle(pid, x, y, z, t, px, py, pz, e))
+     
+    // loop on particles  
+    while (fReader->ReadParticle (pid, x, y, z, t, px, py, pz, e))
     {  
       candidate = factory->NewCandidate();
 
@@ -175,8 +182,8 @@ void PileUpMerger::Process()
       candidate->Position += TLorentzVector(fOutputBSX,fOutputBSY,0.,0.);
 
       fOutputArray->Add(candidate);
-    }
-  }
+    } // loop on particles
+  } // loop on events
 
   // Store true number of pileup vertices
   candidate = factory->NewCandidate();

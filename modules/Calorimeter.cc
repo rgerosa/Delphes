@@ -68,16 +68,16 @@ Calorimeter::~Calorimeter(){
   if(fECalResolutionFormula) delete fECalResolutionFormula;
   if(fHCalResolutionFormula) delete fHCalResolutionFormula;
   if(fTowerTrackArray)       delete fTowerTrackArray;
-  if(fItTowerTrackArray)     delete fItTowerTrackArray;
+//   if(fItTowerTrackArray)     delete fItTowerTrackArray;
 
-  if(fItParticleInputArray)  delete fItParticleInputArray;
-  if(fItTrackInputArray)     delete fItTrackInputArray;
-  if(fItLHEPartonInputArray) delete fItLHEPartonInputArray;
+//   if(fItParticleInputArray)  delete fItParticleInputArray;
+//   if(fItTrackInputArray)     delete fItTrackInputArray;
+//   if(fItLHEPartonInputArray) delete fItLHEPartonInputArray;
 
-  vector< vector< Double_t >* >::iterator itPhiBin;
-  for (itPhiBin = fPhiBins.begin(); itPhiBin != fPhiBins.end(); ++itPhiBin){
-    delete *itPhiBin;
-  }
+//   vector< vector< Double_t >* >::iterator itPhiBin;
+//   for (itPhiBin = fPhiBins.begin(); itPhiBin != fPhiBins.end(); ++itPhiBin){
+//     delete *itPhiBin;
+//   }
 }
 
 //------------------------------------------------------------------------------
@@ -442,7 +442,7 @@ void Calorimeter::Process(){
         if (feta < 1.6) delay = fDelayBarrel.Eval (feta) ;
         else            delay = fDelayEndcap.Eval (feta) ;
         
-        float time = track->Position.T () * inv_c_light ;
+        float time = track->Position.T () ;
 
         fTower->ecal_E_t.push_back(
           std::make_pair<float,float>(totalEnergy, time - delay));
@@ -471,9 +471,8 @@ void Calorimeter::Process(){
     if ( (totalEnergy > fTimingEMin && fTower) &&
          (abs(particle->PID) != 11 || !fElectronsFromTrack) ) {
 
-        // the time in the delphes propagation is in mm, 
-        // converting here in ps
-        float time = particle->Position.T () * inv_c_light ;
+        // the time in the delphes propagation is in mm
+        float time = particle->Position.T () ;
 
         float delay = 0. ;
         float feta = fabs (particle->Position.Eta ()) ;
@@ -498,7 +497,7 @@ void Calorimeter::Process(){
 
         fDebugOutputCollector.fillContainer4D ("eta:time:pt:PID", 
             feta,
-            time - delay,
+            (time - delay)  * inv_c_light,
             particle->Momentum.Pt (),
             particle->PID
           ) ;
@@ -507,15 +506,15 @@ void Calorimeter::Process(){
           {
             fDebugOutputCollector.fillContainer ("m_partType", particle->PID) ;
             fDebugOutputCollector.fillContainer3D ("m_eta:time:pt", 
-               feta, time - delay, particle->Momentum.Pt ()) ;
+               feta, (time - delay)  * inv_c_light, particle->Momentum.Pt ()) ;
             fDebugOutputCollector.fillContainer3D ("m_eta:time_nc:pt", 
-               feta, time, particle->Momentum.Pt ()) ;
+               feta, time * inv_c_light, particle->Momentum.Pt ()) ;
           }
         else
           {
             fDebugOutputCollector.fillContainer ("Nm_partType", particle->PID) ;
             fDebugOutputCollector.fillContainer3D ("Nm_eta:time:pt", 
-               feta, time - delay, particle->Momentum.Pt ()) ;
+               feta, (time - delay) * inv_c_light, particle->Momentum.Pt ()) ;
           }
     }
 
