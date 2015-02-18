@@ -62,7 +62,6 @@ set ExecutionPath {
   GenScalarHT
   ScalarHT
 
-  TreeWriter
 
 }
 
@@ -95,6 +94,8 @@ set ExecutionPath {
 #  PuppiMissingET
 #  PuppiScalarHT
 
+#  TreeWriter
+
 #################
 # PileUp Merger #
 #################
@@ -113,6 +114,7 @@ module PileUpMerger PileUpMerger {
 # set OutputBSX 0.24
 # set OutputBSY 0.39  
 
+ # put them in in mm
  set OutputBSX 0.
  set OutputBSY 0.  
  set OutputBSZ TEMP_PUZPOS  
@@ -121,7 +123,7 @@ module PileUpMerger PileUpMerger {
  set PileUpFile /afs/cern.ch/user/g/govoni/work/TP/Delphes/testSample/MB_1.mb
  #average expected pile up <poissonian generation>
  set MeanPileUp TEMP_PUMEAN
- # spread in the beam direction in m (assumed gaussian) ; 
+ # spread in the beam direction in mm (assumed gaussian) ; 
  set ZVertexSpread TEMP_PUZSPREAD
  # time spread in the events happening in ns (assumed gaussian) ; 
  # baseline = 160 ps, crab-kiss = 100 ps
@@ -328,22 +330,36 @@ module Calorimeter Calorimeter {
   # profile of the delay for a particle traveling from the interaction vertex
   # to the calorimetry, determined from LHE particles in Delphes
   # originating from (0,0,0)
-  # up to eta = 1.6
-  set DelayBarrel_0   4294.67
-  set DelayBarrel_1     18.52
-  set DelayBarrel_2   2120.36
-  set DelayBarrel_3     64.10
-  set DelayBarrel_4    100.09
-  set DelayBarrel_5     40.43
+  set DelayBarrel_0 1287.51    
+  set DelayBarrel_1 5.55276    
+  set DelayBarrel_2 635.669    
+  set DelayBarrel_3 19.2171    
+  set DelayBarrel_4 30.0051    
+  set DelayBarrel_5 12.1216    
 
-  # from eta = 1.6
-  set DelayEndcap_0  21393.03
-  set DelayEndcap_1 -14996.47
-  set DelayEndcap_2   8023.92
-  set DelayEndcap_3  -2158.68
-  set DelayEndcap_4    290.26
-  set DelayEndcap_5    -15.55
+  # from eta = 1.6, delay in millimeters
+  set DelayEndcap_0  6.41347e+03
+  set DelayEndcap_1 -4.49583e+03
+  set DelayEndcap_2  2.40551e+03
+  set DelayEndcap_3 -6.47156e+02
+  set DelayEndcap_4  8.70166e+01
+  set DelayEndcap_5 -4.66147e+00
 
+  # up to eta = 1.6, delay in picoseconds
+#  set DelayBarrel_0   4294.67
+#  set DelayBarrel_1     18.52
+#  set DelayBarrel_2   2120.36
+#  set DelayBarrel_3     64.10
+#  set DelayBarrel_4    100.09
+#  set DelayBarrel_5     40.43
+
+  # from eta = 1.6, delay in picoseconds
+#  set DelayEndcap_0  21393.03
+#  set DelayEndcap_1 -14996.47
+#  set DelayEndcap_2   8023.92
+#  set DelayEndcap_3  -2158.68
+#  set DelayEndcap_4    290.26
+#  set DelayEndcap_5    -15.55
 
   # ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- 
   #   calorimetry granularity
