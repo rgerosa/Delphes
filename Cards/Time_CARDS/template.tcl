@@ -137,11 +137,20 @@ module PileUpMerger PileUpMerger {
 ##################
 
 module ModifyBeamSpot ModifyBeamSpot {
-#  set ZVertexSpread 0.053
+  # in ps
+  set TVertexSpread 0.
+  # in mm
   set ZVertexSpread 0.
+  
+  set OutputBSX 0.
+  set OutputBSY 0.  
+  set OutputBSZ 0.  
+
   set InputArray    PileUpMerger/stableParticles 
   set OutputArray   stableParticles
   set PVOutputArray PV  
+
+  set simpleOutputFileName TEMP_OUTFOLDER/simpleOutput_MB.root  
 }
 
 

@@ -28,11 +28,14 @@
 #include <iostream>
 #include <sstream>
 
-static const double mm  = 1.;
-static const double m = 1000.*mm;
-static const double ns  = 1.;
-static const double s = 1.e+9 *ns;
-static const double c_light   = 2.99792458e+8 * m/s;
+// static const double mm  = 1.;
+// static const double m = 1000.*mm;
+// static const double ns  = 1.;
+// static const double s = 1.e+9 *ns;
+// static const double c_light   = 2.99792458e+8 * m/s;
+
+static const double c_light     = 0.299792458 ; // mm/ps , or m/ns
+static const double inv_c_light = 3.335640952 ; // ps/mm or ns/m
 
 
 using namespace std;
@@ -58,26 +61,34 @@ void ModifyBeamSpot::Init()
 {
   // read resolution formula
 
-  fZVertexSpread = GetDouble("ZVertexSpread", 0.05)*1.0E3;
+  fZVertexSpread = GetDouble ("ZVertexSpread", 53)  ;
+  // mm in the cfg file, mm in the code
+  fTVertexSpread = GetDouble ("TVertexSpread", 160) ;
+  // ps in the cfg file, ps in the code
 
-  currentPU = -1;
+  fOutputBSX = GetDouble ("OutputBSX", 0.) ;
+  fOutputBSY = GetDouble ("OutputBSY", 0.) ;
+  fOutputBSZ = GetDouble ("OutputBSZ", 0.) ;
 
   // import input array
-
   fInputArray = ImportArray(GetString("InputArray", "ParticlePropagator/stableParticles"));
   fItInputArray = fInputArray->MakeIterator();
 
   // create output array
-
   fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
-
   fPVOutputArray = ExportArray(GetString("PVOutputArray", "PV"));
+  
+  fDebugOutputCollector.addVariable ("PUindex") ;
+  
 }
 
 //------------------------------------------------------------------------------
 
 void ModifyBeamSpot::Finish()
 {  
+  std::string outfile = GetString ("simpleOutputFileName", "simpleOutput_Ca.root") ;
+  fDebugOutputCollector.save (outfile) ;
+
   if(fItInputArray) delete fItInputArray;
 }
 
@@ -86,71 +97,53 @@ void ModifyBeamSpot::Finish()
 void ModifyBeamSpot::Process()
 {
   Candidate *candidate, *mother;
-  Double_t PVX = 0., PVY = 0., PVZ = 0., PVT = 0.; // Average position of primary particles
-  Int_t PVN = 0;
-  currentPU = -1;
+  // Average position of primary particles
+  Double_t PVX = 0., PVY = 0., PVZ = 0., PVT = 0.; 
 
-  fItInputArray->Reset();
+  PVX = fOutputBSX ;
+  PVY = fOutputBSY ;
+  PVZ = gRandom->Gaus (0., fZVertexSpread) + fOutputBSZ ;
+  PVT = gRandom->Gaus (0., fTVertexSpread * c_light) ;
+
+  fItInputArray->Reset () ;
+  // loop over particles in the event
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
     const TLorentzVector &candidatePosition = candidate->Position;
-    if (currentPU < 0 || currentPU != candidate->IsPU) {
-      //cout << "SCZ Debug: currentPU=" << currentPU << " candidate->IsPU=" << candidate->IsPU << " so throwing new numbers" << endl;
 
-      if (currentPU == 0) {
-	// Done with PV
-	PVX /= PVN;
-	PVY /= PVN;
-	PVZ /= PVN;
-	PVT /= PVN;
+    double X = candidatePosition.X () ;
+    double Y = candidatePosition.Y () ;
+    double Z = candidatePosition.Z () ;
+    double T = candidatePosition.T () ;
+
+    // LHE files are centered in (0,0,0,0)
+    // while PU has been generated with smearing already, therefore I smear only 
+    // the hard scattering.
+    if (candidate->IsPU == 0)
+      {
+        X += PVX ;
+        Y += PVY ;
+        Z += PVZ ;
+        T += PVT ;
       }
 
-      currentPU = candidate->IsPU; // Depends on generated particle IsPU being set to a different value for each vertex
+    fDebugOutputCollector.fillContainer ("PUindex", candidate->IsPU) ;
 
-      // N.B. Z and T are not correlated
-      // Not exactly right but it seems to be what CMSSW does
-      currentZ = gRandom->Gaus(0., fZVertexSpread);
-      currentT = gRandom->Gaus(0., fZVertexSpread*(mm/ns)/c_light);
-    }
+    mother = candidate ;
+    candidate = static_cast<Candidate*> (candidate->Clone ()) ;
+    candidate->Position.SetXYZT (X, Y, Z, T) ;
+    candidate->AddCandidate (mother) ;
+    fOutputArray->Add (candidate) ;
 
-    // For now simply keep X, Y - they looked okish
-    double X = candidatePosition.X();
-    double Y = candidatePosition.Y();
-    double Z = currentZ;
-    double T = currentT;
-
-    if (currentPU == 0) {
-      PVN++;
-      PVX += X;
-      PVY += Y;
-      PVZ += Z;
-      PVT += T;
-    }
- 
-    mother = candidate;
-    candidate = static_cast<Candidate*>(candidate->Clone());
-    candidate->Position.SetXYZT(X,Y,Z,T);
-    candidate->AddCandidate(mother);
-    fOutputArray->Add(candidate);
-
-  }
-
-  // If PV is somehow last (i.e. no pileup, still gotta divide out
-  if (currentPU == 0) {
-    // Done with PV
-    PVX /= PVN;
-    PVY /= PVN;
-    PVZ /= PVN;
-    PVT /= PVN;
-  }
-
-  //  cout << " SCZ ModifyBeamSpot PVZ=" << PVZ << endl;
+  } // loop over particles in the event
 
   // Store the PV "beam spot"
-  DelphesFactory *factory = GetFactory();
-  candidate               = factory->NewCandidate();
-  candidate->Position.SetXYZT(PVX,PVY,PVZ,PVT);
-  fPVOutputArray->Add(candidate);
+  DelphesFactory *factory = GetFactory () ;
+  candidate               = factory->NewCandidate () ;
+  candidate->Position.SetXYZT (PVX, PVY, PVZ, PVT) ;
+  fPVOutputArray->Add (candidate) ;
+
+  ++fEventCounter ;                                                                                                                                             
 
 }
 

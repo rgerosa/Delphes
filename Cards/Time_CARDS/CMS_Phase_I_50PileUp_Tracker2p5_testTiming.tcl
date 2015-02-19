@@ -119,7 +119,7 @@ module PileUpMerger PileUpMerger {
  # pre-generated minbias input file
  set PileUpFile /afs/cern.ch/user/g/govoni/work/TP/Delphes/testSample/MB_1.mb
  #average expected pile up (poissonian generation)
- set MeanPileUp 0
+ set MeanPileUp 10
  # spread in the beam direction in mm (assumed gaussian) ; 
  set ZVertexSpread 53
  # time spread in the events happening in ps (assumed gaussian) ; 
@@ -133,12 +133,22 @@ module PileUpMerger PileUpMerger {
 # ModifyBeamSpot #
 ##################
 
+
 module ModifyBeamSpot ModifyBeamSpot {
-#  set ZVertexSpread 0.053
+  # in ps
+  set TVertexSpread 0.
+  # in mm
   set ZVertexSpread 0.
+
+  set OutputBSX 0.
+  set OutputBSY 0.  
+  set OutputBSZ 0.  
+
   set InputArray    PileUpMerger/stableParticles 
   set OutputArray   stableParticles
   set PVOutputArray PV  
+
+  set simpleOutputFileName /afs/cern.ch/user/g/govoni/work/TP/Delphes/testSample/simpleOutput_MB.root
 }
 
 

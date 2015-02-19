@@ -8,6 +8,7 @@
  */
 
 #include "classes/DelphesModule.h"
+#include "modules/simpleVariableCollector.h"
 
 class TIterator;
 class TObjArray;
@@ -34,12 +35,16 @@ private:
   
   TObjArray *fOutputArray; //!
 
+  Double_t fOutputBSX, fOutputBSY, fOutputBSZ ;
   Double_t fZVertexSpread;
+  Double_t fTVertexSpread;
   Double_t currentZ, currentT;
-  Double_t currentPU;
 
   // Store Z of PV
   TObjArray *fPVOutputArray; //!
+
+  simpleVariableCollector fDebugOutputCollector ;    
+  int fEventCounter ;                                                                                                                                             
 
   ClassDef(ModifyBeamSpot, 1)
 };

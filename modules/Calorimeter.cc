@@ -192,6 +192,7 @@ void Calorimeter::Init(){
 //   fDebugOutputCollector.addVariable ("DR") ;
 //   fDebugOutputCollector.addVariable ("m_partType") ;
 //   fDebugOutputCollector.addVariable ("Nm_partType") ;
+  fDebugOutputCollector.addVariable ("PUindex") ;
   fDebugOutputCollector.addVariable3D ("m_eta:time:pt") ;
   fDebugOutputCollector.addVariable3D ("m_eta:time_nc:pt") ;
   fDebugOutputCollector.addVariable3D ("Nm_eta:time:pt") ;
@@ -496,6 +497,8 @@ void Calorimeter::Process(){
 //               Rmin = particle->Position.DeltaR (LHEParticles.at (i)) ;
 //           }
 //         fDebugOutputCollector.fillContainer ("DR", Rmin) ;
+
+        fDebugOutputCollector.fillContainer ("PUindex", particle->IsPU) ;
 
         fDebugOutputCollector.fillContainer4D ("eta:time:pt:PID", 
             feta,

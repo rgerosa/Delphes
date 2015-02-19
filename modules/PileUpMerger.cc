@@ -115,7 +115,7 @@ void PileUpMerger::Process()
   Candidate *candidate;
   DelphesFactory *factory;
 
-  fItInputArray->Reset();
+  fItInputArray->Reset () ;
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
     fOutputArray->Add(candidate);
@@ -125,7 +125,7 @@ void PileUpMerger::Process()
   poisson = gRandom->Poisson(fMeanPileUp);
 
   allEntries = fReader->GetEntries();
-  // loop on events
+  // loop on PU events
   for(event = 0; event < poisson; ++event)
   {
     do
@@ -167,7 +167,7 @@ void PileUpMerger::Process()
 
       candidate->PID = pid;
 
-      candidate->Status = 1;
+      candidate->Status = 1 ;
       pdgParticle = pdg->GetParticle (pid) ;
       candidate->Charge = pdgParticle ? Int_t (pdgParticle->Charge () / 3.0) : -999 ;
       candidate->Mass = pdgParticle ? pdgParticle->Mass () : -999.9 ;
@@ -189,7 +189,7 @@ void PileUpMerger::Process()
 
       fOutputArray->Add(candidate);
     } // loop on particles
-  } // loop on events
+  } // loop on PU events
 
   // Store true number of pileup vertices
   candidate = factory->NewCandidate();
