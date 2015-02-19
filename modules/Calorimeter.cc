@@ -49,11 +49,11 @@ Calorimeter::Calorimeter() :
   fECalResolutionFormula(0), fHCalResolutionFormula(0),
   fItParticleInputArray(0), fItTrackInputArray(0),
   fTowerTrackArray(0), fItTowerTrackArray(0),
-  fItLHEPartonInputArray (0),
-  fDelayBarrel ("fDelayBarrel", "pol5", 0, 5),
-  fDelayEndcap ("fDelayEndcap", "pol5", 0, 5)
+  fItLHEPartonInputArray (0)
   {
-
+  
+  fDelayBarrel = new TF1 ("fDelayBarrel", "pol5", 0, 5) ;
+  fDelayEndcap = new TF1 ("fDelayEndcap", "pol5", 0, 5) ;
   fECalResolutionFormula = new DelphesFormula;
   fHCalResolutionFormula = new DelphesFormula;
 
@@ -65,19 +65,13 @@ Calorimeter::Calorimeter() :
 
 Calorimeter::~Calorimeter(){
 
+  delete fDelayBarrel ;
+  delete fDelayEndcap ;
   if(fECalResolutionFormula) delete fECalResolutionFormula;
   if(fHCalResolutionFormula) delete fHCalResolutionFormula;
   if(fTowerTrackArray)       delete fTowerTrackArray;
-//   if(fItTowerTrackArray)     delete fItTowerTrackArray;
-
-//   if(fItParticleInputArray)  delete fItParticleInputArray;
-//   if(fItTrackInputArray)     delete fItTrackInputArray;
-//   if(fItLHEPartonInputArray) delete fItLHEPartonInputArray;
-
-//   vector< vector< Double_t >* >::iterator itPhiBin;
-//   for (itPhiBin = fPhiBins.begin(); itPhiBin != fPhiBins.end(); ++itPhiBin){
-//     delete *itPhiBin;
-//   }
+  if(fItTowerTrackArray)     delete fItTowerTrackArray;
+  if(fItLHEPartonInputArray) delete fItLHEPartonInputArray;
 }
 
 //------------------------------------------------------------------------------
@@ -179,7 +173,7 @@ void Calorimeter::Init(){
   delayBarrelParams[3] = GetDouble ("DelayBarrel_3", 0.) ;
   delayBarrelParams[4] = GetDouble ("DelayBarrel_4", 0.) ;
   delayBarrelParams[5] = GetDouble ("DelayBarrel_5", 0.) ;
-  fDelayBarrel.SetParameters (delayBarrelParams) ;
+  fDelayBarrel->SetParameters (delayBarrelParams) ;
 
   Double_t delayEndcapParams[6] ;
   delayEndcapParams[0] = GetDouble ("DelayEndcap_0", 0.) ;
@@ -188,7 +182,7 @@ void Calorimeter::Init(){
   delayEndcapParams[3] = GetDouble ("DelayEndcap_3", 0.) ;
   delayEndcapParams[4] = GetDouble ("DelayEndcap_4", 0.) ;
   delayEndcapParams[5] = GetDouble ("DelayEndcap_5", 0.) ;
-  fDelayEndcap.SetParameters (delayEndcapParams) ;
+  fDelayEndcap->SetParameters (delayEndcapParams) ;
 
   //PG FIXME where does this come from?
   // suggested from A. Bornheim, reasonable according to him
@@ -215,6 +209,14 @@ void Calorimeter::Finish(){
 
   std::string outfile = GetString ("simpleOutputFileName", "simpleOutput_Ca.root") ;
   fDebugOutputCollector.save (outfile) ;
+
+  if(fItParticleInputArray)  delete fItParticleInputArray;
+  if(fItTrackInputArray)     delete fItTrackInputArray;
+
+  vector< vector< Double_t >* >::iterator itPhiBin;
+  for (itPhiBin = fPhiBins.begin(); itPhiBin != fPhiBins.end(); ++itPhiBin){
+    delete *itPhiBin;
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -439,8 +441,8 @@ void Calorimeter::Process(){
       if ( totalEnergy > fTimingEMin && fTower && fElectronsFromTrack) {
         float delay = 0. ;
         float feta = fabs (track->Position.Eta ()) ;
-        if (feta < 1.6) delay = fDelayBarrel.Eval (feta) ;
-        else            delay = fDelayEndcap.Eval (feta) ;
+        if (feta < 1.6) delay = fDelayBarrel->Eval (feta) ;
+        else            delay = fDelayEndcap->Eval (feta) ;
         
         float time = track->Position.T () ;
 
@@ -476,8 +478,8 @@ void Calorimeter::Process(){
 
         float delay = 0. ;
         float feta = fabs (particle->Position.Eta ()) ;
-        if (feta < 1.6) delay = fDelayBarrel.Eval (feta) ;
-        else            delay = fDelayEndcap.Eval (feta) ;
+        if (feta < 1.6) delay = fDelayBarrel->Eval (feta) ;
+        else            delay = fDelayEndcap->Eval (feta) ;
         
         // the timing is corrected in the map,
         // since I assume that the knowledge of the position of the detID

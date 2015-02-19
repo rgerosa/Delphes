@@ -92,8 +92,8 @@ private:
   const TObjArray *fLHEPartonInputArray; //! 
   TIterator *fItLHEPartonInputArray; //!  
 
-  TF1 fDelayBarrel ;
-  TF1 fDelayEndcap ;
+  TF1 * fDelayBarrel ;
+  TF1 * fDelayEndcap ;
 
   simpleVariableCollector fDebugOutputCollector ;    
   int fEventCounter ;                                                                                                                                             
