@@ -25,8 +25,10 @@ parser.add_option("-a","--njobmax"    , dest="njobmax"    , type="int"   , defau
 parser.add_option(""  ,"--eventsPerJob", dest="eventsPerJob", default = 25000, type="int", help="Number of events in each job .. don't look at the number of files")
 
 ## other options
-parser.add_option("-m" ,"--mjjcut" , dest="mjjcut", default=0, type="int",help="cut value in GeV for the mjj at LHE")
-parser.add_option("-f" ,"--filter" , dest="filter", default=1, type="int",help="filter all hadronic events at LHE level")
+parser.add_option("-v" ,"--applyMLM" , dest="applyMLM", default=0, type="int",help="apply MLM matching")
+parser.add_option("-n" ,"--cutMLM"   , dest="cutMLM",   default=0, type="int",help="cut value in GeV for the MLM matching")
+parser.add_option("-m" ,"--mjjcut"   , dest="mjjcut", default=0, type="int",help="cut value in GeV for the mjj at LHE")
+parser.add_option("-f" ,"--filter"   , dest="filter", default=1, type="int",help="filter all hadronic events at LHE level")
 
 parser.add_option(""  ,"--checkJobs"  , dest="checkJobs"  , action="store_true", default=False,help="Checks job status")
 parser.add_option(""  ,"--resubmit"   , dest="resubmit"   , action="store_true", default=False,help="Resubmit job ")
@@ -134,7 +136,7 @@ def writeJobs(workingdir,executable,executableDumper,configCard,inputdir,inputPU
       jobscript.write('if ( \n')
       jobscript.write('\t touch %s/subJob_%d.run \n'%(jobdir,jobid))
       if( executableDumper != '' ) :
-          jobscript.write('\t ./%s %s %s %s %d %d %d %d \n'%(executable,jobdir+"/"+str(configName[len(configName)-1]),str(fileName[len(fileName)-1]),outputname+"_"+str(jobid)+"_Delphes.root",options.mjjcut,options.filter,firstEvent,options.eventsPerJob));
+          jobscript.write('\t ./%s %s %s %s %d %d %d %d %d %d \n'%(executable,jobdir+"/"+str(configName[len(configName)-1]),str(fileName[len(fileName)-1]),outputname+"_"+str(jobid)+"_Delphes.root",options.applyMLM,options.cutMLM,options.mjjcut,options.filter,firstEvent,options.eventsPerJob));
           dumperSplit = executableDumper.split("/")
           jobscript.write('\t ./%s %s %s'%(dumperSplit[len(dumperSplit)-1],outputname+"_"+str(jobid)+"_Delphes.root", outputname+"_"+str(jobid)+".root")); 
       else :

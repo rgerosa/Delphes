@@ -75,6 +75,8 @@ int main(int argc, char *argv[]){
     std::cout << "- input_file           ->  lhe file for Pythia8" << std::endl;
     std::cout << "- output_file          ->  output file in ROOT format" << std::endl;
     std::cout << "- Mjj_cut  (optional)  ->  cut on Mjj in GeV -- default = 0 GeV" << std::endl;
+    std::cout << "- apply MLM matching or not " << std::endl;
+    std::cout << "- apply MLM matching cut value " << std::endl;
     std::cout << "- filter   (optional)  ->  flag to filter fully hadronic events at LHE level -- default = 1" << std::endl;
     std::cout << "- start    (optional)  ->  number of starting event" << std::endl;
     std::cout << "- number   (optional)  ->  number of total events to be processed" << std::endl;
@@ -87,10 +89,12 @@ int main(int argc, char *argv[]){
   std::cout<<"config file   : "<<argv[1]<<std::endl;
   std::cout<<"input  file   : "<<argv[2]<<std::endl;
   std::cout<<"output file   : "<<argv[3]<<std::endl;
-  if(argc >=5) std::cout<<"Mjj cut value : "<<argv[4]<<std::endl;
-  if(argc >=6) std::cout<<"filter events : "<<argv[5]<<std::endl;
-  if(argc >=7) std::cout<<"start event number : "<<argv[6]<<std::endl;
-  if(argc >=8) std::cout<<"number of events to analyze  : "<<argv[7]<<std::endl;
+  if(argc >=5) std::cout<<"MLM matching options "<<argv[4]<<std::endl; 
+  if(argc >=6) std::cout<<"MLM matching value   "<<argv[5]<<std::endl; 
+  if(argc >=7) std::cout<<"Mjj cut value : "<<argv[6]<<std::endl;
+  if(argc >=8) std::cout<<"filter events : "<<argv[7]<<std::endl;
+  if(argc >=9) std::cout<<"start event number : "<<argv[8]<<std::endl;
+  if(argc >=10) std::cout<<"number of events to analyze  : "<<argv[9]<<std::endl;
   std::cout << "---------------------------------------------------------------------------------------------" << std::endl << std::endl;  
 
   signal(SIGINT,SignalHandler);
@@ -129,17 +133,17 @@ int main(int argc, char *argv[]){
     int     skimFullyHadronic  = 1;
     int     startEvent = 0, nEvent = -1;
 
-    if (argc >= 5) 
-      Mjj_cut = atof(argv[4]);
-    
-    if (argc >= 6) 
-      skimFullyHadronic = atoi(argv[5]);
-                    
     if (argc >= 7) 
-      startEvent = atoi(argv[6]);
+      Mjj_cut = atof(argv[6]);
     
     if (argc >= 8) 
-      nEvent = atoi(argv[7]);                                                     
+      skimFullyHadronic = atoi(argv[7]);
+                    
+    if (argc >= 9) 
+      startEvent = atoi(argv[8]);
+    
+    if (argc >= 10) 
+      nEvent = atoi(argv[9]);                                                     
     
     //--- deals with the HepMc output of Pythia8 ---> no need to store it
     ExRootTreeWriter *treeHepMC = new ExRootTreeWriter();
@@ -195,6 +199,12 @@ int main(int argc, char *argv[]){
     pythia->readString(sRandomSeed.c_str());          // random seed set
     pythia->readString("Beams:frameType = 4");        
     pythia->readString(("Beams:LHEF = "+inputFile).c_str());
+
+    if(argc >=5 and atoi(argv[4]) == 1){
+      pythia->readString("JetMatching:setMad = on"); 
+      pythia->readString((std::string("JetMatching:qCut = ")+std::string(argv[5])).c_str());
+    }
+
     pythia->init();
     
     if(pythia->LHAeventSkip(startEvent)){
