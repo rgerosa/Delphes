@@ -76,7 +76,8 @@ int main(int argc, char *argv[]){
     std::cout << "- output_file          ->  output file in ROOT format" << std::endl;
     std::cout << "- Mjj_cut  (optional)  ->  cut on Mjj in GeV -- default = 0 GeV" << std::endl;
     std::cout << "- apply MLM matching or not " << std::endl;
-    std::cout << "- apply MLM matching cut value " << std::endl;
+    std::cout << "- apply MLM matching qcut value " << std::endl;
+    std::cout << "- apply MLM matching nJet for exclusive (=-1) or inclusive (nParton) generation " << std::endl;
     std::cout << "- filter   (optional)  ->  flag to filter fully hadronic events at LHE level -- default = 1" << std::endl;
     std::cout << "- start    (optional)  ->  number of starting event" << std::endl;
     std::cout << "- number   (optional)  ->  number of total events to be processed" << std::endl;
@@ -91,10 +92,11 @@ int main(int argc, char *argv[]){
   std::cout<<"output file   : "<<argv[3]<<std::endl;
   if(argc >=5) std::cout<<"MLM matching options "<<argv[4]<<std::endl; 
   if(argc >=6) std::cout<<"MLM matching value   "<<argv[5]<<std::endl; 
-  if(argc >=7) std::cout<<"Mjj cut value : "<<argv[6]<<std::endl;
-  if(argc >=8) std::cout<<"filter events : "<<argv[7]<<std::endl;
-  if(argc >=9) std::cout<<"start event number : "<<argv[8]<<std::endl;
-  if(argc >=10) std::cout<<"number of events to analyze  : "<<argv[9]<<std::endl;
+  if(argc >=7) std::cout<<"MLM nJet value   "<<argv[6]<<std::endl; 
+  if(argc >=8) std::cout<<"Mjj cut value : "<<argv[7]<<std::endl;
+  if(argc >=9) std::cout<<"filter events : "<<argv[8]<<std::endl;
+  if(argc >=10) std::cout<<"start event number : "<<argv[9]<<std::endl;
+  if(argc >=11) std::cout<<"number of events to analyze  : "<<argv[10]<<std::endl;
   std::cout << "---------------------------------------------------------------------------------------------" << std::endl << std::endl;  
 
   signal(SIGINT,SignalHandler);
@@ -133,17 +135,17 @@ int main(int argc, char *argv[]){
     int     skimFullyHadronic  = 1;
     int     startEvent = 0, nEvent = -1;
 
-    if (argc >= 7) 
-      Mjj_cut = atof(argv[6]);
-    
     if (argc >= 8) 
-      skimFullyHadronic = atoi(argv[7]);
-                    
-    if (argc >= 9) 
-      startEvent = atoi(argv[8]);
+      Mjj_cut = atof(argv[7]);
     
+    if (argc >= 9) 
+      skimFullyHadronic = atoi(argv[8]);
+                    
     if (argc >= 10) 
-      nEvent = atoi(argv[9]);                                                     
+      startEvent = atoi(argv[9]);
+    
+    if (argc >= 11) 
+      nEvent = atoi(argv[10]);                                                     
     
     //--- deals with the HepMc output of Pythia8 ---> no need to store it
     ExRootTreeWriter *treeHepMC = new ExRootTreeWriter();
@@ -200,9 +202,30 @@ int main(int argc, char *argv[]){
     pythia->readString("Beams:frameType = 4");        
     pythia->readString(("Beams:LHEF = "+inputFile).c_str());
 
+    pythia->readString("MultipartonInteractions:pT0Ref=2.4024");
+    pythia->readString("MultipartonInteractions:ecmPow=0.25208");
+    pythia->readString("MultipartonInteractions:expPow=1.6");
+    pythia->readString("Tune:pp = 14");
+    pythia->readString("Tune:ee = 7");
+
     if(argc >=5 and atoi(argv[4]) == 1){
+
+      pythia->readString("JetMatching:merge = on");
+      pythia->readString("JetMatching:scheme = 1");
       pythia->readString("JetMatching:setMad = on"); 
       pythia->readString((std::string("JetMatching:qCut = ")+std::string(argv[5])).c_str());
+      pythia->readString("JetMatching:jetAlgorithm = 2");
+      pythia->readString("JetMatching:etaJetMax = 5.");
+      pythia->readString("JetMatching:coneRadius = 1.");
+      pythia->readString("JetMatching:slowJetPower = 1");
+      pythia->readString("JetMatching:nQmatch = 5");
+      if(atoi(argv[6]) == -1){
+	pythia->readString((std::string("JetMatching:nJetMax = ")+std::string(argv[6])).c_str());						  			  
+	pythia->readString((std::string("JetMatching:nJet = ")+std::string(argv[6])).c_str());						  			  	
+      }
+      else
+	pythia->readString((std::string("JetMatching:nJet = ")+std::string(argv[6])).c_str());						  			  
+      pythia->readString("JetMatching:doShowerKt = off");
     }
 
     pythia->init();

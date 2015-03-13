@@ -27,6 +27,7 @@ parser.add_option(""  ,"--eventsPerJob", dest="eventsPerJob", default = 25000, t
 ## other options
 parser.add_option("-v" ,"--applyMLM" , dest="applyMLM", default=0, type="int",help="apply MLM matching")
 parser.add_option("-n" ,"--cutMLM"   , dest="cutMLM",   default=0, type="int",help="cut value in GeV for the MLM matching")
+parser.add_option("-r" ,"--nJestMLM" , dest="nJestMLM",   default=0, type="int",help="number of jets maximum for exclusive or inclusive generation")
 parser.add_option("-m" ,"--mjjcut"   , dest="mjjcut", default=0, type="int",help="cut value in GeV for the mjj at LHE")
 parser.add_option("-f" ,"--filter"   , dest="filter", default=1, type="int",help="filter all hadronic events at LHE level")
 
@@ -136,11 +137,11 @@ def writeJobs(workingdir,executable,executableDumper,configCard,inputdir,inputPU
       jobscript.write('if ( \n')
       jobscript.write('\t touch %s/subJob_%d.run \n'%(jobdir,jobid))
       if( executableDumper != '' ) :
-          jobscript.write('\t ./%s %s %s %s %d %d %d %d %d %d \n'%(executable,jobdir+"/"+str(configName[len(configName)-1]),str(fileName[len(fileName)-1]),outputname+"_"+str(jobid)+"_Delphes.root",options.applyMLM,options.cutMLM,options.mjjcut,options.filter,firstEvent,options.eventsPerJob));
+          jobscript.write('\t ./%s %s %s %s %d %d %d %d %d %d %d \n'%(executable,jobdir+"/"+str(configName[len(configName)-1]),str(fileName[len(fileName)-1]),outputname+"_"+str(jobid)+"_Delphes.root",options.applyMLM,options.cutMLM,options.nJestMLM,options.mjjcut,options.filter,firstEvent,options.eventsPerJob));
           dumperSplit = executableDumper.split("/")
           jobscript.write('\t ./%s %s %s'%(dumperSplit[len(dumperSplit)-1],outputname+"_"+str(jobid)+"_Delphes.root", outputname+"_"+str(jobid)+".root")); 
       else :
-          jobscript.write('\t ./%s %s %s %s %d %d %d %d'%(executable,jobdir+"/"+str(configName[len(configName)-1]),str(fileName[len(fileName)-1]),outputname+"_"+str(jobid)+".root",options.mjjcut,options.filter,firstEvent,options.eventsPerJob));    
+          jobscript.write('\t ./%s %s %s %s %d %d %d %d %d %d %d'%(executable,jobdir+"/"+str(configName[len(configName)-1]),str(fileName[len(fileName)-1]),outputname+"_"+str(jobid)+".root",options.applyMLM,options.cutMLM,options.nJestMLM,options.mjjcut,options.filter,firstEvent,options.eventsPerJob));    
       jobscript.write(') then \n')
       if (eosoutdir == ''):
             jobscript.write('\t cp ./%s_%s.root %s \n'%(outputname,jobid,jobdir))

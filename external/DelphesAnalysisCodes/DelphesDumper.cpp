@@ -247,7 +247,7 @@ int main (int argc, char *argv[]){
   TClonesArray* branchRhokt4 = delphesTree->UseBranch("RhoKt4");
   TClonesArray* branchRhoGFJ= delphesTree->UseBranch("RhoGridFastJet");
   TClonesArray* branchPuppiRhokt4 = delphesTree->UseBranch("PuppiRhoKt4");
-  TClonesArray* branchPuppiRhoGFJ= delphesTree->UseBranch("PuppiRhoGridFastJet");
+  //TClonesArray* branchPuppiRhoGFJ= delphesTree->UseBranch("PuppiRhoGridFastJet");
              
   //--------- Creating branches for the new (light) tree    
 
@@ -719,9 +719,9 @@ int main (int argc, char *argv[]){
   //  RhoGridFastJet
   // 0: eta = 0 and eta = 2.5 range
   // 1: eta = 2.5 and eta = 5 range
-  float PuppiRhoGridFastJet_tmp[2] ;
-  easyTree->Branch("PuppiRhoGridFastJet_0",&PuppiRhoGridFastJet_tmp[0],"PuppiRhoGridFastJet_0/F");
-  easyTree->Branch("PuppiRhoGridFastJet_1",&PuppiRhoGridFastJet_tmp[1],"PuppiRhoGridFastJet_1/F");
+  //float PuppiRhoGridFastJet_tmp[2] ;
+  //easyTree->Branch("PuppiRhoGridFastJet_0",&PuppiRhoGridFastJet_tmp[0],"PuppiRhoGridFastJet_0/F");
+  //easyTree->Branch("PuppiRhoGridFastJet_1",&PuppiRhoGridFastJet_tmp[1],"PuppiRhoGridFastJet_1/F");
 
   
 
@@ -1504,7 +1504,7 @@ int main (int argc, char *argv[]){
       }
 
       //Puppi GridFastJetRho filling
-
+      /*
       int rpgk_entries = branchPuppiRhoGFJ->GetEntriesFast();
 
       for(int i=0; i<rpgk_entries; i++){
@@ -1517,7 +1517,7 @@ int main (int argc, char *argv[]){
 	}
 		
       }
-
+      */
         
       easyTree -> Fill();
     }
