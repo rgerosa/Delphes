@@ -15,6 +15,7 @@ parser.add_option("-w","--workdir"    , dest="workdir"    , type="string", defau
 parser.add_option("-o","--outputname" , dest="outputname" , type="string", default="outtree", help = "Name of the output file. Default is: outtree")
 parser.add_option(""  ,"--eosdir"     , dest="eosdir"     , type="string", default="",help="Name of the eos output directory for jobs")
 parser.add_option("-e","--executable" , dest="executable" , type="string", default="DelphesPythia8",help="Name of the executable. Default is: DelphesPythia8")
+parser.add_option("","--addEFTweights" , dest="addEFTweights" , type="int", default=0,help="add LHE weight for EFT studies")
 
 ## njobs decide the number of the jobs as a function fo the number of the file in the inputdir
 parser.add_option("-a","--njobs"    , dest="njobs"    , type="int"   , default = 0, help = "Number of jobs")
@@ -92,9 +93,17 @@ def writeJobs(workingdir,executable,inputdir,outputname,eosoutdir,njobs):
      jobscript.write('if ( \n')
      jobscript.write('\t touch %s/sub_%d.run \n'%(jobdir,job))    
      if iseos:
-         jobscript.write('\t ./%s %s/input_%d.txt %s_%d.root\n'%(executable,jobdir,job,outputname,job))
+         if options.addEFTweights == 0 :
+             jobscript.write('\t ./%s %s/input_%d.txt %s_%d.root\n'%(executable,jobdir,job,outputname,job))
+         else :
+             jobscript.write('\t ./%s -w %s/input_%d.txt %s_%d.root\n'%(executable,jobdir,job,outputname,job))
+
      else:
-         jobscript.write('\t X509_USER_PROXY=$HOME/testproxy ./%s %s/input_%d.txt %s_%d.root\n'%(executable,jobdir,job,outputname,job))
+         if options.addEFTweights == 0 :
+             jobscript.write('\t X509_USER_PROXY=$HOME/testproxy ./%s %s/input_%d.txt %s_%d.root\n'%(executable,jobdir,job,outputname,job))
+         else :
+             jobscript.write('\t X509_USER_PROXY=$HOME/testproxy ./%s -w %s/input_%d.txt %s_%d.root\n'%(executable,jobdir,job,outputname,job))
+
      jobscript.write(') then \n')
      if (eosoutdir == ''):
        jobscript.write('\t cp ./%s_%d.root %s \n'%(outputname,job,jobdir))
