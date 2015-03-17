@@ -161,16 +161,16 @@ int main (int argc, char *argv[]){
   //complex object definitions
   //change it for root input
 
-  TChain* delphesNtuples = new TChain("Delphes");
+  TChain* delphesNtuples        = new TChain("Delphes");
   ExRootTreeReader *delphesTree = new ExRootTreeReader(delphesNtuples);
 
   // reading input files
   if(argc < 3){
     cout << "ERROR: not enough info provided" << endl;
     cout << "Usage: DelphesDumper [-w] inputFile outputFile" << endl;
-    cout << "\t-w: add weight information" << endl;
-    cout << "\tinputFile: a Delphes ROOT file or a list of these in a text file" << endl;
-    cout << "\toutputFile: the flat tree ROOT file" << endl;    
+    cout << "\t -w: add weight information" << endl;
+    cout << "\t inputFile: a Delphes ROOT file or a list of these in a text file" << endl;
+    cout << "\t outputFile: the flat tree ROOT file" << endl;    
     return 0;
   }
   
@@ -254,12 +254,16 @@ int main (int argc, char *argv[]){
   //-------- LHE event weights
   int nlheweights = 657;
   float evtsperfile = 100;
-  float eventLHEweight_tmp[nlheweights];
+  std::vector<float> eventLHEweight_tmp;
+
+  float weightLHE_tmp = 1 ;
+  TString LHEweightStr = "LHEweight";
+
+  easyTree->Branch(LHEweightStr,&weightLHE_tmp,LHEweightStr+"/F");
+
   if (fillWeights) {
-    for(int ilhe=0; ilhe<nlheweights; ilhe++){
-      TString eventLHEweightStr = "eventLHEweight"; eventLHEweightStr += (ilhe);
-      easyTree->Branch(eventLHEweightStr,&eventLHEweight_tmp[ilhe],eventLHEweightStr+"/F");
-    }    
+      TString eventLHEweightStr = "eventLHEweight"; 
+      easyTree->Branch(eventLHEweightStr,"vector<float>",&eventLHEweight_tmp);
   }
 
   //--------- LHE Information
@@ -761,21 +765,23 @@ int main (int argc, char *argv[]){
       vbosonLHEch_tmp[k]=-999;  vbosonLHEm_tmp[k]=-999;
     }
 
-    
+    LHEFEvent* lheevent         = (LHEFEvent*) branchLHEEvent->At(0);
+    weightLHE_tmp = lheevent->Weight;
 
     if (fillWeights) {
+      eventLHEweight_tmp.clear();
       for(int i=0; i<nlheweights; i++) 
-	eventLHEweight_tmp[i] = -999;
-      LHEFEvent* lheevent         = (LHEFEvent*) branchLHEEvent->At(0);
+	eventLHEweight_tmp.push_back(-999);
       vector<Double_t> lheweights = lheevent->lheWeights;
       float replicas = ((float)numberOfEntries)/evtsperfile;
-      for(vector<Double_t>::iterator it = lheweights.begin(); it != lheweights.end(); ++it)      
+      for(vector<Double_t>::iterator it = lheweights.begin(); it != lheweights.end(); ++it)    {  
 	eventLHEweight_tmp[(uint)(it-lheweights.begin())] = (*it)/replicas;
+      }
     }        
-        
+
+            
     int lhe_entries = branchLHEParticle->GetEntriesFast();
-    
-    
+        
     for (int i = 0 ; i < lhe_entries  ; i++) {
       LHEParticle *lhepart = (LHEParticle*) branchLHEParticle->At(i);
       int type   =  lhepart-> PID;
