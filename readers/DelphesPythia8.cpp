@@ -74,10 +74,10 @@ int main(int argc, char *argv[]){
     std::cout << "- config_file          ->  configuration file in Tcl format" << std::endl;
     std::cout << "- input_file           ->  lhe file for Pythia8" << std::endl;
     std::cout << "- output_file          ->  output file in ROOT format" << std::endl;
-    std::cout << "- Mjj_cut  (optional)  ->  cut on Mjj in GeV -- default = 0 GeV" << std::endl;
     std::cout << "- apply MLM matching or not " << std::endl;
     std::cout << "- apply MLM matching qcut value " << std::endl;
     std::cout << "- apply MLM matching nJet for exclusive (=-1) or inclusive (nParton) generation " << std::endl;
+    std::cout << "- Mjj_cut  (optional)  ->  cut on Mjj in GeV -- default = 0 GeV" << std::endl;
     std::cout << "- filter   (optional)  ->  flag to filter fully hadronic events at LHE level -- default = 1" << std::endl;
     std::cout << "- start    (optional)  ->  number of starting event" << std::endl;
     std::cout << "- number   (optional)  ->  number of total events to be processed" << std::endl;
