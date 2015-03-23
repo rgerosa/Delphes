@@ -253,7 +253,6 @@ int main (int argc, char *argv[]){
 
   //-------- LHE event weights
   int nlheweights = 657;
-  float evtsperfile = 100;
   std::vector<float> eventLHEweight_tmp;
 
   float weightLHE_tmp = 1 ;
@@ -773,9 +772,8 @@ int main (int argc, char *argv[]){
       for(int i=0; i<nlheweights; i++) 
 	eventLHEweight_tmp.push_back(-999);
       vector<Double_t> lheweights = lheevent->lheWeights;
-      float replicas = ((float)numberOfEntries)/evtsperfile;
       for(vector<Double_t>::iterator it = lheweights.begin(); it != lheweights.end(); ++it)    {  
-	eventLHEweight_tmp[(uint)(it-lheweights.begin())] = (*it)/replicas;
+	eventLHEweight_tmp[(uint)(it-lheweights.begin())] = (*it);
       }
     }        
 
