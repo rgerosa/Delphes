@@ -34,12 +34,26 @@ private:
   typedef std::map< Double_t, std::set< Double_t > > TBinMap; //!
 
   Candidate *fTower; // cadidate
-  Double_t fTowerEta, fTowerPhi, fTowerEdges[4];
-  Double_t fTowerECalEnergy, fTowerHCalEnergy;
-  Double_t fTrackECalEnergy, fTrackHCalEnergy;
-  Int_t    fTowerTrackHits, fTowerPhotonHits;
 
-  Double_t fTimingEMin;
+  Double_t  fTowerEta, fTowerPhi, fTowerEdges[4];
+  Double_t  fTowerECalEnergy, fTowerHCalEnergy;
+  Double_t  fTrackECalEnergy, fTrackHCalEnergy;
+
+  Double_t fTowerECalTime, fTowerHCalTime;
+  Double_t fTrackECalTime, fTrackHCalTime;
+
+  Double_t fTowerECalTimeWeight, fTowerHCalTimeWeight;
+  Double_t fTrackECalTimeWeight, fTrackHCalTimeWeight;
+
+  Int_t     fTowerTrackHits, fTowerPhotonHits;
+
+  Double_t fECalEnergyMin;
+  Double_t fHCalEnergyMin;
+
+  Double_t fECalEnergySignificanceMin;
+  Double_t fHCalEnergySignificanceMin;
+
+  Bool_t fSmearTowerCenter;
 
   TFractionMap fFractionMap; //!
   TBinMap      fBinMap; //!
@@ -61,6 +75,8 @@ private:
 
   DelphesFormula *fECalResolutionFormula; //!
   DelphesFormula *fHCalResolutionFormula; //!
+  DelphesFormula *fECalEfficiencyFormula; //!
+  DelphesFormula *fHCalEfficiencyFormula; //!
 
   TIterator *fItParticleInputArray; //!
   TIterator *fItTrackInputArray; //!
@@ -78,6 +94,7 @@ private:
   TIterator *fItTowerTrackArray; //!
 
   void FinalizeTower();
+
   Double_t LogNormal(Double_t mean, Double_t sigma);
 
   bool electronsFromTrack; // for timing

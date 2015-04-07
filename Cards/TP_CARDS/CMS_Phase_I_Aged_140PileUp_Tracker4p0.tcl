@@ -332,6 +332,14 @@ module Calorimeter Calorimeter {
   set EFlowTrackOutputArray eflowTracks
   set EFlowTowerOutputArray eflowTowers
 
+  set ECalEnergyMin 1.0
+  set HCalEnergyMin 1.0
+
+  set ECalEnergySignificanceMin 2.0
+  set HCalEnergySignificanceMin 2.0
+
+  set SmearTowerCenter false
+
   set pi [expr {acos(-1)}]
 
   ## Granularity for |eta| < 1.65
@@ -395,6 +403,12 @@ module Calorimeter Calorimeter {
                                (abs(eta) > 1.7 && abs(eta)<=2.1) * (energy*0.0737 - sqrt(energy)*0.0343 + 7.3) + \
                                (abs(eta) > 2.1 && abs(eta)<=2.3) * (energy*0.239 + sqrt(energy)*1.95 + 19.1) + \
                                (abs(eta) > 2.3 && abs(eta) <= 5.0) * (energy*0.0732 + sqrt(energy)*14.7+42.8)
+  }
+
+  set ECalEfficiencyFormula { (abs(eta) <= 5.0) * 1
+  }
+
+  set HCalEfficiencyFormula { (abs(eta) <= 5.0) * 1
   }
 
 

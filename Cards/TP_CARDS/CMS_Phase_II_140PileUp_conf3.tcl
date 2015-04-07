@@ -326,6 +326,16 @@ module Calorimeter Calorimeter {
   set EFlowTrackOutputArray eflowTracks
   set EFlowTowerOutputArray eflowTowers
 
+  set ECalEnergyMin 1.0
+  set HCalEnergyMin 1.0
+
+  set ECalEnergySignificanceMin 2.0
+  set HCalEnergySignificanceMin 2.0
+
+  set SmearTowerCenter false
+
+
+
   set pi [expr {acos(-1)}]
 
  # lists of the edges of each tower in eta and phi
@@ -392,6 +402,13 @@ module Calorimeter Calorimeter {
   set HCalResolutionFormula {                  (abs(eta) <= 1.7) * sqrt(energy^2*0.0302^2 + energy*0.5205^2 + 1.59^2) + \
 						   (abs(eta) > 1.7 && abs(eta) <= 3.2) * sqrt(energy^2*0.050^2 + energy*0.706^2) + \
 						   (abs(eta) > 3.0 && abs(eta) <= 4.9) * sqrt(energy^2*0.05^2 + energy*1.00^2)}
+
+
+  set ECalEfficiencyFormula { (abs(eta) <= 5.0) * 1
+  }
+
+  set HCalEfficiencyFormula { (abs(eta) <= 5.0) * 1
+  }
 
 
 }
