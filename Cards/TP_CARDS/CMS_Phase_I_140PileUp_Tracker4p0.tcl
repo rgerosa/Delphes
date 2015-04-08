@@ -331,7 +331,7 @@ module Calorimeter Calorimeter {
   set EFlowTrackOutputArray eflowTracks
   set EFlowTowerOutputArray eflowTowers
 
-  set ECalEnergyMin 1.0
+  set ECalEnergyMin 0.5
   set HCalEnergyMin 1.0
 
   set ECalEnergySignificanceMin 2.0
@@ -1000,7 +1000,7 @@ module Efficiency MuonEfficiency {
                          (abs(eta) > 2.40 && abs(eta) <= 4.00) * (pt > 11. && pt <= 50.) * (0.96) + \
                          (abs(eta) > 2.40 && abs(eta) <= 4.00) * (pt > 50. && pt <= 70.) * (0.98) + \
                          (abs(eta) > 2.40 && abs(eta) <= 4.00) * (pt > 70.0 ) * (1.00) + \
-                         (abs(eta) > 2.40 && abs(eta) > 4.00) * (0.00)
+                         (abs(eta) > 4.00) * (0.00)
  
   }
 }

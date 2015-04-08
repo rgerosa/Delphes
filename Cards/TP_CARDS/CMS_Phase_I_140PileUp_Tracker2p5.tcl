@@ -296,13 +296,13 @@ module Calorimeter Calorimeter {
   set EFlowTrackOutputArray eflowTracks
   set EFlowTowerOutputArray eflowTowers
 
-  set ECalEnergyMin 1.0
+  set ECalEnergyMin 0.5
   set HCalEnergyMin 1.0
 
   set ECalEnergySignificanceMin 2.0
   set HCalEnergySignificanceMin 2.0
 
-  set SmearTowerCenter false
+  set SmearTowerCenter true
 
   set pi [expr {acos(-1)}]
 
