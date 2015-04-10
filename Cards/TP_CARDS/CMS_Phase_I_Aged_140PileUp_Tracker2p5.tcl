@@ -75,6 +75,8 @@ set ExecutionPath {
   ScalarHT
   PuppiScalarHT
 
+  StatusPid
+
   TreeWriter
 
 }
@@ -82,7 +84,6 @@ set ExecutionPath {
 ### remove some modules
 
 # GenBeamSpotFilter
-# StatusPid
 # JetPileUpSubtractorGrid
 # JetPileUpSubtractor4VArea
 # PuppiJetPileUpSubtractorGrid
@@ -157,7 +158,7 @@ module StatusPidFilter StatusPid {
     ## take the particles from Pythia8 not adding pile-up
     set InputArray  Delphes/allParticles
     set OutputArray filteredParticles
-    set PTMin 0.35
+    set PTMin 5
 }
 
 ####################################
@@ -303,12 +304,12 @@ module Calorimeter Calorimeter {
   set EFlowTowerOutputArray eflowTowers
 
   set ECalEnergyMin 0.5
-  set HCalEnergyMin 1.0
+  set HCalEnergyMin 0.5
 
   set ECalEnergySignificanceMin 2.0
   set HCalEnergySignificanceMin 2.0
 
-  set SmearTowerCenter true
+  set SmearTowerCenter false
 
   set pi [expr {acos(-1)}]
 
@@ -2231,7 +2232,7 @@ module TreeWriter TreeWriter {
   #add Branch ParticlePropagator/muons           muonPropagator GenParticle 
 
   ## after Pt filter: all delphes particles, not only status 1 
-  #add Branch StatusPid/filteredParticles GenParticles GenParticle
+  add Branch StatusPid/filteredParticles GenParticles GenParticle
  
   ## track collection after: charged hadrons smearing and track eff, electron smearing and track eff
   #add Branch TrackMerger/tracks trackCollectionNoMU Track

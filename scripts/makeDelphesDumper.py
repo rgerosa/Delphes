@@ -26,7 +26,7 @@ parser.add_option(""  ,"--submit"     , dest="submit"     , action="store_true",
 parser.add_option("-j","--jobmin"     , dest="jobmin"     , type="int", help="Job number (for resubmission). You can resubmit one job at time for now.")
 parser.add_option("-x","--jobmax"     , dest="jobmax"     , type="int", help="Job number (for resubmission). You can resubmit one job at time for now.")
 parser.add_option("-q","--queue"      , dest="queue"      , type="string", default="1nh",help="Name of the queue on lxbatch")
-
+parser.add_option("-p","--addGenParticle", dest="addGenParticle", type="int", default=0)
 
 (options,args)=parser.parse_args()
 
@@ -94,15 +94,29 @@ def writeJobs(workingdir,executable,inputdir,outputname,eosoutdir,njobs):
      jobscript.write('\t touch %s/sub_%d.run \n'%(jobdir,job))    
      if iseos:
          if options.addEFTweights == 0 :
-             jobscript.write('\t ./%s %s/input_%d.txt %s_%d.root\n'%(executable,jobdir,job,outputname,job))
+             if not options.addGenParticle :
+                 jobscript.write('\t ./%s %s/input_%d.txt %s_%d.root\n'%(executable,jobdir,job,outputname,job))
+             else :
+                 jobscript.write('\t ./%s %s/input_%d.txt %s_%d.root %d\n'%(executable,jobdir,job,outputname,job,options.addGenParticle))
+
          else :
-             jobscript.write('\t ./%s -w %s/input_%d.txt %s_%d.root\n'%(executable,jobdir,job,outputname,job))
+             if not addGenParticle :
+                 jobscript.write('\t ./%s -w %s/input_%d.txt %s_%d.root\n'%(executable,jobdir,job,outputname,job))
+             else :
+                 jobscript.write('\t ./%s -w %s/input_%d.txt %s_%d.root %d\n'%(executable,jobdir,job,outputname,job,options.addGenParticle))
+
 
      else:
          if options.addEFTweights == 0 :
-             jobscript.write('\t X509_USER_PROXY=$HOME/testproxy ./%s %s/input_%d.txt %s_%d.root\n'%(executable,jobdir,job,outputname,job))
+             if not options.addGenParticle :
+                 jobscript.write('\t X509_USER_PROXY=$HOME/testproxy ./%s %s/input_%d.txt %s_%d.root\n'%(executable,jobdir,job,outputname,job))
+             else:
+                 jobscript.write('\t X509_USER_PROXY=$HOME/testproxy ./%s %s/input_%d.txt %s_%d.root %d\n'%(executable,jobdir,job,outputname,job,options.addGenParticle))
          else :
-             jobscript.write('\t X509_USER_PROXY=$HOME/testproxy ./%s -w %s/input_%d.txt %s_%d.root\n'%(executable,jobdir,job,outputname,job))
+             if not options.addGenParticle :
+                 jobscript.write('\t X509_USER_PROXY=$HOME/testproxy ./%s -w %s/input_%d.txt %s_%d.root\n'%(executable,jobdir,job,outputname,job))
+             else:
+                 jobscript.write('\t X509_USER_PROXY=$HOME/testproxy ./%s -w %s/input_%d.txt %s_%d.root %d\n'%(executable,jobdir,job,outputname,job,options.addGenParticle))
 
      jobscript.write(') then \n')
      if (eosoutdir == ''):

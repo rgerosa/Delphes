@@ -91,15 +91,15 @@ void StatusPidFilter::Process()
 
     // status == 3
     if(status == 3) pass = kTRUE;
-
+    
     // electrons, muons, taus and neutrinos
-    if(pdgCode > 10 && pdgCode < 17) pass = kTRUE;
+    if(status == 1 and (pdgCode > 10 && pdgCode < 17)) pass = kTRUE;
 
     // heavy quarks
-    if(pdgCode == 5 || pdgCode == 6) pass = kTRUE;
+    if(status == 1 and (pdgCode == 5 || pdgCode == 6)) pass = kTRUE;
 
     // Gauge bosons and other fundamental bosons
-    if(pdgCode > 22 && pdgCode < 43) pass = kTRUE;
+    if((pdgCode > 22 && pdgCode < 43) and status == 1) pass = kTRUE;
 
     //    if(!pass || candidate->Momentum.Pt() <= fPTMin) continue;
     if (pass && ( candidate->Momentum.Pt() > fPTMin || status == 3) ) {

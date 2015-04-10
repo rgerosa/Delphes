@@ -75,6 +75,8 @@ set ExecutionPath {
   ScalarHT
   PuppiScalarHT
 
+  StatusPid
+
   TreeWriter
 
 
@@ -160,7 +162,7 @@ module StatusPidFilter StatusPid {
     ## take the particles from Pythia8 not adding pile-up
     set InputArray  Delphes/allParticles
     set OutputArray filteredParticles
-    set PTMin 0.35
+    set PTMin 5
 }
 
 ####################################
@@ -249,11 +251,11 @@ module EnergySmearing ElectronEnergySmearing {
   set InputArray ElectronTrackingEfficiency/electrons
   set OutputArray electrons
   # set ResolutionFormula {resolution formula as a function of eta and energy}
-  set ResolutionFormula { 
-      (abs(eta) <= 1.5) * (energy > 0.1   && energy <= 2.5e1) * (energy*0.015) + \
-      (abs(eta) <= 1.5) * (energy > 2.5e1)                    * sqrt(energy^2*0.005^2 + energy*0.027^2 + 0.15^2) + \
-      (abs(eta) > 1.5 && abs(eta) <= 4.0)                      * sqrt(energy^2*0.008^2 + energy*0.092^2 + 0.088^2)
-  }                                                  
+  set ResolutionFormula {  (abs(eta) <= 2.5) * (energy > 0.1   && energy <= 2.5e1) * (energy*0.02) + \
+			   (abs(eta) <= 2.5) * (energy > 2.5e1)                    * (energy*0.028) + \
+			   (abs(eta) > 2.5 && abs(eta) <= 3.0)                     * (energy*0.032) + \
+			   (abs(eta) > 3.0 && abs(eta) <= 5.0)                     * (energy*0.07)
+  }
 }
 
 ###############################
@@ -265,15 +267,15 @@ module MomentumSmearing MuonMomentumSmearing {
   set OutputArray muons
   # resolution formula for muons
   set ResolutionFormula {
-      (abs(eta) <= 1.5) * (pt > 0.1   && pt <= 1.0)   * (0.015) + \
-	  (abs(eta) <= 1.5) * (pt > 1.0   && pt <= 1.0e1) * (0.013) + \
-	  (abs(eta) <= 1.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.02) + \
-	  (abs(eta) <= 1.5) * (pt > 2.0e2)                * (0.05) + \
-	  (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.1   && pt <= 1.0)   * (0.015) + \
-	  (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0   && pt <= 1.0e1) * (0.015) + \
-	  (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.04) + \
-	  (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 2.0e2)                * (0.05) + \
-	  (abs(eta) > 2.5) * (0.00)
+      (abs(eta) <= 1.5) * (pt > 0.1   && pt <= 1.0)   * (0.012) + \
+      (abs(eta) <= 1.5) * (pt > 1.0   && pt <= 1.0e1) * (0.01) + \
+      (abs(eta) <= 1.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.011) + \
+      (abs(eta) <= 1.5) * (pt > 2.0e2)                * (0.030) + \
+      (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 0.1   && pt <= 1.0)   * (0.011) + \
+      (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0   && pt <= 1.0e1) * (0.011) + \
+      (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 1.0e1 && pt <= 2.0e2) * (0.03) + \
+      (abs(eta) > 1.5 && abs(eta) <= 2.5) * (pt > 2.0e2)                * (0.038) + \
+      (abs(eta) > 2.5) * (0.00)
   }
 }
 
@@ -953,11 +955,11 @@ module Efficiency MuonEfficiency {
   # efficiency formula for muons
   set EfficiencyFormula {                           
       (pt <= 2.0)  * (0.00) + \  
-      (abs(eta) <= 2.50) * (pt >  2.0 && pt <= 3.0)  * (0.51) + \
-      (abs(eta) <= 2.50) * (pt >  3.0 && pt <= 4.0)  * (0.85) + \ 
-      (abs(eta) <= 2.50) * (pt >  4.0 && pt <= 11.0) * (0.93) + \               
-      (abs(eta) <= 2.50) * (pt >  11. && pt <= 50.)  * (0.96) + \   
-      (abs(eta) <= 2.50) * (pt >  50. && pt <= 70.)  * (0.98) + \                      
+      (abs(eta) <= 2.50) * (pt >  2.0 && pt <= 3.0)  * (0.6) + \
+      (abs(eta) <= 2.50) * (pt >  3.0 && pt <= 4.0)  * (0.89) + \ 
+      (abs(eta) <= 2.50) * (pt >  4.0 && pt <= 11.0) * (0.95) + \               
+      (abs(eta) <= 2.50) * (pt >  11. && pt <= 50.)  * (0.976) + \   
+      (abs(eta) <= 2.50) * (pt >  50. && pt <= 70.)  * (0.986) + \                      
       (abs(eta) <= 2.50) * (pt > 70.0 )  * (1.00) + \   
       (abs(eta) > 2.50)  * (0.00)
   }
@@ -2183,7 +2185,7 @@ module TreeWriter TreeWriter {
   #add Branch ParticlePropagator/muons           muonPropagator GenParticle 
 
   ## after Pt filter: all delphes particles, not only status 1 
-  #add Branch StatusPid/filteredParticles GenParticles GenParticle
+  add Branch StatusPid/filteredParticles GenParticles GenParticle
  
   ## track collection after: charged hadrons smearing and track eff, electron smearing and track eff
   #add Branch TrackMerger/tracks trackCollectionNoMU Track

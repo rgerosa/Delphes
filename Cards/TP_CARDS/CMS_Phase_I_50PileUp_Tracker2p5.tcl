@@ -75,6 +75,8 @@ set ExecutionPath {
   ScalarHT
   PuppiScalarHT
 
+  StatusPid
+
   TreeWriter
 
 }
@@ -157,7 +159,7 @@ module StatusPidFilter StatusPid {
     ## take the particles from Pythia8 not adding pile-up
     set InputArray  Delphes/allParticles
     set OutputArray filteredParticles
-    set PTMin 0.35
+    set PTMin 5
 }
 
 ####################################
@@ -244,9 +246,9 @@ module EnergySmearing ElectronEnergySmearing {
   set InputArray ElectronTrackingEfficiency/electrons
   set OutputArray electrons
   # set ResolutionFormula {resolution formula as a function of eta and energy}
-  set ResolutionFormula {  (abs(eta) <= 2.5) * (energy > 0.1   && energy <= 2.5e1) * (energy*0.025) + \
-                           (abs(eta) <= 2.5) * (energy > 2.5e1)                    * (energy*0.035) + \
-                           (abs(eta) > 2.5 && abs(eta) <= 3.0)                     * (energy*0.035) + \
+  set ResolutionFormula {  (abs(eta) <= 2.5) * (energy > 0.1   && energy <= 2.5e1) * (energy*0.02) + \
+                           (abs(eta) <= 2.5) * (energy > 2.5e1)                    * (energy*0.023) + \
+                           (abs(eta) > 2.5 && abs(eta) <= 3.0)                     * (energy*0.030) + \
                            (abs(eta) > 3.0 && abs(eta) <= 5.0)                     * (energy*0.07)
   }                                                  
 }
@@ -297,12 +299,12 @@ module Calorimeter Calorimeter {
   set EFlowTowerOutputArray eflowTowers
 
   set ECalEnergyMin 0.5
-  set HCalEnergyMin 1.0
+  set HCalEnergyMin 0.5
 
   set ECalEnergySignificanceMin 2.0
   set HCalEnergySignificanceMin 2.0
 
-  set SmearTowerCenter true
+  set SmearTowerCenter false
 
 
   set pi [expr {acos(-1)}]
@@ -948,13 +950,13 @@ module Efficiency MuonEfficiency {
   # set EfficiencyFormula {efficiency as a function of eta and pt}
   # efficiency formula for muons
   set EfficiencyFormula {                                  (pt <= 2.0)  * (0.00) + \  
-                         (abs(eta) <= 2.40) * (pt >  2.0 && pt <= 3.0)  * (0.51) + \
-                         (abs(eta) <= 2.40) * (pt >  3.0 && pt <= 4.0)  * (0.85) + \ 
-                         (abs(eta) <= 2.40) * (pt >  4.0 && pt <= 11.0) * (0.93) + \               
-                         (abs(eta) <= 2.40) * (pt >  11. && pt <= 50.)  * (0.96) + \   
-                         (abs(eta) <= 2.40) * (pt >  50. && pt <= 70.)  * (0.98) + \                      
-                         (abs(eta) <= 2.40) * (pt > 70.0 )  * (1.00) + \   
- 	                 (abs(eta) > 2.40)  * (0.00)
+                         (abs(eta) <= 2.50) * (pt >  2.0 && pt <= 3.0)  * (0.51) + \
+                         (abs(eta) <= 2.50) * (pt >  3.0 && pt <= 4.0)  * (0.85) + \ 
+                         (abs(eta) <= 2.50) * (pt >  4.0 && pt <= 11.0) * (0.93) + \               
+                         (abs(eta) <= 2.50) * (pt >  11. && pt <= 50.)  * (0.965) + \   
+                         (abs(eta) <= 2.50) * (pt >  50. && pt <= 70.)  * (0.985) + \                      
+                         (abs(eta) <= 2.50) * (pt > 70.0 )  * (1.00) + \   
+ 	                 (abs(eta) > 2.50)  * (0.00)
   }
 }
 
@@ -2177,7 +2179,7 @@ module TreeWriter TreeWriter {
   #add Branch ParticlePropagator/muons           muonPropagator GenParticle 
 
   ## after Pt filter: all delphes particles, not only status 1 
-  #add Branch StatusPid/filteredParticles GenParticles GenParticle
+  add Branch StatusPid/filteredParticles GenParticles GenParticle
  
   ## track collection after: charged hadrons smearing and track eff, electron smearing and track eff
   #add Branch TrackMerger/tracks trackCollectionNoMU Track
