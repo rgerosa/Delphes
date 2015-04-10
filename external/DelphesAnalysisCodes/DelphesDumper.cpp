@@ -175,7 +175,7 @@ int main (int argc, char *argv[]){
   }
   
   bool fillWeights = false;
-  if(argc == 4) {
+  if(argc == 4 and std::string(argv[1]) == "-w") {
     argv[1] = argv[2];
     argv[2] = argv[3];
     fillWeights = true;
@@ -218,8 +218,12 @@ int main (int argc, char *argv[]){
   cout<<"##### Number of Entires in the Delphes Tree is: "<<numberOfEntries<<endl;
   
   int useGenParticles = 0;
-  if(argc < 4) useGenParticles = 0;
-  else     useGenParticles = atoi(argv[3]);
+  if(argc < 4) 
+    useGenParticles = 0;
+  else if( std::string(argv[3]) == "0" or std::string(argv[3]) == "1")
+    useGenParticles = atoi(argv[3]);
+  else if(std::string(argv[1]) == "-w" and argc >= 5)
+    useGenParticles = atoi(argv[4]);
        
   //----------------------------------------------------------------------------------------
   //variable management
@@ -374,17 +378,17 @@ int main (int argc, char *argv[]){
       easyTree -> Branch(leptonGenptStr,&leptonGenpt_tmp[igen],leptonGenptStr+"/F");
       easyTree -> Branch(leptonGenetaStr,&leptonGeneta_tmp[igen],leptonGenetaStr+"/F");
       easyTree -> Branch(leptonGenphiStr,&leptonGenphi_tmp[igen],leptonGenphiStr+"/F");
-      easyTree -> Branch(leptonGenpidStr,&leptonGenpid_tmp[igen],leptonGenpidStr+"/F");
+      easyTree -> Branch(leptonGenpidStr,&leptonGenpid_tmp[igen],leptonGenpidStr+"/I");
     
       easyTree -> Branch(neutrinoGenptStr,&neutrinoGenpt_tmp[igen],neutrinoGenptStr+"/F");
       easyTree -> Branch(neutrinoGenetaStr,&neutrinoGeneta_tmp[igen],neutrinoGenetaStr+"/F");
       easyTree -> Branch(neutrinoGenphiStr,&neutrinoGenphi_tmp[igen],neutrinoGenphiStr+"/F");
-      easyTree -> Branch(neutrinoGenpidStr,&neutrinoGenpid_tmp[igen],neutrinoGenpidStr+"/F");
+      easyTree -> Branch(neutrinoGenpidStr,&neutrinoGenpid_tmp[igen],neutrinoGenpidStr+"/I");
     }
   }
 	
   //--------- GEN JETS Information
-  int ngjet=4;
+  int ngjet=8;
   float jetGenpt_tmp[ngjet], jetGeneta_tmp[ngjet], jetGenphi_tmp[ngjet],  jetGenm_tmp[ngjet] ;
   float jetGenAreaX_tmp[ngjet], jetGenAreaY_tmp[ngjet], jetGenAreaZ_tmp[ngjet], jetGenAreaT_tmp[ngjet];
 	
@@ -905,9 +909,9 @@ int main (int argc, char *argv[]){
 
 	
 	for (int i = 0 ; i < gen_entries  ; i++) {
+
 	  GenParticle *part = (GenParticle*) branchGenParticle->At(i);
 	  int type   =  part-> PID;
-		
 
 	  if(part->Status!=1)continue;
 			
@@ -923,7 +927,6 @@ int main (int argc, char *argv[]){
 
 	}
 
-
 	sort(genLepton.begin(), genLepton.end(),genParticleDescendingPt());
 	sort(genNeutrino.begin(), genNeutrino.end(),genParticleDescendingPt());
 			
@@ -931,8 +934,7 @@ int main (int argc, char *argv[]){
 
 	int jgl = (leptonID.size()<4) ? leptonID.size():4;
 	int jgn = (neutrinoID.size()<4) ? neutrinoID.size():4;
-			
-     
+    
 			
 	for(int j=0; j<jgl; j++){
 	  leptonGenpt_tmp[j] = genLepton.at(j)->PT;
@@ -954,7 +956,7 @@ int main (int argc, char *argv[]){
         
       vector <Jet*> genJet;
 		
-      for(int k =0; k<4; k++){
+      for(int k =0; k<8; k++){
 	jetGenpt_tmp[k]=-999;
 	jetGeneta_tmp[k]=-999;
 	jetGenphi_tmp[k]=-999;
@@ -973,7 +975,7 @@ int main (int argc, char *argv[]){
       }
 						
 			
-      int njetsgen = (genJet.size()<4) ? genJet.size():4;
+      int njetsgen = (genJet.size()<8) ? genJet.size():8;
 			
       for(int j=0; j<njetsgen; j++){
 	jetGenpt_tmp[j] = genJet.at(j)->PT;
