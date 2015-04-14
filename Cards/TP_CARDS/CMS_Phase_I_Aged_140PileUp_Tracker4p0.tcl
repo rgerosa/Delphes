@@ -391,11 +391,15 @@ module Calorimeter Calorimeter {
   add EnergyFraction {3122} {0.3 0.7}
 
   # set ECalResolutionFormula {resolution formula as a function of eta and energy}
-  # set ECalResolutionFormula {resolution formula as a function of eta and energy}                                                                                               
-  set ECalResolutionFormula { (abs(eta) <= 1.497) * sqrt(energy^2*0.007^2 + energy*0.029^2 + 1.01^2) + \
-                              (abs(eta) > 1.497 && abs(eta)<=3.0) * sqrt(energy^2*0.02^2 + energy*0.087^2 + 1.95^2) + \
-                              (abs(eta) > 3.0 && abs(eta) <= 5.0) * sqrt(energy^2*0.29^2 + energy*0.86^2 + 191^2)
+  # set ECalResolutionFormula {resolution formula as a function of eta and energy}                                                                                              
+  set ECalResolutionFormula { (abs(eta) <= 0.5)                 * sqrt(energy^2*0.01^2 + energy*0.032^2 + 1.17^2) + \
+                              (abs(eta) > 0.5 && abs(eta)<=1.0) * sqrt(energy^2*0.01^2 + energy*0.033^2 + 1.33^2) + \
+                              (abs(eta) > 1.0 && abs(eta)<=1.5) * sqrt(energy^2*0.015^2 + energy*0.034^2 + 1.60^2) + \
+                              (abs(eta) > 1.5 && abs(eta)<=2.0) * sqrt(energy^2*0.04^2 + energy*0.14^2 + 3.17^2) + \
+                              (abs(eta) > 2.0 && abs(eta)<=3.0) * sqrt(energy^2*0.21^2 + energy*0.56^2 + 48^2) + \
+                              (abs(eta) > 3.0 && abs(eta)<=5.0) * sqrt(energy^2*0.38^2 + energy*1.38^2 + 542^2) + \
   }
+
 
 
   # set HCalResolutionFormula {resolution formula as a function of eta and energy}                                                                                               
