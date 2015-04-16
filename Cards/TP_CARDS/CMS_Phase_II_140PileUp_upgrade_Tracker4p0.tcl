@@ -337,7 +337,7 @@ module Calorimeter Calorimeter {
   set EFlowTowerOutputArray eflowTowers
 
   set ECalEnergyMin 0.5
-  set HCalEnergyMin 1.0
+  set HCalEnergyMin 0.5
 
   set ECalEnergySignificanceMin 2.0
   set HCalEnergySignificanceMin 2.0
