@@ -991,23 +991,16 @@ module Efficiency MuonEfficiency {
   set OutputArray muons
   # set EfficiencyFormula {efficiency as a function of eta and pt}
   # efficiency formula for muons
-  set EfficiencyFormula {                           
-      (pt <= 2.0)  * (0.00) + \
-      (abs(eta) <= 2.50) * (pt >  2.0 && pt <= 3.0)  * (0.6) + \
-      (abs(eta) <= 2.50) * (pt >  3.0 && pt <= 4.0)  * (0.89) + \
-      (abs(eta) <= 2.50) * (pt >  4.0 && pt <= 11.0) * (0.95) + \
-      (abs(eta) <= 2.50) * (pt >  11. && pt <= 50.)  * (0.976) + \
-      (abs(eta) <= 2.50) * (pt >  50. && pt <= 70.)  * (0.986) + \
-      (abs(eta) <= 2.50) * (pt > 70.0 )  * (1.00) + \
-      (abs(eta) > 2.50 && abs(eta) <= 4.00) * (pt > 2.0 && pt <= 3.0) * (0.51) + \
-	  (abs(eta) > 2.50 && abs(eta) <= 4.00) * (pt > 3.0 && pt <= 4.0) * (0.85) + \
-	  (abs(eta) > 2.50 && abs(eta) <= 4.00) * (pt > 4.0 && pt <= 11.0) * (0.93) + \
-	  (abs(eta) > 2.50 && abs(eta) <= 4.00) * (pt > 11. && pt <= 50.) * (0.96) + \
-	  (abs(eta) > 2.50 && abs(eta) <= 4.00) * (pt > 50. && pt <= 70.) * (0.98) + \
-	  (abs(eta) > 2.50 && abs(eta) <= 4.00) * (pt > 70.0 ) * (1.00) + \
-	  (abs(eta) > 4.00) * (0.00)
+  set EfficiencyFormula { (pt <= 2.0)  * (0.00) + \
+  			  (abs(eta) <= 4.00) * (pt >  2.0 && pt <= 3.0)  * (0.51) + \
+                          (abs(eta) <= 4.00) * (pt >  3.0 && pt <= 4.0)  * (0.85) + \
+                          (abs(eta) <= 4.00) * (pt >  4.0 && pt <= 11.0) * (0.93) + \
+                          (abs(eta) <= 4.00) * (pt >  11. && pt <= 50.)  * (0.96) + \
+                          (abs(eta) <= 4.00) * (pt >  50. && pt <= 70.)  * (0.98) + \
+                          (abs(eta) <= 4.00) * (pt > 70.0 )  * (1.00) + \
+			 (abs(eta) > 4.00)  * (0.00)
+ }
 
-  }
 }
 
 ##################

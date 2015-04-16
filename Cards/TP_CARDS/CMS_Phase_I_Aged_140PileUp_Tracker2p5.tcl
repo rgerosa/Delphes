@@ -83,6 +83,7 @@ set ExecutionPath {
 
 ### remove some modules
 
+
 # GenBeamSpotFilter
 # JetPileUpSubtractorGrid
 # JetPileUpSubtractor4VArea
@@ -295,7 +296,7 @@ module Merger TrackMerger {
 module Calorimeter Calorimeter {
   ## particle from the propagation without any efficiency or smearing (for neutrals)
   set ParticleInputArray ParticlePropagator/stableParticles
-  ## track after smearing and efficiency: used for charged particles
+  ## track after smearing and efficiency: used for chargeda particles
   set TrackInputArray   TrackMerger/tracks
   ## output collections
   set TowerOutputArray  towers
@@ -304,10 +305,10 @@ module Calorimeter Calorimeter {
   set EFlowTowerOutputArray eflowTowers
 
   set ECalEnergyMin 0.5
-  set HCalEnergyMin 0.5
+  set HCalEnergyMin 1.0
 
-  set ECalEnergySignificanceMin 2.0
-  set HCalEnergySignificanceMin 2.0
+  set ECalEnergySignificanceMin 1.0
+  set HCalEnergySignificanceMin 1.0
 
   set SmearTowerCenter false
 
@@ -362,29 +363,34 @@ module Calorimeter Calorimeter {
   add EnergyFraction {3122} {0.3 0.7}
 
   # set ECalResolutionFormula {resolution formula as a function of eta and energy}
-  set ECalResolutionFormula { (abs(eta) <= 0.5)                 * sqrt(energy^2*0.01^2 + energy*0.032^2 + 1.17^2) + \
-                              (abs(eta) > 0.5 && abs(eta)<=1.0) * sqrt(energy^2*0.01^2 + energy*0.033^2 + 1.33^2) + \
-                              (abs(eta) > 1.0 && abs(eta)<=1.5) * sqrt(energy^2*0.015^2 + energy*0.034^2 + 1.60^2) + \
-                              (abs(eta) > 1.5 && abs(eta)<=2.0) * sqrt(energy^2*0.04^2 + energy*0.14^2 + 3.17^2) + \
-                              (abs(eta) > 2.0 && abs(eta)<=3.0) * sqrt(energy^2*0.21^2 + energy*0.56^2 + 48^2) + \
-                              (abs(eta) > 3.0 && abs(eta)<=5.0) * sqrt(energy^2*0.38^2 + energy*1.38^2 + 542^2) 
-  }
-
-  # set HCalResolutionFormula {resolution formula as a function of eta and energy}
-  set HCalResolutionFormula {  (abs(eta) <= 1.7) * (energy*0.132 - sqrt(energy)*0.285 + 10) + \
-                               (abs(eta) > 1.7 && abs(eta)<=2.1) * (energy*0.0737 - sqrt(energy)*0.0343 + 7.3) + \
-                               (abs(eta) > 2.1 && abs(eta)<=2.3) * (energy*0.239 + sqrt(energy)*1.95 + 19.1) + \
-                               (abs(eta) > 2.3 && abs(eta) <= 5.0) * (energy*0.0732 + sqrt(energy)*14.7+42.8)
+  set ECalResolutionFormula { (abs(eta) <= 0.5)                 * sqrt(energy^2*0.01^2 + energy*0.030^2 + 0.60^2) + \
+                              (abs(eta) > 0.5 && abs(eta)<=1.0) * sqrt(energy^2*0.01^2 + energy*0.033^2 + 0.67^2) + \
+                              (abs(eta) > 1.0 && abs(eta)<=1.5) * sqrt(energy^2*0.01^2 + energy*0.031^2 + 0.78^2) + \
+                              (abs(eta) > 1.5 && abs(eta)<=2.0) * sqrt(energy^2*0.02^2 + energy*0.071^2 + 0.78^2) + \
+                              (abs(eta) > 2.0 && abs(eta)<=2.5) * sqrt(energy^2*0.034^2 + energy*0.135^2 + 2.82^2) + \
+                              (abs(eta) > 2.5 && abs(eta)<=3.0) * sqrt(energy^2*0.145^2 + energy*0.37^2 + 21.4^2) + \
+                              (abs(eta) > 3.0 && abs(eta)<=5.0) * sqrt(energy^2*0.37^2  + energy*1.36^2 + 284^2)
   }
 
   set ECalEfficiencyFormula { (abs(eta) <= 5.0) * 1
   }
 
-  set HCalEfficiencyFormula { (abs(eta) <= 5.0) * 1
+  set HCalEfficiencyFormula { -TMath::Erf((abs(eta)-(3.58-3.42/sqrt(energy)))*10)*( abs(eta) < (3.58-3.42/sqrt(energy)))
+  } 
+										 
+
+  set HCalResolutionFormula { (abs(eta)<=1.4) * (energy*0.132-0.285*sqrt(energy)+10) + \
+			      (abs(eta) > 1.4 && abs(eta)<=1.7) * ( (energy*0.132 - sqrt(energy)*0.285 + 10) + ((0.0737*energy-0.0343*sqrt(energy)+7.30) - \
+			      (energy*0.132 - sqrt(energy)*0.285 + 10))*(abs(eta)-1.4)/(1.7-1.4)) + \
+			      (abs(eta) > 1.7 && abs(eta)<=2.1) * ( (energy*0.0737 - sqrt(energy)*0.0343 + 7.30) + ((0.239*energy+1.95*sqrt(energy)+19.1) - \
+			      (energy*0.0737 - sqrt(energy)*0.0343 + 7.3))*(abs(eta)-1.7)/(2.1-1.7)) + \
+			      (abs(eta) > 2.1 && abs(eta)<=2.3) * ( (energy*0.239  + sqrt(energy)*1.95 + 19.1) + ((0.0732*energy+14.7*sqrt(energy)+42.8) - \
+			      (energy*0.239 + sqrt(energy)*1.95 + 19.1))*(abs(eta)-2.1)/(2.3-2.1)) + \
+			      (abs(eta)>=2.3 && abs(eta) < 5.0)*( energy*0.0732  + sqrt(energy)*14.7 + 42.8)
   }
 
-
 }
+
 
 ####################################################################
 ## Track pile-up subtractor: apply CHS on top of track collection ##

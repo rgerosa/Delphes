@@ -441,34 +441,29 @@ void Calorimeter::FinalizeTower(){
   ecalEnergy = LogNormal(fTowerECalEnergy, ecalSigma);
 
   // compute the ecal tower efficiency (in case of non gaussian resolution, for aged scenario as example)
-  ecalEfficiency = fECalEfficiencyFormula->Eval(0.0, fTowerEta, 0.0, fTowerECalEnergy);
+  ecalEfficiency = fECalEfficiencyFormula->Eval(0.0, fTowerEta, 0.0, fTowerECalEnergy);  
   bool isEcalGood = gRandom->Uniform(0.,1.) < ecalEfficiency ;
+  if(!isEcalGood)
+    ecalEnergy = 0;
 
   // compute the new hcal energy
   hcalSigma  = fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, fTowerHCalEnergy);
   hcalEnergy = LogNormal(fTowerHCalEnergy, hcalSigma);
 
   // compute the hcal tower efficiency (in case of non gaussian resolution, for aged scenario as example)
-  hcalEfficiency = fHCalEfficiencyFormula->Eval(0.0, fTowerEta, 0.0, fTowerHCalEnergy);
+  hcalEfficiency = fabs(fHCalEfficiencyFormula->Eval(0.0, fTowerEta, 0.0, fTowerHCalEnergy));
   bool isHcalGood = gRandom->Uniform(0.,1.) < hcalEfficiency ;
+  if(!isHcalGood)
+    hcalEnergy = 0;
 
   ecalTime = (fTowerECalTimeWeight < 1.0E-09 ) ? 0.0 : fTowerECalTime/fTowerECalTimeWeight;
   hcalTime = (fTowerHCalTimeWeight < 1.0E-09 ) ? 0.0 : fTowerHCalTime/fTowerHCalTimeWeight;
 
-  // take the resoluton for the new real ecal energy
-  ecalSigma = fECalResolutionFormula->Eval(0.0, fTowerEta, 0.0, ecalEnergy);
-  hcalSigma = fHCalResolutionFormula->Eval(0.0, fTowerEta, 0.0, hcalEnergy);
-
-  if(ecalEnergy < fECalEnergyMin || ecalEnergy < fECalEnergySignificanceMin*ecalSigma) ecalEnergy = 0.0;
-  if(hcalEnergy < fHCalEnergyMin || hcalEnergy < fHCalEnergySignificanceMin*hcalSigma) hcalEnergy = 0.0;
-
   time = (TMath::Sqrt(ecalEnergy)*ecalTime + TMath::Sqrt(hcalEnergy)*hcalTime)/(TMath::Sqrt(ecalEnergy) + TMath::Sqrt(hcalEnergy));
 
   // add ecal and hcal to the total energy and save the tower information
-  if( isEcalGood ) 
-    energy     += ecalEnergy;
-  if( isHcalGood ) 
-    energy += hcalEnergy;
+  energy += ecalEnergy;
+  energy += hcalEnergy;
 
   eta = fTowerEta;
   phi = fTowerPhi;
