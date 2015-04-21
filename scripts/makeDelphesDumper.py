@@ -100,7 +100,7 @@ def writeJobs(workingdir,executable,inputdir,outputname,eosoutdir,njobs):
                  jobscript.write('\t ./%s %s/input_%d.txt %s_%d.root %d\n'%(executable,jobdir,job,outputname,job,options.addGenParticle))
 
          else :
-             if not addGenParticle :
+             if not options.addGenParticle :
                  jobscript.write('\t ./%s -w %s/input_%d.txt %s_%d.root\n'%(executable,jobdir,job,outputname,job))
              else :
                  jobscript.write('\t ./%s -w %s/input_%d.txt %s_%d.root %d\n'%(executable,jobdir,job,outputname,job,options.addGenParticle))

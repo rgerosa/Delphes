@@ -175,7 +175,7 @@ int main (int argc, char *argv[]){
   }
   
   bool fillWeights = false;
-  if(argc == 4 and std::string(argv[1]) == "-w") {
+  if(argc >= 4 and std::string(argv[1]) == "-w") {
     argv[1] = argv[2];
     argv[2] = argv[3];
     fillWeights = true;
