@@ -264,7 +264,7 @@ all:
 
 }
 
-executableDeps {converters/*.cpp} {examples/*.cpp} {external/DelphesAnalysisCodes/*.cpp}
+executableDeps {converters/*.cpp} {examples/*.cpp} {external/DelphesAnalysisCodes/*.cpp} {external/LHEActions/*.cpp}
 
 executableDeps {readers/DelphesHepMC.cpp} {readers/DelphesLHEF.cpp} {readers/DelphesSTDHEP.cpp}
 
@@ -303,7 +303,7 @@ puts {
 
 ###
 
-all: $(DELPHES) $(EXECUTABLE) genMinBias_14TeV countEvents
+all: $(DELPHES) $(EXECUTABLE) genMinBias_14TeV countEvents countParticles
 
 display: $(DISPLAY)
 
@@ -428,9 +428,13 @@ genMinBias_14TeV: external/MinBiasProduction/genMinBias_14TeV.cpp
 	@echo ">> Compiling $<"
 	@$(CXX) -o $@ $< -I$(HEPMC)/include -L$(HEPMC)/lib -I$(PYTHIA8DATA)/../../../include -L$(PYTHIA8DATA)/../../../lib -I$(LHAPDF)/include -L$(LHAPDF)/lib -lHepMC  -lpythia8 -lLHAPDF -lgfortran -lpythia8lhapdf5
 
-countEvents: external/LHEActions/countEvents.cpp
-	@echo ">> Compiling $<"
-	@$(CXX) $(CXXFLAGS) -o $@ $< 
+#countEvents: external/LHEActions/countEvents.cpp
+#	@echo ">> Compiling $<"
+#	@$(CXX) $(CXXFLAGS) -o $@ $< 
+
+#countParticles: external/LHEActions/countParticles.cpp
+#	@echo ">> Compiling $<"
+#	@$(CXX) $(CXXFLAGS) $(LDFLAGS)  -o $@ $< 
 
 
 

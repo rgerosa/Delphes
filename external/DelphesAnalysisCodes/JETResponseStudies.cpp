@@ -33,7 +33,7 @@ using namespace std;
 int main (int argc, char** argv){
 
   if(argc < 3 ) {
-    cerr<<" to be used as: ./<exe file> <directory with delphes trees> <outputPlot> "<<endl;
+    cerr<<" to be used as: ./<exe file> <directory with delphes trees> <outputPlot> <letponPT> <jetPT> <PU>"<<endl;
     return -1;
   }
 
@@ -103,7 +103,6 @@ int main (int argc, char** argv){
   trailingPuppiJetEta->Sumw2();
 
   // histogram to fill : numerator efficiency
-
   TH1F* NumeratorReco_vsEta  = new TH1F ("NumeratorReco_vsEta","",35,-5,5);
   TH1F* NumeratorPuppi_vsEta  = new TH1F ("NumeratorPuppi_vsEta","",35,-5,5);
 
